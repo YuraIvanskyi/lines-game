@@ -1,29 +1,31 @@
 # from src.models.board import Board
 import pygame
 from src.const.colors import GameColors
-from src.models.board import Board
+from src.models.board import Board, Point
 
 
 def main():
-    board = Board(width=10, height=10, anchor=(0, 0))
+    board = Board(width=5, height=5, start_anchor=Point(0, 0))
     board.display()
-    board.connect_cords((0, 0), (1, 1))
-    board.display()
-    board.connect_cords((1, 1), (2, 2))
-    board.display()
-    board.connect_cords((2, 2), (3, 2))
-    board.display()
-    board.connect_cords((3, 2), (3, 3))
-    board.display()
-    board.connect_cords((3, 3), (4, 3))  #! WRONG
-    board.display()
-    board.connect_cords((4, 3), (3, 4))
-    board.display()
-    board.connect_cords((3, 2), (3, 3))
-    board.display()
+    board.possible_connections()
+    # board.connect_cords((0, 0), (1, 1))
+    # board.display()
+    # board.connect_cords((1, 1), (2, 2))
+    # board.display()
+    # board.connect_cords((2, 2), (3, 2))
+    # board.display()
+    # board.connect_cords((3, 2), (3, 3))
+    # board.display()
+    # board.connect_cords((3, 3), (4, 3))
+    # board.display()
+    # board.connect_cords((4, 3), (3, 4))
+    # board.display()
+    # board.connect_cords((3, 4), (4, 4))
+    # board.display()
+    # board.connect_cords((4, 4), (5, 3))
+    # board.display()
     # board.draw_board()
     # board.state()
-    print(2)
 
 
 def pygame_main():

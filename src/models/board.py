@@ -1,31 +1,71 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from src.const.context import DrawCtx
 from src.const.symbols import BoardSymbol
-from src.models.node import Connection
-from src.models.node import Node
-from turtle import Turtle
+from src.models.node import Connection, Node, Connectivity, Point
 
 
 @dataclass
 class Board:
     height: int
     width: int
-    anchor: tuple[int, int] | None = None
-    # t: Turtle | None = field(default=Turtle())
+    start_anchor: Point
+    head: Node | None = None
+    # tail: Node | None = None
 
     def __post_init__(self):
         self.nodes: list[Node] = [
-            [Node(x, y, anchor=self.anchor == (x, y)) for x in range(self.width)] for y in range(self.height)
+            [Node(x, y, anchor=self.start_anchor == Point(x, y)) for x in range(self.width)] for y in range(self.height)
         ]
+        self.head = self.tail = self.nodes[self.start_anchor.y][self.start_anchor.x]
         self.connections: list[Connection] = []
 
-    def connect_cords(self, n1: tuple[int, int], n2: tuple[int, int]) -> Connection:
-        self.nodes[n1[0]][n1[1]].connect(self.nodes[n2[0]][n2[1]])
+    def possible_connections(self, node: Node = None) -> list[Connectivity]:
+        if not node:
+            node = self.head
+        surrounding_nodes = [
+            Point(node.x - 1, node.y - 1),
+            Point(node.x, node.y - 1),
+            Point(node.x + 1, node.y - 1),
+            Point(node.x - 1, node.y),
+            Point(node.x + 1, node.y),
+            Point(node.x - 1, node.y + 1),
+            Point(node.x, node.y + 1),
+            Point(node.x + 1, node.y + 1),
+        ]
+
+        def _no_crossing(p: Point) -> bool:
+            if abs(node.x - p.x) > 1 and abs(node.y - p.y) > 1:
+                return not self.nodes[p.y][node.x].connected and not self.nodes[node.y][p.x].connected
+            else:
+                return True
+
+        return [
+            connectivity
+            for connectivity in [
+                node.can_connect(self.nodes[p.y][p.x] if p.x < self.width and p.y < self.height else None)
+                for p in surrounding_nodes
+                if _no_crossing(p)
+            ]
+            if connectivity.possible
+        ]
+
+    def connect_head(self, connectivity: Connectivity) -> None:
+        connection = self.head.connect(self.nodes[connectivity.end.y][connectivity.end.x])
+        if connection:
+            self.head = self.nodes[connectivity.end.y][connectivity.end.x]
+
+    def connect_cords(self, n1: tuple[int, int], n2: tuple[int, int]) -> None:
+        self.nodes[n1[1]][n1[0]].connect(self.nodes[n2[1]][n2[0]])
 
     def display(self):
-        for row in self.nodes:
+        print("  ", end="")
+        for i in range(self.width):
+            print(i, end=" ")
+        print()
+        for ri, row in enumerate(self.nodes):
+            print(ri, end=" ")
             for node in row:
-                print(node if not node.connections else node.connections[-1], end="  ")
+                print(node if not node.connections else node.connections[-1], end=" ")
             print()
         print()
 

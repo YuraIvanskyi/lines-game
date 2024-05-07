@@ -4,14 +4,36 @@ from src.const.symbols import BoardSymbol
 
 
 @dataclass
+class Point:
+    x: int
+    y: int
+
+    def __repr__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+    def __eq__(self, other: "Point") -> bool:
+        return self.x == other.x and self.y == other.y
+
+
+@dataclass
 class Connection:
     start: "Node"
     end: "Node"
-    ctype: str = BoardSymbol.Connection.MISSING
-    draw_context: dict = field(default_factory=dict)
+    ctype: str = BoardSymbol.Connection.IMPOSSIBLE
 
     def __repr__(self) -> str:
         return f"{self.ctype}"
+
+
+@dataclass
+class Connectivity:
+    value: str
+    possible: bool
+    start: Point
+    end: Point
+
+    def __repr__(self) -> str:
+        return f"{self.start} {self.value} {self.end}"
 
 
 @dataclass(init=True)
@@ -20,8 +42,7 @@ class Node:
     y: int
     connected: bool = False
     anchor: bool = False
-    connections: list["Connection"] = field(default_factory=list["Connection"])
-    draw_context: dict = field(default_factory=dict)
+    connections: list[Connection] = field(default_factory=list[Connection])
 
     def __post_init__(self):
         self.connected = True if self.anchor else False
@@ -31,56 +52,63 @@ class Node:
         return f"{filling}"
 
     @property
-    def coords(self) -> tuple[int, int]:
-        return self.x, self.y
+    def coords(self) -> Point:
+        return Point(self.x, self.y)
 
-    @property
-    def draw_center(self) -> tuple[float, float]:
-        return (
-            self.draw_context[DrawCtx.CIRCLE_C_X],
-            self.draw_context[DrawCtx.CIRCLE_C_Y],
+    def can_connect(self, other: "Node" = None) -> Connectivity:
+        connectivity = Connectivity(
+            value=BoardSymbol.Connection.IMPOSSIBLE,
+            possible=False,
+            start=self.coords,
+            end=other.coords if other else Point(-1, -1),
         )
-
-    def distance(self, other: "Node") -> float:
-        return (
-            (self.draw_context[DrawCtx.CIRCLE_C_X] - other.draw_context[DrawCtx.CIRCLE_C_X]) ** 2
-            + (self.draw_context[DrawCtx.CIRCLE_C_Y] - other.draw_context[DrawCtx.CIRCLE_C_Y]) ** 2
-        ) ** 0.5
-
-    def availiable_connection_for_node(self, other: "Node") -> str:
+        if not other:
+            return connectivity
+        if any([self.x < 0, self.y < 0, other.x < 0, other.y < 0]):
+            return connectivity
         if not self.connected or other.connected:
-            return BoardSymbol.Connection.MISSING
+            return connectivity
         elif abs(self.x - other.x) > 1 or abs(self.y - other.y) > 1:
-            return BoardSymbol.Connection.MISSING
+            return connectivity
         else:
             if self.x == other.x and self.y == other.y:
-                return BoardSymbol.Connection.MISSING
+                return connectivity
             elif self.x == other.x and self.y > other.y:
-                return BoardSymbol.Connection.TOP
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.TOP
             elif self.x == other.x and self.y < other.y:
-                return BoardSymbol.Connection.BOTTOM
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.BOTTOM
             elif self.y == other.y and self.x > other.x:
-                return BoardSymbol.Connection.LEFT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.LEFT
             elif self.y == other.y and self.x < other.x:
-                return BoardSymbol.Connection.RIGHT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.RIGHT
             elif self.y > other.y and self.x > other.x:
-                return BoardSymbol.Connection.TOP_RIGHT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.TOP_RIGHT
             elif self.y > other.y and self.x < other.x:
-                return BoardSymbol.Connection.TOP_LEFT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.TOP_LEFT
             elif self.y < other.y and self.x > other.x:
-                return BoardSymbol.Connection.BOTTOM_RIGHT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.BOTTOM_RIGHT
             elif self.y < other.y and self.x < other.x:
-                return BoardSymbol.Connection.BOTTOM_LEFT
+                connectivity.possible = True
+                connectivity.value = BoardSymbol.Connection.BOTTOM_LEFT
             else:
-                return BoardSymbol.Connection.MISSING
+                return connectivity
+        return connectivity
 
     def connect(self, other: "Node") -> Connection | None:
-        conn_type = self.availiable_connection_for_node(other)
-        if conn_type != BoardSymbol.Connection.MISSING:
-            self.connected = True
-            other.connected = True
-            connection = Connection(ctype=conn_type, start=self, end=other)
+        connectivity = self.can_connect(other)
+        if connectivity.possible:
+            self.connected, other.connected = True, True
+            connection = Connection(ctype=connectivity.value, start=self, end=other)
             self.connections.append(connection)
             other.connections.append(connection)
+            print(f"Connected {self} {self.coords} to {other} {other.coords}")
+            return connection
         else:
             print(f"Can't connect {self} {self.coords} to {other} {other.coords}")
