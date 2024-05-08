@@ -5,7 +5,7 @@ from src.models.board import Board, Point
 
 
 def main():
-    board = Board(width=5, height=5, start_anchor=Point(0, 0))
+    board = Board(width=3, height=3, start_anchor=Point(0, 0))
     board.display()
     board.possible_connections()
     # board.connect_cords((0, 0), (1, 1))

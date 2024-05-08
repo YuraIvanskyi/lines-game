@@ -23,29 +23,29 @@ class Board:
         if not node:
             node = self.head
         surrounding_nodes = [
-            Point(node.x - 1, node.y - 1),
-            Point(node.x, node.y - 1),
-            Point(node.x + 1, node.y - 1),
-            Point(node.x - 1, node.y),
-            Point(node.x + 1, node.y),
-            Point(node.x - 1, node.y + 1),
-            Point(node.x, node.y + 1),
-            Point(node.x + 1, node.y + 1),
+            node
+            for node in [
+                Point(node.x - 1, node.y - 1),
+                Point(node.x, node.y - 1),
+                Point(node.x + 1, node.y - 1),
+                Point(node.x - 1, node.y),
+                Point(node.x + 1, node.y),
+                Point(node.x - 1, node.y + 1),
+                Point(node.x, node.y + 1),
+                Point(node.x + 1, node.y + 1),
+            ]
+            if node.x < self.width and node.y < self.height
         ]
 
-        def _no_crossing(p: Point) -> bool:
-            if abs(node.x - p.x) > 1 and abs(node.y - p.y) > 1:
-                return not self.nodes[p.y][node.x].connected and not self.nodes[node.y][p.x].connected
+        def _crossing(p: Point) -> bool:
+            if abs(node.x - p.x) > 0 and abs(node.y - p.y) > 0:
+                return self.nodes[p.y][node.x].connected and self.nodes[node.y][p.x].connected
             else:
-                return True
+                return False
 
         return [
             connectivity
-            for connectivity in [
-                node.can_connect(self.nodes[p.y][p.x] if p.x < self.width and p.y < self.height else None)
-                for p in surrounding_nodes
-                if _no_crossing(p)
-            ]
+            for connectivity in [node.can_connect(self.nodes[p.y][p.x]) for p in surrounding_nodes if not _crossing(p)]
             if connectivity.possible
         ]
 
@@ -53,9 +53,6 @@ class Board:
         connection = self.head.connect(self.nodes[connectivity.end.y][connectivity.end.x])
         if connection:
             self.head = self.nodes[connectivity.end.y][connectivity.end.x]
-
-    def connect_cords(self, n1: tuple[int, int], n2: tuple[int, int]) -> None:
-        self.nodes[n1[1]][n1[0]].connect(self.nodes[n2[1]][n2[0]])
 
     def display(self):
         print("  ", end="")
