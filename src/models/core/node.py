@@ -14,6 +14,10 @@ class Point:
     def __eq__(self, other: "Point") -> bool:
         return self.x == other.x and self.y == other.y
 
+    @property
+    def tuple(self) -> tuple:
+        return (self.x, self.y)
+
 
 @dataclass
 class Connection:
@@ -42,6 +46,7 @@ class Node:
     y: int
     connected: bool = False
     anchor: bool = False
+    is_head: bool = False
     connections: list[Connection] = field(default_factory=list[Connection])
 
     def __post_init__(self):
