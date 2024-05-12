@@ -25,7 +25,7 @@ class Game:
         self.buld_main_menu()
         self.build_action_phase()
         self.board = VisualBoard(10, 10, self.surface)
-        # self.board.random_simulation()
+        self.player_controller = None
 
     def buld_main_menu(self):
         # self.mainmenu.add.text_input("Name: ", default="username", maxchar=20)

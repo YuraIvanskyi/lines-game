@@ -1,8 +1,10 @@
+from dataclasses import dataclass
 import math
 import random
 import pygame
+from itertools import cycle
 from src.const.colors import GameColors
-from src.models.core.node import Connectivity, Node, Point
+from src.models.core.node import Connectivity, Node, Point, Connection
 from src.models.core.board import Board
 
 
@@ -58,33 +60,62 @@ class VisualNode(Node):
             )
 
 
-class VisualBoard(Board):
-    def __init__(self, height: int, width: int, surface: pygame.Surface):
-        super().__init__(height, width, start_anchor=Point(0, 0))
+@dataclass
+class PlayerVisual:
+    name: str
+    connection_color: tuple
+    turn: bool = False
+    lost: bool = False
+
+    def __repr__(self) -> str:
+        return f"{self.name}"
+
+
+class VisualConnection(Connection):
+    def __init__(self, connection: Connection, player: PlayerVisual, surface: pygame.Surface):
+        super().__init__(start=connection.start, end=connection.end, ctype=connection.ctype)
+        self.player = player
         self.surface = surface
 
-    def draw(self):
+    def draw(self) -> None:
+        pygame.draw.line(
+            surface=self.surface,
+            color=self.player.connection_color,
+            start_pos=VisualNode(self.start, self.surface).coords.tuple,
+            end_pos=VisualNode(self.end, self.surface).coords.tuple,
+            width=5,
+        )
+
+
+class VisualBoard(Board):
+    def __init__(self, height: int, width: int, surface: pygame.Surface, players: list[PlayerVisual] = None):
+        super().__init__(height, width, start_anchor=Point(0, 0))
+        self.surface = surface
+        self.players = cycle(
+            [
+                PlayerVisual(name="Ya", connection_color=GameColors.CYAN),
+                PlayerVisual(name="Ne Ya", connection_color=GameColors.YELLOW),
+            ]
+        )
+        self.current_player = next(self.players)
+
+    def draw(self) -> None:
         for y in range(self.height):
             for x in range(self.width):
                 VisualNode(self.nodes[y][x], self.surface).draw()
 
         for connection in self.connections:
-            pygame.draw.line(
-                surface=self.surface,
-                color=(100, 0, 255),
-                start_pos=VisualNode(connection.start, self.surface).coords.tuple,
-                end_pos=VisualNode(connection.end, self.surface).coords.tuple,
-                width=5,
-            )
+            VisualConnection(connection, self.current_player, self.surface).draw()
 
         for possible in self.possible_connections():
             VisualNode(self.nodes[possible.end.y][possible.end.x], self.surface).draw(as_fututre_target=True)
 
-    def random_simulation(self):
+    def random_simulation(self) -> None:
         while self.possible_connections():
             self.connect_head(random.choice(self.possible_connections()))
 
     def pick_next(self, key: int) -> Connectivity | None:
+
         if key == pygame.K_0:
             self.random_simulation()
         key_map = {
@@ -104,9 +135,10 @@ class VisualBoard(Board):
             for key, conn in possible_keys.items():
                 print(f"{key_map[key]}: {conn}")
             return None
+        self.current_player = next(self.players)
+        print(self.current_player)
         return possible_keys[key]
 
-    def flush(self):
+    def flush(self) -> "VisualBoard":
         self = VisualBoard(self.height, self.width, self.surface)
-        # self.random_simulation()
         return self
