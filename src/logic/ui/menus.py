@@ -1,8 +1,10 @@
 import pygame
 import pygame.freetype
 import pygame_menu
-from src.models.ui.action_phase import VisualBoard
+from src.logic.core.board import Board
 from pygame_menu import themes
+
+from src.logic.core.objects import Point
 
 
 class Game:
@@ -24,7 +26,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.buld_main_menu()
         self.build_action_phase()
-        self.board = VisualBoard(10, 10, self.surface)
+        self.board = Board(height=10, width=10, start_anchor=Point(0, 0), surface=self.surface)
         self.player_controller = None
 
     def buld_main_menu(self):
@@ -55,20 +57,22 @@ class Game:
             self.surface.fill((255, 255, 255))
             event = pygame.event.wait()
             if not self.board.possible_connections():
-                self.font.render_to(self.surface, (10, 10), "You lost, no connections left")
+                self.font.render_to(
+                    self.surface, (10, 10), f"You lost {self.board.current_player}, no connections left"
+                )
             else:
                 self.font.render_to(self.surface, (10, 10), "Possible moves:")
             if event.type == pygame.QUIT:
                 exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                next_connection = self.board.pick_next_by_mouse(pygame.mouse.get_pos())
+                if next_connection:
+                    self.board.connect_head(next_connection)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.board = self.board.flush()
                     self.surface.fill((255, 255, 255))
                     pygame.display.flip()
-                else:
-                    next_connection = self.board.pick_next(event.key)
-                    if next_connection:
-                        self.board.connect_head(next_connection)
 
             self.board.draw()
 

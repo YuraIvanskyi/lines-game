@@ -1,10 +1,6 @@
 # from src.models.board import Board
-import pygame
-import pygame_menu
-from pygame_menu import themes
-from src.const.colors import GameColors
-from src.models.core.board import Board, Point
-from src.models.ui.menus import Game
+from src.logic.core.board import Board, Point
+from src.logic.ui.menus import Game
 
 
 def main():
