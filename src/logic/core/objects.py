@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import math
 
 import pygame
 from src.const.colors import GameColors
@@ -17,6 +18,16 @@ class PlayerVisual:
 
 
 @dataclass
+class NodeVisual:
+    SCALE_FACTOR: int = 40
+    NODE_RADIUS: int = 20
+    COORD_MARGIN_X: int = 100
+    COORD_MARGIN_Y: int = 100
+    NODE_INTERVAL: int = 25
+    HOVER_HIT_RADIUS: int = 3
+
+
+@dataclass
 class Point:
     x: int
     y: int
@@ -30,6 +41,22 @@ class Point:
     @property
     def tuple(self) -> tuple:
         return (self.x, self.y)
+
+
+@dataclass
+class Connectivity:
+    value: str
+    possible: bool
+    start: Point
+    end: Point
+    from_head: bool = False
+    from_tail: bool = False
+
+    def __repr__(self) -> str:
+        return f"{self.value} {self.end}"
+
+    def __eq__(self, other: "Connectivity") -> bool:
+        return self.start == other.start and self.end == other.end
 
 
 class Connection:
@@ -57,28 +84,11 @@ class Connection:
             color=self.player.connection_color,
             start_pos=self.start.v_coords.tuple,
             end_pos=self.end.v_coords.tuple,
-            width=5,
+            width=max(int(self.start.node_style.NODE_RADIUS / 5), 5),
         )
 
 
-@dataclass
-class Connectivity:
-    value: str
-    possible: bool
-    start: Point
-    end: Point
-
-    def __repr__(self) -> str:
-        return f"{self.value} {self.end}"
-
-
 class Node:
-    SCALE_FACTOR = 20
-    NODE_RADIUS = 10
-    COORD_MARGIN_X = 44
-    COORD_MARGIN_Y = 95
-    NODE_INTERVAL = 25
-
     def __init__(
         self,
         x: int,
@@ -86,14 +96,17 @@ class Node:
         surface: pygame.Surface,
         anchor: bool = False,
         connections: list[Connection] = None,
+        node_style: NodeVisual = None,
     ):
         self.x = x
         self.y = y
         self.anchor = anchor
         self.connected = True if self.anchor else False
         self.is_head = False
+        self.is_tail = False
         self.connections = connections or []
         self.surface = surface
+        self.node_style = node_style if node_style else NodeVisual()
 
     def __repr__(self) -> str:
         filling = BoardSymbol.Node.FILLED if self.connected else BoardSymbol.Node.EMPTY
@@ -109,6 +122,8 @@ class Node:
             possible=False,
             start=self.coords,
             end=other.coords if other else Point(-1, -1),
+            from_head=self.is_head,
+            from_tail=self.is_tail,
         )
         if not other:
             return connectivity
@@ -165,30 +180,46 @@ class Node:
 
     @property
     def v_coords(self) -> Point:
-        x = self.x * (self.SCALE_FACTOR + self.NODE_INTERVAL) + self.COORD_MARGIN_X
-        y = self.y * (self.SCALE_FACTOR + self.NODE_INTERVAL) + self.COORD_MARGIN_Y
+        x = self.x * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL) + self.node_style.COORD_MARGIN_X
+        y = self.y * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL) + self.node_style.COORD_MARGIN_Y
         return Point(x, y)
 
-    def draw(self, as_fututre_target: bool = False):
-        pygame.draw.circle(
-            surface=self.surface, color=GameColors.WHITE, center=self.v_coords.tuple, radius=self.NODE_RADIUS, width=0
+    @property
+    def hovered(self) -> bool:
+        mouse_pos = pygame.mouse.get_pos()
+        return (
+            math.sqrt((self.v_coords.x - mouse_pos[0]) ** 2 + (self.v_coords.y - mouse_pos[1]) ** 2)
+            < self.node_style.NODE_RADIUS + self.node_style.HOVER_HIT_RADIUS
         )
+
+    def draw(self, as_fututre_target: bool = False):
+        # pygame.draw.circle(
+        #     surface=self.surface,
+        #     color=GameColors.WHITE,
+        #     center=self.v_coords.tuple,
+        #     radius=self.node_style.NODE_RADIUS,
+        #     width=0,
+        # )
         pygame.draw.circle(
-            surface=self.surface, color=GameColors.BLACK, center=self.v_coords.tuple, radius=self.NODE_RADIUS, width=2
+            surface=self.surface,
+            color=GameColors.BLACK,
+            center=self.v_coords.tuple,
+            radius=self.node_style.NODE_RADIUS,
+            width=2,
         )
         if self.connected:
             pygame.draw.circle(
                 surface=self.surface,
-                color=GameColors.BLUE if self.is_head else GameColors.GREEN,
+                color=GameColors.BLUE if self.is_head or self.is_tail else GameColors.GREEN,
                 center=self.v_coords.tuple,
-                radius=self.NODE_RADIUS / 2,
+                radius=self.node_style.NODE_RADIUS / 2,
                 width=0,
             )
         elif as_fututre_target:
             pygame.draw.circle(
                 surface=self.surface,
-                color=GameColors.RED,
+                color=GameColors.RED if not self.hovered else GameColors.CYAN,
                 center=self.v_coords.tuple,
-                radius=self.NODE_RADIUS / 2,
-                width=2,
+                radius=self.node_style.NODE_RADIUS / 2,
+                width=2 if not self.hovered else 0,
             )

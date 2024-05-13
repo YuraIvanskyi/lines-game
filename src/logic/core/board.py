@@ -5,7 +5,7 @@ import random
 
 import pygame
 from src.const.colors import GameColors
-from src.logic.core.objects import Connection, Node, Connectivity, Point
+from src.logic.core.objects import Connection, Node, Connectivity, NodeVisual, Point
 
 
 @dataclass
@@ -28,22 +28,40 @@ class Board:
         self.width = width
         self.start_anchor = start_anchor
 
+        self.surface = surface
+        self.node_style = NodeVisual(
+            COORD_MARGIN_X=self.surface.get_width() / self.width + 20,
+            COORD_MARGIN_Y=self.surface.get_height() / self.height + 20,
+            NODE_RADIUS=10,
+            HOVER_HIT_RADIUS=10,
+            # SCALE_FACTOR=10,
+        )
         self.nodes: list[Node] = [
-            [Node(x, y, anchor=self.start_anchor == Point(x, y), surface=surface) for x in range(self.width)]
+            [
+                Node(
+                    x=x,
+                    y=y,
+                    anchor=self.start_anchor == Point(x, y),
+                    surface=surface,
+                    node_style=self.node_style,
+                )
+                for x in range(self.width)
+            ]
             for y in range(self.height)
         ]
         self.head: Node = self.nodes[self.start_anchor.y][self.start_anchor.x]
+        self.tail: Node = self.nodes[self.start_anchor.y][self.start_anchor.x]
         self.connections: list[Connection] = []
 
-        self.surface = surface
         self.players = cycle(
             players
             or [
-                PlayerVisual(name="Ya", connection_color=GameColors.CYAN),
-                PlayerVisual(name="Ne Ya", connection_color=GameColors.YELLOW),
+                PlayerVisual(name="Player 1", connection_color=GameColors.CYAN),
+                PlayerVisual(name="Player 2", connection_color=GameColors.YELLOW),
             ]
         )
         self.current_player = next(self.players)
+        self.paper = self.paper_bg()
 
     def possible_connections(self, node: Node = None) -> list[Connectivity]:
         if not node:
@@ -90,6 +108,10 @@ class Board:
             if connectivity.possible
         ]
 
+    def avaialable_moves(self) -> list[Connectivity]:
+        # TODO remove duplicates
+        return self.possible_connections(self.head) + self.possible_connections(self.tail)
+
     def connect_head(self, connectivity: Connectivity) -> None:
         connection = self.head.connect(self.nodes[connectivity.end.y][connectivity.end.x], self.current_player)
         if connection:
@@ -97,6 +119,15 @@ class Board:
             self.head.is_head = False
             self.head = self.nodes[connectivity.end.y][connectivity.end.x]
             self.head.is_head = True
+            self.current_player = next(self.players)
+
+    def connect_tail(self, connectivity: Connectivity) -> None:
+        connection = self.tail.connect(self.nodes[connectivity.end.y][connectivity.end.x], self.current_player)
+        if connection:
+            self.connections.append(connection)
+            self.tail.is_tail = False
+            self.tail = self.nodes[connectivity.end.y][connectivity.end.x]
+            self.tail.is_tail = True
             self.current_player = next(self.players)
 
     def display_as_text(self):
@@ -111,36 +142,89 @@ class Board:
             print()
         print()
 
+    def paper_bg(self) -> None:
+        MIN_PAPER_MARGIN = 25
+        MAX_PAPER_MARGIN = 55
+
+        def _get_margin() -> int:
+            return random.randint(MIN_PAPER_MARGIN, MAX_PAPER_MARGIN)
+
+        horizontal_top_points = [
+            (point.x, point.y - _get_margin()) for point in [self.nodes[0][col].v_coords for col in range(self.width)]
+        ][::-1]
+        horizontal_bottom_points = [
+            (point.x, point.y + _get_margin()) for point in [self.nodes[-1][col].v_coords for col in range(self.width)]
+        ]
+        vertical_left_points = [
+            (point.x - _get_margin(), point.y) for point in [self.nodes[row][0].v_coords for row in range(self.height)]
+        ]
+        vertical_right_points = [
+            (point.x + _get_margin(), point.y) for point in [self.nodes[row][-1].v_coords for row in range(self.height)]
+        ][::-1]
+        return (
+            vertical_left_points + horizontal_bottom_points + vertical_right_points + horizontal_top_points,
+            list(zip(horizontal_top_points[::-1], horizontal_bottom_points)),
+            list(zip(vertical_left_points, vertical_right_points[::-1])),
+        )
+
+    def draw_paper_bg(self) -> None:
+        paper, vertical, horizontal = self.paper
+
+        pygame.draw.polygon(surface=self.surface, color=GameColors.IVORY, width=0, points=paper)
+        pygame.draw.polygon(surface=self.surface, color=GameColors.CORNFLOWER_BLUE, width=2, points=paper)
+
+        for hline in horizontal:
+            pygame.draw.line(
+                self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=hline[0], end_pos=hline[1], width=2
+            )
+
+        for vline in vertical:
+            pygame.draw.line(
+                self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=vline[0], end_pos=vline[1], width=2
+            )
+
     def draw(self) -> None:
-        for y in range(self.height):
-            for x in range(self.width):
-                self.nodes[y][x].draw()
+        self.draw_paper_bg()
 
         for connection in self.connections:
             connection.draw()
 
-        for possible in self.possible_connections():
+        for y in range(self.height):
+            for x in range(self.width):
+                self.nodes[y][x].draw()
+
+        for possible in self.avaialable_moves():
             self.nodes[possible.end.y][possible.end.x].draw(as_fututre_target=True)
 
     def random_simulation(self) -> None:
-        while self.possible_connections():
-            self.connect_head(random.choice(self.possible_connections()))
+        while self.avaialable_moves():
+            (
+                self.connect_head(random.choice(self.possible_connections(self.head)))
+                if self.possible_connections(self.head)
+                else self.connect_tail(random.choice(self.possible_connections(self.tail)))
+            )
 
     def pick_next_by_mouse(self, mouse_pos: tuple) -> Connectivity | None:
 
         def _mouse_over_node(node: Node) -> bool:
             return (
                 math.sqrt((node.v_coords.x - mouse_pos[0]) ** 2 + (node.v_coords.y - mouse_pos[1]) ** 2)
-                < Node.NODE_RADIUS
+                < self.node_style.NODE_RADIUS + self.node_style.HOVER_HIT_RADIUS
             )
 
-        for connectivity in self.possible_connections():
+        for connectivity in self.avaialable_moves():
             node = self.nodes[connectivity.end.y][connectivity.end.x]
 
             if _mouse_over_node(node):
                 return connectivity
 
         return None
+
+    def get_hovered_node(self, mouse_pos: tuple) -> Node | None:
+        flatten = lambda l: [item for sublist in l for item in sublist]
+        for node in flatten(self.nodes):
+            if node.hovered(mouse_pos):
+                return node
 
     def flush(self) -> "Board":
         self = self.__class__(

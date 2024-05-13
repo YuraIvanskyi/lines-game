@@ -9,8 +9,8 @@ from src.logic.core.objects import PlayerVisual, Point
 
 
 class Game:
-    DIMX = 500
-    DIMY = 600
+    DIMX = 1000
+    DIMY = 800
 
     def __init__(self):
         pygame.init()
@@ -30,11 +30,12 @@ class Game:
         self.board = Board(
             height=10,
             width=10,
-            start_anchor=Point(0, 0),
+            start_anchor=Point(4, 4),
             surface=self.surface,
             players=[
-                PlayerVisual(name="Kraken", connection_color=GameColors.CYAN),
-                PlayerVisual(name="Magura", connection_color=GameColors.YELLOW),
+                PlayerVisual(name="Shuri", connection_color=GameColors.DARK_GREEN),
+                PlayerVisual(name="Steve", connection_color=GameColors.ORANGE),
+                PlayerVisual(name="Chen", connection_color=GameColors.BURGUNDY),
             ],
         )
         self.player_controller = None
@@ -76,8 +77,13 @@ class Game:
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 next_connection = self.board.pick_next_by_mouse(pygame.mouse.get_pos())
-                if next_connection:
+                if next_connection and next_connection.from_head:
                     self.board.connect_head(next_connection)
+                elif next_connection and next_connection.from_tail:
+                    self.board.connect_tail(next_connection)
+
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.board.pick_next_by_mouse(pygame.mouse.get_pos())
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     self.board = self.board.flush()
@@ -89,10 +95,7 @@ class Game:
             self.board.draw()
 
             for i, chunk in enumerate(
-                [
-                    self.board.possible_connections()[i : i + 3]
-                    for i in range(0, len(self.board.possible_connections()), 3)
-                ],
+                [self.board.avaialable_moves()[i : i + 8] for i in range(0, len(self.board.avaialable_moves()), 8)],
                 1,
             ):
                 self.font.render_to(self.surface, (10, 15 + 15 * i), f"{chunk}")
