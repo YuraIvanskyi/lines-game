@@ -144,6 +144,10 @@ class Board:
 
     def flush(self) -> "Board":
         self = self.__class__(
-            height=self.height, width=self.width, start_anchor=self.start_anchor, surface=self.surface
+            height=self.height,
+            width=self.width,
+            start_anchor=self.start_anchor,
+            surface=self.surface,
+            players=self.players,
         )
         return self

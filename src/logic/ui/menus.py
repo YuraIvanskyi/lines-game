@@ -1,10 +1,11 @@
 import pygame
 import pygame.freetype
 import pygame_menu
+from src.const.colors import GameColors
 from src.logic.core.board import Board
 from pygame_menu import themes
 
-from src.logic.core.objects import Point
+from src.logic.core.objects import PlayerVisual, Point
 
 
 class Game:
@@ -26,7 +27,16 @@ class Game:
         self.clock = pygame.time.Clock()
         self.buld_main_menu()
         self.build_action_phase()
-        self.board = Board(height=10, width=10, start_anchor=Point(0, 0), surface=self.surface)
+        self.board = Board(
+            height=10,
+            width=10,
+            start_anchor=Point(0, 0),
+            surface=self.surface,
+            players=[
+                PlayerVisual(name="Kraken", connection_color=GameColors.CYAN),
+                PlayerVisual(name="Magura", connection_color=GameColors.YELLOW),
+            ],
+        )
         self.player_controller = None
 
     def buld_main_menu(self):
@@ -61,7 +71,7 @@ class Game:
                     self.surface, (10, 10), f"You lost {self.board.current_player}, no connections left"
                 )
             else:
-                self.font.render_to(self.surface, (10, 10), "Possible moves:")
+                self.font.render_to(self.surface, (10, 10), f"{self.board.current_player}'s turn, possible moves:")
             if event.type == pygame.QUIT:
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -73,6 +83,8 @@ class Game:
                     self.board = self.board.flush()
                     self.surface.fill((255, 255, 255))
                     pygame.display.flip()
+                if event.key == pygame.K_0:
+                    self.board.random_simulation()
 
             self.board.draw()
 
