@@ -1,62 +1,9 @@
-from dataclasses import dataclass, field
 import math
 
 import pygame
 from src.const.colors import GameColors
 from src.const.symbols import BoardSymbol
-
-
-@dataclass
-class PlayerVisual:
-    name: str
-    connection_color: tuple
-    turn: bool = False
-    lost: bool = False
-
-    def __repr__(self) -> str:
-        return f"{self.name}"
-
-
-@dataclass
-class NodeVisual:
-    SCALE_FACTOR: int = 40
-    NODE_RADIUS: int = 20
-    COORD_MARGIN_X: int = 100
-    COORD_MARGIN_Y: int = 100
-    NODE_INTERVAL: int = 25
-    HOVER_HIT_RADIUS: int = 3
-
-
-@dataclass
-class Point:
-    x: int
-    y: int
-
-    def __repr__(self) -> str:
-        return f"({self.x}, {self.y})"
-
-    def __eq__(self, other: "Point") -> bool:
-        return self.x == other.x and self.y == other.y
-
-    @property
-    def tuple(self) -> tuple:
-        return (self.x, self.y)
-
-
-@dataclass
-class Connectivity:
-    value: str
-    possible: bool
-    start: Point
-    end: Point
-    from_head: bool = False
-    from_tail: bool = False
-
-    def __repr__(self) -> str:
-        return f"{self.value} {self.end}"
-
-    def __eq__(self, other: "Connectivity") -> bool:
-        return self.start == other.start and self.end == other.end
+from src.logic.core.utils import Connectivity, NodeVisual, PlayerVisual, Point
 
 
 class Connection:
@@ -84,7 +31,7 @@ class Connection:
             color=self.player.connection_color,
             start_pos=self.start.v_coords.tuple,
             end_pos=self.end.v_coords.tuple,
-            width=max(int(self.start.node_style.NODE_RADIUS / 5), 5),
+            width=max(int(self.start.node_style.NODE_RADIUS * 0.75), 5),
         )
 
 
@@ -95,6 +42,7 @@ class Node:
         y: int,
         surface: pygame.Surface,
         anchor: bool = False,
+        wall: bool = False,
         connections: list[Connection] = None,
         node_style: NodeVisual = None,
     ):
@@ -102,8 +50,9 @@ class Node:
         self.y = y
         self.anchor = anchor
         self.connected = True if self.anchor else False
-        self.is_head = False
-        self.is_tail = False
+        self.is_head = True if self.anchor else False
+        self.is_tail = True if self.anchor else False
+        self.is_wall = wall if not self.anchor else False
         self.connections = connections or []
         self.surface = surface
         self.node_style = node_style if node_style else NodeVisual()
@@ -126,6 +75,8 @@ class Node:
             from_tail=self.is_tail,
         )
         if not other:
+            return connectivity
+        if other.is_wall:
             return connectivity
         if any([self.x < 0, self.y < 0, other.x < 0, other.y < 0]):
             return connectivity
@@ -173,22 +124,21 @@ class Node:
             )
             self.connections.append(connection)
             other.connections.append(connection)
-            print(f"Connected {self} {self.coords} to {other} {other.coords} by {player.name}")
             return connection
         else:
             print(f"Can't connect {self} {self.coords} to {other} {other.coords} by {player.name}")
 
     @property
     def v_coords(self) -> Point:
-        x = self.x * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL) + self.node_style.COORD_MARGIN_X
-        y = self.y * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL) + self.node_style.COORD_MARGIN_Y
+        x = self.x * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL_X) + self.node_style.COORD_MARGIN_X
+        y = self.y * (self.node_style.SCALE_FACTOR + self.node_style.NODE_INTERVAL_Y) + self.node_style.COORD_MARGIN_Y
         return Point(x, y)
 
     @property
     def hovered(self) -> bool:
-        mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = Point.from_tuple(pygame.mouse.get_pos())
         return (
-            math.sqrt((self.v_coords.x - mouse_pos[0]) ** 2 + (self.v_coords.y - mouse_pos[1]) ** 2)
+            math.sqrt((self.v_coords.x - mouse_pos.x) ** 2 + (self.v_coords.y - mouse_pos.y) ** 2)
             < self.node_style.NODE_RADIUS + self.node_style.HOVER_HIT_RADIUS
         )
 
@@ -200,6 +150,20 @@ class Node:
         #     radius=self.node_style.NODE_RADIUS,
         #     width=0,
         # )
+        if self.is_wall:
+            pygame.draw.rect(
+                surface=self.surface,
+                color=GameColors.CORNFLOWER_BLUE,
+                width=0,
+                rect=pygame.Rect(
+                    self.v_coords.x - self.node_style.NODE_RADIUS,
+                    self.v_coords.y - self.node_style.NODE_RADIUS,
+                    self.node_style.NODE_RADIUS * 2,
+                    self.node_style.NODE_RADIUS * 2,
+                ),
+            )
+            return
+
         pygame.draw.circle(
             surface=self.surface,
             color=GameColors.BLACK,

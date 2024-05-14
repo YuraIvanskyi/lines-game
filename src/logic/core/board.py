@@ -5,7 +5,8 @@ import random
 
 import pygame
 from src.const.colors import GameColors
-from src.logic.core.objects import Connection, Node, Connectivity, NodeVisual, Point
+from src.logic.core.utils import Connectivity, NodeVisual, Point, flatten
+from src.logic.core.objects import Connection, Node
 
 
 @dataclass
@@ -22,19 +23,31 @@ class PlayerVisual:
 class Board:
 
     def __init__(
-        self, height: int, width: int, start_anchor: Point, surface: pygame.Surface, players: list[PlayerVisual] = None
+        self,
+        height: int,
+        width: int,
+        start_anchor: Point,
+        surface: pygame.Surface,
+        players: list[PlayerVisual] = None,
+        wall_density: float = 0.05,
     ):
         self.height = height
         self.width = width
         self.start_anchor = start_anchor
 
         self.surface = surface
+        node_radius = 10
+        node_interval_x = self.surface.get_width() / self.width
+        node_interval_y = self.surface.get_height() / self.height
+
         self.node_style = NodeVisual(
-            COORD_MARGIN_X=self.surface.get_width() / self.width + 20,
-            COORD_MARGIN_Y=self.surface.get_height() / self.height + 20,
-            NODE_RADIUS=10,
-            HOVER_HIT_RADIUS=10,
-            # SCALE_FACTOR=10,
+            COORD_MARGIN_X=node_interval_x,
+            COORD_MARGIN_Y=node_interval_y,
+            NODE_RADIUS=node_radius,
+            NODE_INTERVAL_X=node_interval_x - node_interval_x / self.width,
+            NODE_INTERVAL_Y=node_interval_y - node_interval_y / self.height,
+            HOVER_HIT_RADIUS=node_radius,
+            SCALE_FACTOR=0,
         )
         self.nodes: list[Node] = [
             [
@@ -44,6 +57,7 @@ class Board:
                     anchor=self.start_anchor == Point(x, y),
                     surface=surface,
                     node_style=self.node_style,
+                    wall=random.choices([True, False], [wall_density, 1 - wall_density])[-1],
                 )
                 for x in range(self.width)
             ]
@@ -170,29 +184,22 @@ class Board:
     def draw_paper_bg(self) -> None:
         paper, vertical, horizontal = self.paper
 
-        pygame.draw.polygon(surface=self.surface, color=GameColors.IVORY, width=0, points=paper)
-        pygame.draw.polygon(surface=self.surface, color=GameColors.CORNFLOWER_BLUE, width=2, points=paper)
+        pygame.draw.polygon(surface=self.surface, color=GameColors.CHALK_WHITE, width=0, points=paper)
+        pygame.draw.aalines(self.surface, color=GameColors.CORNFLOWER_BLUE, closed=True, points=paper)
 
         for hline in horizontal:
-            pygame.draw.line(
-                self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=hline[0], end_pos=hline[1], width=2
-            )
+            pygame.draw.line(self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=hline[0], end_pos=hline[1])
 
         for vline in vertical:
-            pygame.draw.line(
-                self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=vline[0], end_pos=vline[1], width=2
-            )
+            pygame.draw.aaline(self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=vline[0], end_pos=vline[1])
 
     def draw(self) -> None:
         self.draw_paper_bg()
 
         for connection in self.connections:
             connection.draw()
-
-        for y in range(self.height):
-            for x in range(self.width):
-                self.nodes[y][x].draw()
-
+        for node in flatten(self.nodes):
+            node.draw()
         for possible in self.avaialable_moves():
             self.nodes[possible.end.y][possible.end.x].draw(as_fututre_target=True)
 
@@ -221,7 +228,6 @@ class Board:
         return None
 
     def get_hovered_node(self, mouse_pos: tuple) -> Node | None:
-        flatten = lambda l: [item for sublist in l for item in sublist]
         for node in flatten(self.nodes):
             if node.hovered(mouse_pos):
                 return node

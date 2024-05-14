@@ -5,7 +5,8 @@ from src.const.colors import GameColors
 from src.logic.core.board import Board
 from pygame_menu import themes
 
-from src.logic.core.objects import PlayerVisual, Point
+from src.logic.core.utils import PlayerVisual
+from src.logic.core.utils import Point
 
 
 class Game:
@@ -28,8 +29,8 @@ class Game:
         self.buld_main_menu()
         self.build_action_phase()
         self.board = Board(
-            height=10,
-            width=10,
+            height=25,
+            width=25,
             start_anchor=Point(4, 4),
             surface=self.surface,
             players=[
@@ -72,7 +73,7 @@ class Game:
                     self.surface, (10, 10), f"You lost {self.board.current_player}, no connections left"
                 )
             else:
-                self.font.render_to(self.surface, (10, 10), f"{self.board.current_player}'s turn, possible moves:")
+                self.font.render_to(self.surface, (10, 10), f"{self.board.current_player}'s turn")
             if event.type == pygame.QUIT:
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -94,11 +95,11 @@ class Game:
 
             self.board.draw()
 
-            for i, chunk in enumerate(
-                [self.board.avaialable_moves()[i : i + 8] for i in range(0, len(self.board.avaialable_moves()), 8)],
-                1,
-            ):
-                self.font.render_to(self.surface, (10, 15 + 15 * i), f"{chunk}")
+            # for i, chunk in enumerate(
+            #     [self.board.avaialable_moves()[i : i + 8] for i in range(0, len(self.board.avaialable_moves()), 8)],
+            #     1,
+            # ):
+            #     self.font.render_to(self.surface, (10, 15 + 15 * i), f"{chunk}")
 
             # if self.mainmenu.is_enabled() and not self.is_ap:
             #     self.mainmenu.draw(self.surface)

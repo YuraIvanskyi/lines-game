@@ -1,5 +1,6 @@
 # from src.models.board import Board
-from src.logic.core.board import Board, Point
+from src.logic.core.board import Board
+from src.logic.core.utils import Point
 from src.logic.ui.menus import Game
 
 
