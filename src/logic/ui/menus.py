@@ -29,9 +29,8 @@ class Game:
         self.buld_main_menu()
         self.build_action_phase()
         self.board = Board(
-            height=25,
-            width=25,
-            start_anchor=Point(4, 4),
+            height=20,
+            width=20,
             surface=self.surface,
             players=[
                 PlayerVisual(name="Shuri", connection_color=GameColors.DARK_GREEN),

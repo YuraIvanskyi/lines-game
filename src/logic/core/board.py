@@ -26,27 +26,32 @@ class Board:
         self,
         height: int,
         width: int,
-        start_anchor: Point,
         surface: pygame.Surface,
+        start_anchor: Point = None,
         players: list[PlayerVisual] = None,
         wall_density: float = 0.05,
     ):
         self.height = height
         self.width = width
-        self.start_anchor = start_anchor
+        self.start_anchor = (
+            start_anchor
+            if start_anchor
+            else Point(random.randint(0, self.width - 1), random.randint(0, self.height - 1))
+        )
 
         self.surface = surface
-        node_radius = 10
         node_interval_x = self.surface.get_width() / self.width
         node_interval_y = self.surface.get_height() / self.height
+        node_radius = ((self.surface.get_width() + self.surface.get_height()) / 2) / ((self.width + self.height) * 2)
+        node_interval = min(node_interval_x, node_interval_y)
 
         self.node_style = NodeVisual(
             COORD_MARGIN_X=node_interval_x,
             COORD_MARGIN_Y=node_interval_y,
             NODE_RADIUS=node_radius,
-            NODE_INTERVAL_X=node_interval_x - node_interval_x / self.width,
-            NODE_INTERVAL_Y=node_interval_y - node_interval_y / self.height,
-            HOVER_HIT_RADIUS=node_radius,
+            NODE_INTERVAL_X=node_interval - node_interval / max(self.width, self.height),
+            NODE_INTERVAL_Y=node_interval - node_interval / max(self.width, self.height),
+            HOVER_HIT_RADIUS=int(node_radius * 0.2),
             SCALE_FACTOR=0,
         )
         self.nodes: list[Node] = [
@@ -236,7 +241,7 @@ class Board:
         self = self.__class__(
             height=self.height,
             width=self.width,
-            start_anchor=self.start_anchor,
+            start_anchor=Point(random.randint(0, self.width - 1), random.randint(0, self.height - 1)),
             surface=self.surface,
             players=self.players,
         )

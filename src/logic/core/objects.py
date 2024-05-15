@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame
 from src.const.colors import GameColors
@@ -57,9 +58,18 @@ class Node:
         self.surface = surface
         self.node_style = node_style if node_style else NodeVisual()
 
+        self.wall_cutout = self.get_wall_cutout_points()
+
     def __repr__(self) -> str:
-        filling = BoardSymbol.Node.FILLED if self.connected else BoardSymbol.Node.EMPTY
-        return f"{filling}"
+        if self.is_head:
+            return "H"
+        elif self.is_tail:
+            return "T"
+        elif self.is_wall:
+            return "W"
+        else:
+            filling = BoardSymbol.Node.FILLED if self.connected else BoardSymbol.Node.EMPTY
+            return f"{filling}"
 
     @property
     def coords(self) -> Point:
@@ -142,39 +152,38 @@ class Node:
             < self.node_style.NODE_RADIUS + self.node_style.HOVER_HIT_RADIUS
         )
 
+    def get_wall_cutout_points(self) -> list[Point]:
+        MIN_PAPER_MARGIN = int(self.node_style.NODE_RADIUS) - 5
+        MAX_PAPER_MARGIN = int(self.node_style.NODE_RADIUS) + 10
+
+        def _get_margin() -> int:
+            return random.randint(MIN_PAPER_MARGIN, MAX_PAPER_MARGIN)
+
+        return [
+            Point(self.v_coords.x - _get_margin(), self.v_coords.y - _get_margin()).tuple,
+            Point(self.v_coords.x - _get_margin(), self.v_coords.y).tuple,
+            Point(self.v_coords.x - _get_margin(), self.v_coords.y + _get_margin()).tuple,
+            Point(self.v_coords.x, self.v_coords.y + _get_margin()).tuple,
+            Point(self.v_coords.x + _get_margin(), self.v_coords.y + _get_margin()).tuple,
+            Point(self.v_coords.x + _get_margin(), self.v_coords.y).tuple,
+            Point(self.v_coords.x + _get_margin(), self.v_coords.y - _get_margin()).tuple,
+            Point(self.v_coords.x, self.v_coords.y - _get_margin()).tuple,
+        ]
+
     def draw(self, as_fututre_target: bool = False):
-        # pygame.draw.circle(
-        #     surface=self.surface,
-        #     color=GameColors.WHITE,
-        #     center=self.v_coords.tuple,
-        #     radius=self.node_style.NODE_RADIUS,
-        #     width=0,
-        # )
+
         if self.is_wall:
-            pygame.draw.rect(
-                surface=self.surface,
-                color=GameColors.CORNFLOWER_BLUE,
-                width=0,
-                rect=pygame.Rect(
-                    self.v_coords.x - self.node_style.NODE_RADIUS,
-                    self.v_coords.y - self.node_style.NODE_RADIUS,
-                    self.node_style.NODE_RADIUS * 2,
-                    self.node_style.NODE_RADIUS * 2,
-                ),
+            pygame.draw.polygon(surface=self.surface, color=GameColors.WHITE, width=0, points=self.wall_cutout)
+            pygame.draw.aalines(
+                surface=self.surface, color=GameColors.CORNFLOWER_BLUE, closed=True, points=self.wall_cutout
             )
+
             return
 
-        pygame.draw.circle(
-            surface=self.surface,
-            color=GameColors.BLACK,
-            center=self.v_coords.tuple,
-            radius=self.node_style.NODE_RADIUS,
-            width=2,
-        )
-        if self.connected:
+        if self.connected and self.connections:
             pygame.draw.circle(
                 surface=self.surface,
-                color=GameColors.BLUE if self.is_head or self.is_tail else GameColors.GREEN,
+                color=self.connections[-1].player.connection_color,
                 center=self.v_coords.tuple,
                 radius=self.node_style.NODE_RADIUS / 2,
                 width=0,
@@ -186,4 +195,21 @@ class Node:
                 center=self.v_coords.tuple,
                 radius=self.node_style.NODE_RADIUS / 2,
                 width=2 if not self.hovered else 0,
+            )
+
+        if self.is_head:
+            pygame.draw.circle(
+                surface=self.surface,
+                color=GameColors.WHITE_SMOKE,
+                center=self.v_coords.tuple,
+                radius=self.node_style.NODE_RADIUS / 2 - 2,
+                width=2,
+            )
+        if self.is_tail:
+            pygame.draw.circle(
+                surface=self.surface,
+                color=GameColors.WHITE_SMOKE,
+                center=self.v_coords.tuple,
+                radius=self.node_style.NODE_RADIUS / 2 - 2,
+                width=2,
             )
