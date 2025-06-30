@@ -13,6 +13,9 @@ class Game:
     DIMX = 600
     DIMY = 800
 
+    FIELD_X = 4
+    FIELD_Y = 4
+
     def __init__(self):
         pygame.init()
         pygame.font.init()
@@ -30,8 +33,8 @@ class Game:
         self.buld_main_menu()
         self.build_action_phase()
         self.board = Board(
-            height=5,
-            width=5,
+            height=self.FIELD_Y,
+            width=self.FIELD_X,
             surface=self.surface,
             players=[
                 PlayerVisual(name="Shuri", connection_color=GameColors.DARK_GREEN),
@@ -64,36 +67,35 @@ class Game:
         self.action_phase.close()
 
     def mainloop(self):
-        self.clock.tick(60)
 
         while True:
-            self.surface.blit(pygame.transform.scale_by(self.bg, 0.4), (0, 0))
-            # self.surface.fill((255, 255, 255))
-            event = pygame.event.wait()
+            # self.surface.blit(pygame.transform.scale_by(self.bg, 0.4), (0, 0))
+            self.surface.fill((255, 255, 255))
             if not self.board.available_moves():
                 self.font.render_to(
                     self.surface, (10, 10), f"You lost {self.board.current_player}, no connections left"
                 )
             else:
                 self.font.render_to(self.surface, (10, 10), f"{self.board.current_player}'s turn")
-            if event.type == pygame.QUIT:
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                next_connection = self.board.pick_next_by_mouse(pygame.mouse.get_pos())
-                if next_connection and next_connection.from_head:
-                    self.board.connect_head(next_connection)
-                elif next_connection and next_connection.from_tail:
-                    self.board.connect_tail(next_connection)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    next_connection = self.board.pick_next_by_mouse(pygame.mouse.get_pos())
+                    if next_connection and next_connection.from_head:
+                        self.board.connect_head(next_connection)
+                    elif next_connection and next_connection.from_tail:
+                        self.board.connect_tail(next_connection)
 
-            if event.type == pygame.MOUSEBUTTONUP:
-                self.board.pick_next_by_mouse(pygame.mouse.get_pos())
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    self.board = self.board.flush()
-                    self.surface.fill((255, 255, 255))
-                    pygame.display.flip()
-                if event.key == pygame.K_0:
-                    self.board.random_simulation()
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.board.pick_next_by_mouse(pygame.mouse.get_pos())
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.board = self.board.flush()
+                        self.surface.fill((255, 255, 255))
+                        pygame.display.flip()
+                    if event.key == pygame.K_0:
+                        self.board.random_simulation()
 
             self.board.draw()
 
@@ -112,3 +114,4 @@ class Game:
             #     self.action_phase.update(events)
 
             pygame.display.flip()
+            self.clock.tick(120)

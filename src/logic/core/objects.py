@@ -1,5 +1,6 @@
 import math
 import random
+import itertools
 
 import pygame
 from src.const.colors import GameColors
@@ -23,18 +24,33 @@ class Connection(pygame.sprite.Sprite):
         self.ctype = ctype
         self.player = player
         self.surface = surface
+        self.hand_drawn_line = []
 
     def __repr__(self) -> str:
         return f"{self.ctype}"
 
+    def hand_drawn_lines_points(self, segments: int = 10, jitter: int = 5) -> list[Point]:
+        points = []
+        for i in range(segments + 1):
+            t = i / segments
+            x = self.start.v_coords.x + (self.end.v_coords.x - self.start.v_coords.x) * t
+            y = self.start.v_coords.y + (self.end.v_coords.y - self.start.v_coords.y) * t
+            x += random.uniform(-jitter, jitter)
+            y += random.uniform(-jitter, jitter)
+            points.append((x, y))
+
+        return points
+
+    def get_hand_drawn_line(self) -> list[Point]:
+        points = []
+        for _ in range(5):
+            points.append(self.hand_drawn_lines_points())
+        self.hand_drawn_line = points if not self.hand_drawn_line else self.hand_drawn_line
+        return self.hand_drawn_line
+
     def draw(self) -> None:
-        pygame.draw.line(
-            surface=self.surface,
-            color=self.player.connection_color,
-            start_pos=self.start.v_coords.tuple,
-            end_pos=self.end.v_coords.tuple,
-            width=max(int(self.start.node_style.NODE_RADIUS * 0.75), 5),
-        )
+        for points in self.get_hand_drawn_line():
+            pygame.draw.lines(self.surface, self.player.connection_color, False, points, 2)
 
     def __eq__(self, other: "Connection") -> bool:
         return (self.start == other.start and self.end == other.end) or (
@@ -43,6 +59,14 @@ class Connection(pygame.sprite.Sprite):
 
 
 class Node(pygame.sprite.Sprite):
+    node_animation_frame = itertools.cycle(
+        [1 for _ in range(15)]
+        + [2 for _ in range(25)]
+        + [3 for _ in range(40)]
+        + [2 for _ in range(25)]
+        + [1 for _ in range(15)]
+    )
+
     def __init__(
         self,
         x: int,
@@ -63,8 +87,11 @@ class Node(pygame.sprite.Sprite):
         self.is_wall = wall if not self.anchor else False
         self.connections = connections or []
         self.surface = surface
-        self.wall_image = pygame.image.load("assets/kl1.png").convert_alpha()
         self.node_style = node_style if node_style else NodeVisual()
+        self.wall_image = pygame.transform.scale_by(
+            pygame.image.load(f"assets/stains/s{random.randint(1,15)}.png").convert_alpha(),
+            self.node_style.NODE_RADIUS / 100,
+        )
 
         self.wall_cutout = self.get_wall_cutout_points()
 
@@ -208,7 +235,7 @@ class Node(pygame.sprite.Sprite):
                 surface=self.surface,
                 color=GameColors.RED if not self.hovered else player.connection_color,
                 center=self.v_coords.tuple,
-                radius=self.node_style.NODE_RADIUS / 2,
+                radius=self.node_style.NODE_RADIUS / 2 + next(self.node_animation_frame),
                 width=2 if not self.hovered else 0,
             )
 
