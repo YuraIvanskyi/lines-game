@@ -7,7 +7,7 @@ from src.const.symbols import BoardSymbol
 from src.logic.core.utils import Connectivity, NodeVisual, PlayerVisual, Point
 
 
-class Connection:
+class Connection(pygame.sprite.Sprite):
 
     def __init__(
         self,
@@ -17,6 +17,7 @@ class Connection:
         surface: pygame.Surface,
         ctype: str = BoardSymbol.Connection.IMPOSSIBLE,
     ):
+        super().__init__()
         self.start = start
         self.end = end
         self.ctype = ctype
@@ -35,8 +36,13 @@ class Connection:
             width=max(int(self.start.node_style.NODE_RADIUS * 0.75), 5),
         )
 
+    def __eq__(self, other: "Connection") -> bool:
+        return (self.start == other.start and self.end == other.end) or (
+            self.start == other.end and self.end == other.start
+        )
 
-class Node:
+
+class Node(pygame.sprite.Sprite):
     def __init__(
         self,
         x: int,
@@ -47,6 +53,7 @@ class Node:
         connections: list[Connection] = None,
         node_style: NodeVisual = None,
     ):
+        super().__init__()
         self.x = x
         self.y = y
         self.anchor = anchor
@@ -56,6 +63,7 @@ class Node:
         self.is_wall = wall if not self.anchor else False
         self.connections = connections or []
         self.surface = surface
+        self.wall_image = pygame.image.load("assets/kl1.png").convert_alpha()
         self.node_style = node_style if node_style else NodeVisual()
 
         self.wall_cutout = self.get_wall_cutout_points()
@@ -70,6 +78,9 @@ class Node:
         else:
             filling = BoardSymbol.Node.FILLED if self.connected else BoardSymbol.Node.EMPTY
             return f"{filling}"
+
+    def __eq__(self, other: "Node") -> bool:
+        return self.x == other.x and self.y == other.y
 
     @property
     def coords(self) -> Point:
@@ -170,13 +181,17 @@ class Node:
             Point(self.v_coords.x, self.v_coords.y - _get_margin()).tuple,
         ]
 
-    def draw(self, as_fututre_target: bool = False):
+    def draw(self, player: PlayerVisual = None, as_future_target: bool = False) -> None:
 
         if self.is_wall:
-            pygame.draw.polygon(surface=self.surface, color=GameColors.WHITE, width=0, points=self.wall_cutout)
-            pygame.draw.aalines(
-                surface=self.surface, color=GameColors.CORNFLOWER_BLUE, closed=True, points=self.wall_cutout
+            self.surface.blit(
+                self.wall_image,
+                (self.v_coords.x - self.wall_image.get_width() / 2, self.v_coords.y - self.wall_image.get_height() / 2),
             )
+            # pygame.draw.polygon(surface=self.surface, color=GameColors.WHITE, width=0, points=self.wall_cutout)
+            # pygame.draw.aalines(
+            #     surface=self.surface, color=GameColors.PACIFIC_BLUE, closed=True, points=self.wall_cutout
+            # )
 
             return
 
@@ -188,10 +203,10 @@ class Node:
                 radius=self.node_style.NODE_RADIUS / 2,
                 width=0,
             )
-        elif as_fututre_target:
+        elif as_future_target:
             pygame.draw.circle(
                 surface=self.surface,
-                color=GameColors.RED if not self.hovered else GameColors.CYAN,
+                color=GameColors.RED if not self.hovered else player.connection_color,
                 center=self.v_coords.tuple,
                 radius=self.node_style.NODE_RADIUS / 2,
                 width=2 if not self.hovered else 0,
@@ -200,12 +215,12 @@ class Node:
         if self.is_head:
             pygame.draw.circle(
                 surface=self.surface,
-                color=GameColors.WHITE_SMOKE,
+                color=GameColors.WHITE_SMOKE if self.connections else GameColors.BLACK,
                 center=self.v_coords.tuple,
                 radius=self.node_style.NODE_RADIUS / 2 - 2,
                 width=2,
             )
-        if self.is_tail:
+        elif self.is_tail:
             pygame.draw.circle(
                 surface=self.surface,
                 color=GameColors.WHITE_SMOKE,

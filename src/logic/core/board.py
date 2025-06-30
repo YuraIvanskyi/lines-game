@@ -41,9 +41,9 @@ class Board:
 
         self.surface = surface
         node_interval_x = self.surface.get_width() / self.width
-        node_interval_y = self.surface.get_height() / self.height
+        node_interval_y = self.surface.get_height() / self.height + 100
         node_radius = ((self.surface.get_width() + self.surface.get_height()) / 2) / ((self.width + self.height) * 2)
-        node_interval = min(node_interval_x, node_interval_y)
+        node_interval = min(node_interval_x, node_interval_y - 100)
 
         self.node_style = NodeVisual(
             COORD_MARGIN_X=node_interval_x,
@@ -127,9 +127,12 @@ class Board:
             if connectivity.possible
         ]
 
-    def avaialable_moves(self) -> list[Connectivity]:
-        # TODO remove duplicates
-        return self.possible_connections(self.head) + self.possible_connections(self.tail)
+    def available_moves(self) -> list[Connectivity]:
+        available_moves = []
+        for move in self.possible_connections(self.head) + self.possible_connections(self.tail):
+            if move.possible and move not in available_moves:
+                available_moves.append(move)
+        return available_moves
 
     def connect_head(self, connectivity: Connectivity) -> None:
         connection = self.head.connect(self.nodes[connectivity.end.y][connectivity.end.x], self.current_player)
@@ -188,28 +191,51 @@ class Board:
 
     def draw_paper_bg(self) -> None:
         paper, vertical, horizontal = self.paper
+        line_color = GameColors.PACIFIC_BLUE
 
-        pygame.draw.polygon(surface=self.surface, color=GameColors.CHALK_WHITE, width=0, points=paper)
-        pygame.draw.aalines(self.surface, color=GameColors.CORNFLOWER_BLUE, closed=True, points=paper)
+        # pygame.draw.polygon(surface=self.surface, color=GameColors.CHALK_WHITE, width=0, points=paper)
+        pygame.draw.aalines(self.surface, color=line_color, closed=True, points=paper)
 
         for hline in horizontal:
-            pygame.draw.line(self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=hline[0], end_pos=hline[1])
+            pygame.draw.line(self.surface, color=line_color, start_pos=hline[0], end_pos=hline[1])
 
         for vline in vertical:
-            pygame.draw.aaline(self.surface, color=GameColors.CORNFLOWER_BLUE, start_pos=vline[0], end_pos=vline[1])
+            pygame.draw.aaline(self.surface, color=line_color, start_pos=vline[0], end_pos=vline[1])
+
+    def draw_game_bounds(self) -> None:
+        points = [
+            Point(
+                self.nodes[0][0].v_coords.x - self.node_style.NODE_INTERVAL_X - 4,
+                self.nodes[0][0].v_coords.y - self.node_style.NODE_INTERVAL_Y,
+            ).tuple,
+            Point(
+                self.nodes[0][self.width - 1].v_coords.x + self.node_style.NODE_INTERVAL_X - 4,
+                self.nodes[0][self.width - 1].v_coords.y - self.node_style.NODE_INTERVAL_Y,
+            ).tuple,
+            Point(
+                self.nodes[self.height - 1][self.width - 1].v_coords.x + self.node_style.NODE_INTERVAL_X - 4,
+                self.nodes[self.height - 1][self.width - 1].v_coords.y + self.node_style.NODE_INTERVAL_Y,
+            ).tuple,
+            Point(
+                self.nodes[self.height - 1][0].v_coords.x - self.node_style.NODE_INTERVAL_X - 4,
+                self.nodes[self.height - 1][0].v_coords.y + self.node_style.NODE_INTERVAL_Y,
+            ).tuple,
+        ]
+        pygame.draw.polygon(self.surface, color=GameColors.RED, points=points, width=4)
 
     def draw(self) -> None:
         self.draw_paper_bg()
+        # self.draw_game_bounds()
 
         for connection in self.connections:
             connection.draw()
         for node in flatten(self.nodes):
-            node.draw()
-        for possible in self.avaialable_moves():
-            self.nodes[possible.end.y][possible.end.x].draw(as_fututre_target=True)
+            node.draw(self.current_player)
+        for possible in self.available_moves():
+            self.nodes[possible.end.y][possible.end.x].draw(self.current_player, as_future_target=True)
 
     def random_simulation(self) -> None:
-        while self.avaialable_moves():
+        while self.available_moves():
             (
                 self.connect_head(random.choice(self.possible_connections(self.head)))
                 if self.possible_connections(self.head)
@@ -224,7 +250,7 @@ class Board:
                 < self.node_style.NODE_RADIUS + self.node_style.HOVER_HIT_RADIUS
             )
 
-        for connectivity in self.avaialable_moves():
+        for connectivity in self.available_moves():
             node = self.nodes[connectivity.end.y][connectivity.end.x]
 
             if _mouse_over_node(node):

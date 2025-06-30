@@ -10,7 +10,7 @@ from src.logic.core.utils import Point
 
 
 class Game:
-    DIMX = 1000
+    DIMX = 600
     DIMY = 800
 
     def __init__(self):
@@ -19,6 +19,7 @@ class Game:
         pygame.display.set_caption("Litterally Pen Game")
 
         self.surface = pygame.display.set_mode((self.DIMX, self.DIMY))
+        self.bg = pygame.image.load("assets/grid.jpg").convert()
 
         self.mainmenu = pygame_menu.Menu("Litterally Pen Game", self.DIMX, self.DIMY, theme=themes.THEME_BLUE)
         self.action_phase = pygame_menu.Menu("Action Phase", self.DIMX, self.DIMY, theme=themes.THEME_BLUE)
@@ -29,13 +30,14 @@ class Game:
         self.buld_main_menu()
         self.build_action_phase()
         self.board = Board(
-            height=20,
-            width=20,
+            height=5,
+            width=5,
             surface=self.surface,
             players=[
                 PlayerVisual(name="Shuri", connection_color=GameColors.DARK_GREEN),
                 PlayerVisual(name="Steve", connection_color=GameColors.ORANGE),
                 PlayerVisual(name="Chen", connection_color=GameColors.BURGUNDY),
+                PlayerVisual(name="Pylyp", connection_color=GameColors.DARK_BLUE),
             ],
         )
         self.player_controller = None
@@ -50,9 +52,10 @@ class Game:
         self.action_phase.add.button("Back", self.back_to_main_menu)
         # self.action_phase_surface = pygame.Surface((300, 300))
         # self.action_phase.add.surface(self.action_phase_surface, "ap_surface")
-        # self.action_phase_surface.blit(pygame.image.load("assets/nbgrid.jpg"), (0, 0))
+        # self.action_phase_surface.blit(pygame.image.load("assets/grid.jpg"), (0, 0))
 
     def go_to_action_phase(self):
+
         self.mainmenu._open(self.action_phase)
         self.is_ap = True
 
@@ -62,12 +65,12 @@ class Game:
 
     def mainloop(self):
         self.clock.tick(60)
-        # self.surface.blit(pygame.image.load("assets/grid.jpg"), (0, 0))
 
         while True:
-            self.surface.fill((255, 255, 255))
+            self.surface.blit(pygame.transform.scale_by(self.bg, 0.4), (0, 0))
+            # self.surface.fill((255, 255, 255))
             event = pygame.event.wait()
-            if not self.board.possible_connections():
+            if not self.board.available_moves():
                 self.font.render_to(
                     self.surface, (10, 10), f"You lost {self.board.current_player}, no connections left"
                 )

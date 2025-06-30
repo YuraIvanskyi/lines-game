@@ -18,3 +18,5 @@ class GameColors:
     DARK_BLUE = (0, 0, 128)  # #000080
     WHITE_SMOKE = (245, 245, 245)  # #f5f5f5
     CHALK_WHITE = (251, 255, 255)  # #fbffff
+    AQUAMARINE = (127, 255, 212)  # #7fffd4
+    PACIFIC_BLUE = (28, 169, 201)  # #1ca9c9
