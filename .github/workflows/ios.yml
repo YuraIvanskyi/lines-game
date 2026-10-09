@@ -1,0 +1,41 @@
+name: iOS build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Rules tests
+        working-directory: packages/rules
+        run: dart test
+      - name: App tests
+        working-directory: app
+        run: flutter test
+
+  ios:
+    needs: rules
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Unsigned iOS build
+        working-directory: app
+        run: flutter build ios --release --no-codesign
+      - name: Pack unsigned ipa
+        working-directory: app/build/ios/iphoneos
+        run: |
+          mkdir -p Payload
+          cp -R Runner.app Payload/
+          zip -r unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned
+          path: app/build/ios/iphoneos/unsigned.ipa
