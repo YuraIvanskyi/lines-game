@@ -12,6 +12,8 @@ A free Apple ID signature lasts about seven days and allows a few sideloaded app
 
 The iOS version string is copied from the phone the first time this install succeeds. It is not guessed here.
 
+On 2026-10-13 the owner deferred this install. Tickets keep their phone sections, and the board does not wait on them. Chrome covers the flow until a build is installed.
+
 ## Who checks what
 
 | Check | Where |

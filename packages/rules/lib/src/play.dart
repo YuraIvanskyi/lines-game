@@ -2,15 +2,32 @@ import 'dart:math';
 
 import 'bit_grid.dart';
 import 'match.dart';
+import 'mode.dart';
 
-const classicModeId = 'classic';
-const classicSize = 8;
-const classicWallChance = 0.05;
+export 'mode.dart';
 
 const defaultPlayers = [
   Player(id: 'p1', name: 'Player 1'),
   Player(id: 'p2', name: 'Player 2'),
 ];
+
+/// Deals [mode]. Classic is [classicMode]: 8×8, wall chance 0.05.
+Match deal(
+  GameMode mode, {
+  required int seed,
+  List<Player> players = defaultPlayers,
+  int firstTurn = 0,
+}) {
+  return dealClassic(
+    seed: seed,
+    players: players,
+    width: mode.width,
+    height: mode.height,
+    wallChance: mode.wallChance,
+    firstTurn: firstTurn,
+    modeId: mode.id,
+  );
+}
 
 /// Anchor first, then one wall roll per other cell, in index order.
 Match dealClassic({

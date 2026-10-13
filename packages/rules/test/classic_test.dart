@@ -42,6 +42,19 @@ Match assembled({
 }
 
 void main() {
+  test('a mode record deals its own size and keeps the classic id', () {
+    final wide = classicMode.copyWith(width: 3, height: 5);
+    final match = deal(wide, seed: 9);
+    expect(match.width, 3);
+    expect(match.height, 5);
+    expect(match.modeId, classicModeId);
+    expect(match.wallChance, classicWallChance);
+    final shipping = deal(classicMode, seed: 9);
+    expect(shipping.width, 8);
+    expect(shipping.height, 8);
+    expect(shipping.wallChance, 0.05);
+  });
+
   test('same seed deals the same classic board', () {
     final a = dealClassic(seed: 11, players: players);
     final b = dealClassic(seed: 11, players: players);
