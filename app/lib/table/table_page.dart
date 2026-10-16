@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
+import '../theme/arcade_dialog.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/game_feel.dart';
 import '../theme/ink_theme.dart';
@@ -31,7 +32,6 @@ class TablePage extends StatefulWidget {
 class _TablePageState extends State<TablePage> {
   late Match _match;
   int? _pendingCell;
-
   @override
   void initState() {
     super.initState();
@@ -45,8 +45,7 @@ class _TablePageState extends State<TablePage> {
   void _onCell(int? cell) {
     if (_match.isTerminal) return;
     if (cell == null) {
-      widget.feel.illegal();
-      setState(() => _pendingCell = null);
+      _miss();
       return;
     }
     if (_pendingCell != null) {
@@ -62,8 +61,7 @@ class _TablePageState extends State<TablePage> {
     }
     final choices = movesAt(_match, cell);
     if (choices.isEmpty) {
-      widget.feel.illegal();
-      setState(() => _pendingCell = null);
+      _miss();
       return;
     }
     if (choices.length == 1) {
@@ -76,7 +74,7 @@ class _TablePageState extends State<TablePage> {
   void _play(Move move) {
     final next = apply(_match, move);
     if (identical(next, _match)) {
-      widget.feel.illegal();
+      _miss();
       return;
     }
     final lost = next.isTerminal;
@@ -90,6 +88,20 @@ class _TablePageState extends State<TablePage> {
     } else {
       widget.feel.passTurn();
     }
+  }
+
+  void _miss() {
+    widget.feel.illegal();
+    setState(() => _pendingCell = null);
+  }
+
+  Future<void> _back() async {
+    if (widget.onHome == null) return;
+    if (!_match.isTerminal) {
+      final leave = await confirmLeave(context);
+      if (!leave || !mounted) return;
+    }
+    widget.onHome!();
   }
 
   void _rematch() {
@@ -129,39 +141,63 @@ class _TablePageState extends State<TablePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      children: [
-                        if (!_match.isTerminal)
-                          Container(
-                            width: 22,
-                            height: 22,
-                            decoration: BoxDecoration(
-                              color: ink,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: InkTheme.ink, width: 3),
-                            ),
-                          ),
-                        if (!_match.isTerminal) const SizedBox(width: 10),
-                        Expanded(
-                          child: TweenAnimationBuilder<double>(
-                            key: ValueKey(headline),
-                            tween: Tween(
-                              begin: _match.isTerminal ? InkTheme.lossScaleStart : InkTheme.passScaleStart,
-                              end: 1,
-                            ),
-                            duration: _match.isTerminal ? InkTheme.lossDuration : InkTheme.passDuration,
-                            curve: _match.isTerminal ? InkTheme.lossCurve : InkTheme.passCurve,
-                            builder: (context, scale, child) =>
-                                Transform.scale(scale: scale, alignment: Alignment.centerLeft, child: child),
-                            child: Text(headline, style: text.headlineMedium?.copyWith(color: InkTheme.cloud, fontWeight: FontWeight.w900)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: SizedBox(
+                        width: 132,
+                        child: PopButton(label: 'Back', onPressed: _back, color: InkTheme.blueFace, compact: true),
+                      ),
+                    ),
+                    TweenAnimationBuilder<double>(
+                      key: ValueKey(headline),
+                      tween: Tween(begin: _match.isTerminal ? InkTheme.lossScaleStart : InkTheme.passScaleStart, end: 1),
+                      duration: _match.isTerminal ? InkTheme.lossDuration : InkTheme.passDuration,
+                      curve: _match.isTerminal ? InkTheme.lossCurve : InkTheme.passCurve,
+                      builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: InkTheme.panel,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: Colors.black, width: 3),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 18,
+                                height: 18,
+                                decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  headline,
+                                  style: text.titleLarge?.copyWith(color: InkTheme.cloud, fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                    Text(detail, style: onSky),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.center,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: _match.isTerminal ? InkTheme.sun : InkTheme.blueFace,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                          child: Text(detail, style: onSky?.copyWith(color: InkTheme.cloud, fontSize: 16)),
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tap a pink dot. The ring is the head, the square is the tail.',
+                      'Tap a gold ring. The circle is the head, the square is the tail.',
                       style: text.bodyMedium?.copyWith(color: InkTheme.muted, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
@@ -171,9 +207,9 @@ class _TablePageState extends State<TablePage> {
                           aspectRatio: 1,
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: InkTheme.paper,
+                              color: InkTheme.field,
                               borderRadius: BorderRadius.circular(28),
-                              border: Border.all(color: InkTheme.ink, width: 4),
+                              border: Border.all(color: Colors.black, width: 4),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(10),
@@ -185,12 +221,9 @@ class _TablePageState extends State<TablePage> {
                     ),
                     if (_match.isTerminal) ...[
                       const SizedBox(height: 12),
-                      PopButton(label: 'Rematch', onPressed: _rematch),
+                      PopButton(label: 'Rematch', onPressed: _rematch, color: InkTheme.greenFace),
                       if (widget.onHome != null)
-                        TextButton(
-                          onPressed: widget.onHome,
-                          child: const Text('Home', style: TextStyle(color: InkTheme.cloud, fontWeight: FontWeight.w800)),
-                        ),
+                        PopButton(label: 'Home', onPressed: widget.onHome!, color: InkTheme.blueFace, compact: true),
                     ],
                   ],
                 ),

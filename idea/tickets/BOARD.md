@@ -1,6 +1,6 @@
 # Board
 
-Active phase: **6**. The default skin is Pop (chunky arcade menus and candy colors). iPhone checks stay deferred. Android is next, and this PC has no Android SDK.
+Active phase: **6**. The default skin is a blue arcade kit: gold, blue, and green glossy buttons, a dark board, and gold target rings. iPhone checks stay deferred. Android is next, and this PC has no Android SDK.
 
 | ID | Phase | Title | Status | Depends on | Blocks |
 | --- | --- | --- | --- | --- | --- |

@@ -19,7 +19,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open)));
     expect(find.text("Player 1's turn"), findsOneWidget);
     expect(find.text('Pass the phone'), findsOneWidget);
-    expect(find.text('Rematch'), findsNothing);
+    expect(find.text('REMATCH'), findsNothing);
   });
 
   testWidgets('tapping a neighboring cell passes the turn', (tester) async {
@@ -50,10 +50,24 @@ void main() {
       ),
     );
     expect(find.text('Player 1 lost'), findsOneWidget);
-    expect(find.text('Rematch'), findsOneWidget);
-    await tester.tap(find.text('Home'));
+    expect(find.text('REMATCH'), findsOneWidget);
+    await tester.tap(find.text('HOME'));
     await tester.pump();
     expect(wentHome, isTrue);
+  });
+
+  testWidgets('back asks before leaving a live game', (tester) async {
+    var wentHome = false;
+    await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open, onHome: () => wentHome = true)));
+    await tester.tap(find.text('BACK'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('STAY'), findsOneWidget);
+    await tester.tap(find.text('STAY'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(wentHome, isFalse);
+    expect(find.text("Player 1's turn"), findsOneWidget);
   });
 
   testWidgets('an illegal tap is not a growth', (tester) async {

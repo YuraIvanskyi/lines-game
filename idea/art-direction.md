@@ -12,17 +12,17 @@ A turn should read in about a second: the pass line is immediate, the stroke fin
 
 | Token | Value |
 | --- | --- |
-| `skyTop` | `#6B4DFF` |
-| `skyBottom` | `#FF6BB5` |
-| `sun` | `#FFE14A` |
-| `paper` | `#FFF6E4` board card |
-| `ink` | `#24143A` outlines and type on buttons |
-| `cloud` | `#FFFFFF` title and turn line on the sky |
-| `quiet` | `#E7DCFF` |
-| `wall` | `#3A2770` |
-| `target` | `#FF2D78` |
-| `anchor` | `#24143A` |
-| player inks | `#FF4D8D`, `#3DDC97`, `#FFC83D`, `#5B8CFF` |
+| `skyTop` / `skyBottom` | `#0B4FBE` / `#08347A` |
+| `sun` / `sunDeep` / `sunLip` | `#FFC107` / `#F39C12` / `#C47D00` |
+| `blueFace` / `blueLip` | `#1E88E5` / `#0D47A1` |
+| `greenFace` / `greenLip` | `#43C94A` / `#1B7A24` |
+| `paper` | `#B8F3E8` note cards |
+| `field` / `panel` | `#0E3A86` board, `#12356E` turn plate |
+| `ink` | `#102A4C` type on light cards |
+| `cloud` | `#FFFFFF` type on the sky and on buttons |
+| `quiet` / `wall` | `#3D7AD6` / `#071E4A` |
+| `target` | `#FFC107` gold rings |
+| player inks | `#FF4D8D`, `#3DDC97`, `#FFC83D`, `#7EC8FF` |
 
 Sizes are fractions of the cell.
 
@@ -33,7 +33,7 @@ Sizes are fractions of the cell.
 | `wallRadius` | 0.14 | Corner of that square. |
 | `dotRadius` | 0.16 | Occupied dot. Fill stays with the player who entered it. |
 | `strokeWidth` | 0.14 | Ink segment, round caps. |
-| `markWidth` | 0.07 | End marker stroke, color `ink`. |
+| `markWidth` | 0.07 | End marker stroke. Gold on the white anchor, white on a colored dot. |
 | `headRadius` | 0.28 | Head is a circle. |
 | `tailExtent` | 0.50 | Tail is a rounded square. |
 | `tailRadius` | 0.08 | Corner of the tail. |

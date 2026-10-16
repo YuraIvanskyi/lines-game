@@ -59,15 +59,12 @@ class _SetupPageState extends State<SetupPage> {
                       alignment: Alignment.centerLeft,
                       child: SizedBox(
                         width: 140,
-                        child: PopButton(label: 'Back', onPressed: widget.onBack, color: InkTheme.paper, compact: true),
+                        child: PopButton(label: 'Back', onPressed: widget.onBack, color: InkTheme.blueFace, compact: true),
                       ),
                     ),
                     const PopTitle('Players', size: 40),
                     const SizedBox(height: 4),
-                    Text(
-                      widget.mode.name,
-                      style: const TextStyle(color: InkTheme.cloud, fontSize: 18, fontWeight: FontWeight.w700),
-                    ),
+                    PopBadge(widget.mode.name),
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -76,38 +73,44 @@ class _SetupPageState extends State<SetupPage> {
                           Expanded(
                             child: PopButton(
                               label: '$count',
-                              color: _count == count ? InkTheme.sun : InkTheme.cloud,
+                              compact: true,
+                              color: _count == count ? InkTheme.sun : InkTheme.blueFace,
                               onPressed: () => setState(() => _count = count),
                             ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    for (var i = 0; i < _count; i++) ...[
-                      TextField(
-                        controller: _names[i],
-                        style: const TextStyle(fontWeight: FontWeight.w700, color: InkTheme.ink),
-                        decoration: InputDecoration(
-                          labelText: 'Seat ${i + 1}',
-                          filled: true,
-                          fillColor: InkTheme.paper,
-                          labelStyle: TextStyle(color: InkTheme.inks[i], fontWeight: FontWeight.w800),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: const BorderSide(color: InkTheme.ink, width: 3),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(18),
-                            borderSide: BorderSide(color: InkTheme.inks[i], width: 3),
-                          ),
-                        ),
-                        textInputAction: TextInputAction.next,
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          for (var i = 0; i < _count; i++)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: TextField(
+                                controller: _names[i],
+                                style: const TextStyle(fontWeight: FontWeight.w700, color: InkTheme.ink),
+                                decoration: InputDecoration(
+                                  labelText: 'Seat ${i + 1}',
+                                  filled: true,
+                                  fillColor: InkTheme.paper,
+                                  labelStyle: TextStyle(color: InkTheme.inks[i], fontWeight: FontWeight.w800),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                    borderSide: const BorderSide(color: InkTheme.ink, width: 3),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                    borderSide: BorderSide(color: InkTheme.inks[i], width: 3),
+                                  ),
+                                ),
+                                textInputAction: TextInputAction.next,
+                              ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                    ],
-                    const Spacer(),
-                    PopButton(label: 'Start', onPressed: _start, color: InkTheme.inks[1]),
+                    ),
+                    PopButton(label: 'Start', onPressed: _start, color: InkTheme.greenFace),
                   ],
                 ),
               ),

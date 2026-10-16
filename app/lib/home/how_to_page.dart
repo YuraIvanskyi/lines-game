@@ -26,7 +26,7 @@ class HowToPage extends StatelessWidget {
                       alignment: Alignment.centerLeft,
                       child: SizedBox(
                         width: 140,
-                        child: PopButton(label: 'Back', onPressed: onDone, color: InkTheme.paper, compact: true),
+                        child: PopButton(label: 'Back', onPressed: onDone, color: InkTheme.blueFace, compact: true),
                       ),
                     ),
                     const PopTitle('How to play', size: 40),
@@ -66,7 +66,7 @@ class _Tip extends StatelessWidget {
       decoration: BoxDecoration(
         color: InkTheme.paper,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: InkTheme.ink, width: 3),
+        border: Border.all(color: Colors.black, width: 3),
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -79,7 +79,7 @@ class _Tip extends StatelessWidget {
                 color: swatch,
                 shape: shape,
                 borderRadius: shape == BoxShape.circle ? null : BorderRadius.circular(8),
-                border: Border.all(color: InkTheme.ink, width: 3),
+                border: Border.all(color: Colors.black, width: 3),
               ),
             ),
             const SizedBox(width: 12),

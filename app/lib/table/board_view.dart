@@ -60,10 +60,11 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: Listenable.merge([_draw, _pulse, _end]),
       builder: (context, _) {
-        return GestureDetector(
-          onTapUp: (details) {
+        return Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerUp: (event) {
             final box = context.findRenderObject()! as RenderBox;
-            widget.onCell(cellAt(widget.match, box.size, details.localPosition));
+            widget.onCell(cellAt(widget.match, box.size, box.globalToLocal(event.position)));
           },
           child: RepaintBoundary(
             child: CustomPaint(
@@ -203,7 +204,7 @@ class BoardPainter extends CustomPainter {
       final mark = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = unit * InkTheme.markWidth
-        ..color = InkTheme.ink;
+        ..color = dotColor(cell) == InkTheme.anchor ? InkTheme.sun : InkTheme.cloud;
       canvas.save();
       canvas.translate(center.dx, center.dy);
       canvas.scale(endScale);

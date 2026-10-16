@@ -66,6 +66,7 @@ class _LinesAppState extends State<LinesApp> {
       title: 'Lines',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        fontFamily: 'Fredoka',
         colorScheme: ColorScheme.fromSeed(seedColor: InkTheme.skyTop, surface: InkTheme.paper),
         scaffoldBackgroundColor: InkTheme.skyTop,
         useMaterial3: true,

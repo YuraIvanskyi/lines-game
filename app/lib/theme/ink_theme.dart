@@ -1,25 +1,35 @@
 import 'package:flutter/material.dart';
 
-/// Pop theme. Values match `idea/art-direction.md`.
+/// Arcade kit. Values match `idea/art-direction.md`.
 abstract final class InkTheme {
-  static const skyTop = Color(0xFF6B4DFF);
-  static const skyBottom = Color(0xFFFF6BB5);
-  static const sun = Color(0xFFFFE14A);
-  static const paper = Color(0xFFFFF6E4);
-  static const ink = Color(0xFF24143A);
+  static const skyTop = Color(0xFF0B4FBE);
+  static const skyBottom = Color(0xFF08347A);
+  static const sun = Color(0xFFFFC107);
+  static const sunDeep = Color(0xFFF39C12);
+  static const sunLip = Color(0xFFC47D00);
+  static const blueFace = Color(0xFF1E88E5);
+  static const blueDeep = Color(0xFF1565C0);
+  static const blueLip = Color(0xFF0D47A1);
+  static const greenFace = Color(0xFF43C94A);
+  static const greenDeep = Color(0xFF2E9E34);
+  static const greenLip = Color(0xFF1B7A24);
+  static const paper = Color(0xFFB8F3E8);
+  static const field = Color(0xFF0E3A86);
+  static const panel = Color(0xFF12356E);
+  static const ink = Color(0xFF102A4C);
   static const cloud = Color(0xFFFFFFFF);
-  static const foam = Color(0x33FFFFFF);
-  static const sunGlow = Color(0x55FFE14A);
-  static const muted = Color(0xFFF3E9FF);
-  static const quiet = Color(0xFFE7DCFF);
-  static const wall = Color(0xFF3A2770);
-  static const target = Color(0xFFFF2D78);
-  static const anchor = Color(0xFF24143A);
+  static const foam = Color(0x332B7BFF);
+  static const sunGlow = Color(0x33FFC107);
+  static const muted = Color(0xFFD6ECFF);
+  static const quiet = Color(0xFF3D7AD6);
+  static const wall = Color(0xFF071E4A);
+  static const target = Color(0xFFFFC107);
+  static const anchor = Color(0xFFFFFFFF);
   static const inks = <Color>[
     Color(0xFFFF4D8D),
     Color(0xFF3DDC97),
     Color(0xFFFFC83D),
-    Color(0xFF5B8CFF),
+    Color(0xFF7EC8FF),
   ];
 
   static const quietRadius = 0.08;
