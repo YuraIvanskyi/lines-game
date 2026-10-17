@@ -1,0 +1,43 @@
+workflows:
+  lines-game-ipa:
+    name: Lines Game - Unsigned IPA
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+
+    environment:
+      flutter: stable
+      xcode: "26.4"
+
+    # Manual builds only to conserve free minutes
+    triggering:
+      events: []
+
+    scripts:
+      - name: Build unsigned Release app for iPhone
+        script: |
+          set -euo pipefail
+          cd "$CM_BUILD_DIR/app"
+          flutter --version
+          xcodebuild -version
+          flutter pub get
+          flutter build ios --release --no-codesign
+
+      - name: Package and verify IPA
+        script: |
+          set -euo pipefail
+          APP="$CM_BUILD_DIR/app/build/ios/iphoneos/Runner.app"
+          PAYLOAD_DIR="$CM_BUILD_DIR/app/build/ios/package/Payload"
+          IPA="$CM_BUILD_DIR/app/build/ios/ipa/lines_game.ipa"
+
+          if [[ ! -d "$APP" ]]; then
+            APP="$(find "$CM_BUILD_DIR/app/build/ios" -type d -name Runner.app | head -n 1)"
+          fi
+
+          test -d "$APP"
+          mkdir -p "$PAYLOAD_DIR" "$(dirname "$IPA")"
+          ditto "$APP" "$PAYLOAD_DIR/Runner.app"
+          ditto -c -k --keepParent --norsrc "$PAYLOAD_DIR" "$IPA"
+          unzip -t "$IPA"
+
+    artifacts:
+      - app/build/ios/ipa/lines_game.ipa
