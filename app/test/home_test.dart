@@ -48,6 +48,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.priority_high));
     await tester.pumpAndSettle();
     expect(find.text('INFO'), findsOneWidget);
+    expect(find.text('Yurii Ivanskyi'), findsOneWidget);
+    expect(find.text('Flutter and Dart'), findsOneWidget);
+    expect(find.textContaining('SIL Open Font License'), findsOneWidget);
     expect(find.text('PLAY'), findsNothing);
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();

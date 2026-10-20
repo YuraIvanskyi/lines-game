@@ -4,6 +4,7 @@ import 'package:rules/rules.dart';
 
 import 'home/home_page.dart';
 import 'home/how_to_page.dart';
+import 'home/info_page.dart';
 import 'home/setup_page.dart';
 import 'home/simple_menu_page.dart';
 import 'leave_app.dart';
@@ -90,7 +91,7 @@ class _LinesAppState extends State<LinesApp> {
           ),
           _Place.howTo => HowToPage(onDone: _home),
           _Place.settings => SimpleMenuPage(title: 'Settings', onBack: _home),
-          _Place.info => SimpleMenuPage(title: 'Info', onBack: _home),
+          _Place.info => InfoPage(onBack: _home),
           _Place.setup => SetupPage(
             mode: widget.mode,
             onBack: _home,
