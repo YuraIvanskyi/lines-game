@@ -110,6 +110,14 @@ void main() {
       ),
     );
     expect(find.text('CLASSIC'), findsOneWidget);
+    expect(find.text('Seat 1'), findsNothing);
+    expect(find.byIcon(Icons.edit), findsNWidgets(2));
+    final first = tester.widget<TextField>(find.byType(TextField).at(0));
+    final second = tester.widget<TextField>(find.byType(TextField).at(1));
+    expect(first.textAlign, TextAlign.center);
+    expect(first.decoration?.labelText, isNull);
+    expect(first.decoration?.fillColor, isNot(second.decoration?.fillColor));
+    expect(first.decoration?.fillColor, isNot(InkTheme.paper));
     await tester.tap(find.text('4'));
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsNWidgets(4));

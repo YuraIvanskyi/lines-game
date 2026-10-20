@@ -83,20 +83,21 @@ class _SetupPageState extends State<SetupPage> {
                               padding: const EdgeInsets.only(bottom: 8),
                               child: TextField(
                                 controller: _names[i],
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(fontWeight: FontWeight.w700, color: InkTheme.ink),
+                                cursorColor: InkTheme.inks[i],
                                 decoration: InputDecoration(
-                                  labelText: 'Seat ${i + 1}',
                                   filled: true,
-                                  fillColor: InkTheme.paper,
-                                  labelStyle: TextStyle(color: InkTheme.inks[i], fontWeight: FontWeight.w800),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                    borderSide: const BorderSide(color: InkTheme.ink, width: 3),
+                                  fillColor: Color.lerp(InkTheme.inks[i], Colors.white, 0.68),
+                                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                                  prefixIcon: ExcludeSemantics(
+                                    child: Icon(Icons.edit, color: InkTheme.inks[i], size: 22),
                                   ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                    borderSide: BorderSide(color: InkTheme.inks[i], width: 3),
-                                  ),
+                                  prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                                  suffixIcon: const SizedBox.shrink(),
+                                  suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                                  enabledBorder: _seatBorder(InkTheme.ink),
+                                  focusedBorder: _seatBorder(InkTheme.inks[i]),
                                 ),
                                 textInputAction: TextInputAction.next,
                               ),
@@ -114,4 +115,11 @@ class _SetupPageState extends State<SetupPage> {
       ),
     );
   }
+}
+
+OutlineInputBorder _seatBorder(Color color) {
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.circular(18),
+    borderSide: BorderSide(color: color, width: 3),
+  );
 }
