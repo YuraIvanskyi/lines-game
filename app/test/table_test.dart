@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lines_game/table/board_view.dart';
 import 'package:lines_game/table/table_page.dart';
 import 'package:lines_game/theme/game_feel.dart';
+import 'package:lines_game/theme/ink_theme.dart';
 import 'package:rules/rules.dart';
 
 final open = classicMode.copyWith(wallChance: 0);
@@ -99,8 +100,11 @@ void main() {
   test('cell hit stays inside its own dot', () {
     final match = deal(open, seed: 1);
     const size = Size(400, 400);
-    expect(cellAt(match, size, const Offset(25, 25)), match.cellOf(0, 0));
-    expect(cellAt(match, size, const Offset(50, 25)), isNull);
+    final cell = size.width / match.width;
+    final center = cell / 2;
+    expect(cellAt(match, size, Offset(center, center)), match.cellOf(0, 0));
+    final pastTheRing = center + cell * InkTheme.hitReach + 1;
+    expect(cellAt(match, size, Offset(pastTheRing, center)), isNull);
   });
 }
 

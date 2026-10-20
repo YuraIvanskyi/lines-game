@@ -50,8 +50,8 @@ void main() {
     expect(match.modeId, classicModeId);
     expect(match.wallChance, classicWallChance);
     final shipping = deal(classicMode, seed: 9);
-    expect(shipping.width, 8);
-    expect(shipping.height, 8);
+    expect(shipping.width, 6);
+    expect(shipping.height, 6);
     expect(shipping.wallChance, 0.05);
   });
 
@@ -59,8 +59,8 @@ void main() {
     final a = dealClassic(seed: 11, players: players);
     final b = dealClassic(seed: 11, players: players);
     expect(a, b);
-    expect(a.width, 8);
-    expect(a.height, 8);
+    expect(a.width, 6);
+    expect(a.height, 6);
     expect(a.walls.test(a.head), isFalse);
     expect(a.head, a.tail);
     expect(a.occupied.test(a.head), isTrue);

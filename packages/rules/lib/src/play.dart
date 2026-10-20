@@ -11,7 +11,7 @@ const defaultPlayers = [
   Player(id: 'p2', name: 'Player 2'),
 ];
 
-/// Deals [mode]. Classic is [classicMode]: 8×8, wall chance 0.05.
+/// Deals [mode]. Classic is [classicMode]: 6×6, wall chance 0.05.
 Match deal(
   GameMode mode, {
   required int seed,

@@ -1,5 +1,5 @@
 const classicModeId = 'classic';
-const classicSize = 8;
+const classicSize = 6;
 const classicWallChance = 0.05;
 
 class GameMode {
