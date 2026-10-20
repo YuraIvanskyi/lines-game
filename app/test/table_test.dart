@@ -59,7 +59,7 @@ void main() {
   testWidgets('back asks before leaving a live game', (tester) async {
     var wentHome = false;
     await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open, onHome: () => wentHome = true)));
-    await tester.tap(find.text('BACK'));
+    await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('STAY'), findsOneWidget);

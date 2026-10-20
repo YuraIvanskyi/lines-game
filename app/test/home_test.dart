@@ -41,7 +41,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('SETTINGS'), findsOneWidget);
     expect(find.text('PLAY'), findsNothing);
-    await tester.tap(find.text('BACK'));
+    await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     expect(find.text('PLAY'), findsOneWidget);
 
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('INFO'), findsOneWidget);
     expect(find.text('PLAY'), findsNothing);
-    await tester.tap(find.text('BACK'));
+    await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     expect(find.text('PLAY'), findsOneWidget);
   });

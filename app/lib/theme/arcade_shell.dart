@@ -211,6 +211,20 @@ class _PopIconButtonState extends State<PopIconButton> {
   }
 }
 
+class PopBackButton extends StatelessWidget {
+  const PopBackButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: PopIconButton(icon: Icons.arrow_back, label: 'Back', onPressed: onPressed, extent: 56),
+    );
+  }
+}
+
 class OutlineLabel extends StatelessWidget {
   const OutlineLabel(this.text, {super.key, required this.size, this.stroke = 2.5});
 

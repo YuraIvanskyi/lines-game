@@ -55,13 +55,7 @@ class _SetupPageState extends State<SetupPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: 140,
-                        child: PopButton(label: 'Back', onPressed: widget.onBack, color: InkTheme.blueFace, compact: true),
-                      ),
-                    ),
+                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: widget.onBack)),
                     const PopTitle('Players', size: 40),
                     const SizedBox(height: 4),
                     PopBadge(widget.mode.name),

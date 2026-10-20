@@ -22,13 +22,7 @@ class HowToPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: 140,
-                        child: PopButton(label: 'Back', onPressed: onDone, color: InkTheme.blueFace, compact: true),
-                      ),
-                    ),
+                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: onDone)),
                     const PopTitle('How to play', size: 40),
                     const SizedBox(height: 20),
                     const _Tip(

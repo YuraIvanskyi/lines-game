@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../theme/arcade_shell.dart';
-import '../theme/ink_theme.dart';
 
 class SimpleMenuPage extends StatelessWidget {
   const SimpleMenuPage({super.key, required this.title, required this.onBack});
@@ -23,13 +22,7 @@ class SimpleMenuPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: 140,
-                        child: PopButton(label: 'Back', onPressed: onBack, color: InkTheme.blueFace, compact: true),
-                      ),
-                    ),
+                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: onBack)),
                     PopTitle(title, size: 40),
                     const Spacer(),
                   ],

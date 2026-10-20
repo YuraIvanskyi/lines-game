@@ -141,13 +141,7 @@ class _TablePageState extends State<TablePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: SizedBox(
-                        width: 132,
-                        child: PopButton(label: 'Back', onPressed: _back, color: InkTheme.blueFace, compact: true),
-                      ),
-                    ),
+                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: _back)),
                     TweenAnimationBuilder<double>(
                       key: ValueKey(headline),
                       tween: Tween(begin: _match.isTerminal ? InkTheme.lossScaleStart : InkTheme.passScaleStart, end: 1),
