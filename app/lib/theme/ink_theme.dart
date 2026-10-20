@@ -13,6 +13,9 @@ abstract final class InkTheme {
   static const greenFace = Color(0xFF43C94A);
   static const greenDeep = Color(0xFF2E9E34);
   static const greenLip = Color(0xFF1B7A24);
+  static const pinkFace = Color(0xFFFF4D8D);
+  static const pinkDeep = Color(0xFFE23478);
+  static const pinkLip = Color(0xFFB51A58);
   static const paper = Color(0xFFB8F3E8);
   static const field = Color(0xFF0E3A86);
   static const panel = Color(0xFF12356E);
@@ -26,7 +29,7 @@ abstract final class InkTheme {
   static const target = Color(0xFFFFC107);
   static const anchor = Color(0xFFFFFFFF);
   static const inks = <Color>[
-    Color(0xFFFF4D8D),
+    pinkFace,
     Color(0xFF3DDC97),
     Color(0xFFFFC83D),
     Color(0xFF7EC8FF),

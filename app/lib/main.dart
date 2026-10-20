@@ -5,6 +5,8 @@ import 'package:rules/rules.dart';
 import 'home/home_page.dart';
 import 'home/how_to_page.dart';
 import 'home/setup_page.dart';
+import 'home/simple_menu_page.dart';
+import 'leave_app.dart';
 import 'table/table_page.dart';
 import 'theme/game_feel.dart';
 import 'theme/ink_theme.dart';
@@ -16,20 +18,20 @@ Future<void> main() async {
 }
 
 class LinesApp extends StatefulWidget {
-  const LinesApp({super.key, this.seed, this.mode = classicMode});
+  const LinesApp({super.key, this.seed, this.mode = classicMode, this.onExit});
 
   final int? seed;
   final GameMode mode;
+  final VoidCallback? onExit;
 
   @override
   State<LinesApp> createState() => _LinesAppState();
 }
 
-enum _Place { home, howTo, setup, table }
+enum _Place { home, howTo, setup, settings, info, table }
 
 class _LinesAppState extends State<LinesApp> {
   _Place _place = _Place.home;
-  bool _howToSeen = false;
   List<Player> _players = defaultPlayers;
   late int _tableSeed = widget.seed ?? DateTime.now().millisecondsSinceEpoch & 0x7fffffff;
   final GameFeel _feel = DeviceFeel();
@@ -78,18 +80,17 @@ class _LinesAppState extends State<LinesApp> {
         },
         child: switch (_place) {
           _Place.home => HomePage(
-            showFirstGameNote: !_howToSeen,
             onPlay: _playDefault,
             onSetup: () => setState(() => _place = _Place.setup),
             onHowTo: () => setState(() => _place = _Place.howTo),
-            onSkipHowTo: () => setState(() => _howToSeen = true),
+            onSettings: () => setState(() => _place = _Place.settings),
+            onInfo: () => setState(() => _place = _Place.info),
+            onStore: () {},
+            onExit: widget.onExit ?? leaveApp,
           ),
-          _Place.howTo => HowToPage(
-            onDone: () => setState(() {
-              _howToSeen = true;
-              _place = _Place.home;
-            }),
-          ),
+          _Place.howTo => HowToPage(onDone: _home),
+          _Place.settings => SimpleMenuPage(title: 'Settings', onBack: _home),
+          _Place.info => SimpleMenuPage(title: 'Info', onBack: _home),
           _Place.setup => SetupPage(
             mode: widget.mode,
             onBack: _home,

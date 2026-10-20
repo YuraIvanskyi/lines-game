@@ -58,6 +58,19 @@ class _ArenaPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+const _lip = 4.0;
+
+const _iconHalo = <Shadow>[
+  Shadow(color: Colors.black, offset: Offset(-1.1, -1.1)),
+  Shadow(color: Colors.black, offset: Offset(0, -1.3)),
+  Shadow(color: Colors.black, offset: Offset(1.1, -1.1)),
+  Shadow(color: Colors.black, offset: Offset(-1.3, 0)),
+  Shadow(color: Colors.black, offset: Offset(1.3, 0)),
+  Shadow(color: Colors.black, offset: Offset(-1.1, 1.1)),
+  Shadow(color: Colors.black, offset: Offset(0, 1.3)),
+  Shadow(color: Colors.black, offset: Offset(1.1, 1.1)),
+];
+
 class PopButton extends StatefulWidget {
   const PopButton({
     super.key,
@@ -66,6 +79,8 @@ class PopButton extends StatefulWidget {
     this.color = InkTheme.sun,
     this.deep,
     this.compact = false,
+    this.extent,
+    this.below = 8,
   });
 
   final String label;
@@ -73,6 +88,8 @@ class PopButton extends StatefulWidget {
   final Color color;
   final Color? deep;
   final bool compact;
+  final double? extent;
+  final double below;
 
   @override
   State<PopButton> createState() => _PopButtonState();
@@ -85,11 +102,12 @@ class _PopButtonState extends State<PopButton> {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(widget.compact ? 18 : 22);
+    final radius = BorderRadius.circular(widget.extent != null ? widget.extent! * 0.26 : (widget.compact ? 18 : 22));
     final face = AnimatedContainer(
       duration: const Duration(milliseconds: 70),
       curve: Curves.easeOut,
-      padding: EdgeInsets.symmetric(vertical: widget.compact ? 12 : 16),
+      height: widget.extent,
+      padding: EdgeInsets.symmetric(vertical: widget.extent == null ? (widget.compact ? 12 : 16) : 0),
       decoration: BoxDecoration(
         borderRadius: radius,
         gradient: LinearGradient(
@@ -99,14 +117,14 @@ class _PopButtonState extends State<PopButton> {
         ),
         border: Border.all(color: Colors.black, width: 3),
       ),
-      child: Center(child: OutlineLabel(widget.label.toUpperCase(), size: widget.compact ? 18 : 24)),
+      child: Center(child: OutlineLabel(widget.label.toUpperCase(), size: widget.compact ? 22 : 28)),
     );
 
     return Semantics(
       button: true,
       label: widget.label,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: EdgeInsets.only(bottom: widget.below),
         child: GestureDetector(
           onTapDown: (_) => setState(() => _down = true),
           onTapCancel: () => setState(() => _down = false),
@@ -117,8 +135,8 @@ class _PopButtonState extends State<PopButton> {
           child: DecoratedBox(
             decoration: BoxDecoration(color: Colors.black, borderRadius: radius),
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Transform.translate(offset: Offset(0, _down ? 5 : 0), child: face),
+              padding: const EdgeInsets.only(bottom: _lip),
+              child: Transform.translate(offset: Offset(0, _down ? _lip - 1 : 0), child: face),
             ),
           ),
         ),
@@ -127,8 +145,74 @@ class _PopButtonState extends State<PopButton> {
   }
 }
 
+class PopIconButton extends StatefulWidget {
+  const PopIconButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+    required this.extent,
+    this.color = InkTheme.blueFace,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+  final double extent;
+  final Color color;
+
+  @override
+  State<PopIconButton> createState() => _PopIconButtonState();
+}
+
+class _PopIconButtonState extends State<PopIconButton> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(widget.extent * 0.26);
+    final deep = _pair(widget.color).$1;
+    final face = AnimatedContainer(
+      duration: const Duration(milliseconds: 70),
+      curve: Curves.easeOut,
+      width: widget.extent,
+      height: widget.extent,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color.lerp(widget.color, Colors.white, 0.28)!, widget.color, deep],
+        ),
+        border: Border.all(color: Colors.black, width: 3),
+      ),
+      child: Center(child: Icon(widget.icon, size: widget.extent * 0.46, color: InkTheme.cloud, shadows: _iconHalo)),
+    );
+
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _down = true),
+        onTapCancel: () => setState(() => _down = false),
+        onTapUp: (_) {
+          setState(() => _down = false);
+          widget.onPressed();
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: Colors.black, borderRadius: radius),
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: _lip),
+            child: Transform.translate(offset: Offset(0, _down ? _lip - 1 : 0), child: face),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class OutlineLabel extends StatelessWidget {
-  const OutlineLabel(this.text, {super.key, required this.size, this.stroke = 3});
+  const OutlineLabel(this.text, {super.key, required this.size, this.stroke = 2.5});
 
   final String text;
   final double size;
@@ -166,6 +250,7 @@ class OutlineLabel extends StatelessWidget {
 (Color, Color) _pair(Color color) {
   if (color == InkTheme.blueFace) return (InkTheme.blueDeep, InkTheme.blueLip);
   if (color == InkTheme.greenFace) return (InkTheme.greenDeep, InkTheme.greenLip);
+  if (color == InkTheme.pinkFace) return (InkTheme.pinkDeep, InkTheme.pinkLip);
   if (color == InkTheme.sun) return (InkTheme.sunDeep, InkTheme.sunLip);
   final deep = Color.lerp(color, Colors.black, 0.18)!;
   final lip = Color.lerp(color, Colors.black, 0.38)!;
@@ -196,30 +281,6 @@ class PopBadge extends StatelessWidget {
   }
 }
 
-class PopNote extends StatelessWidget {
-  const PopNote(this.text, {super.key});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: InkTheme.paper,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.black, width: 3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        child: Text(
-          text,
-          style: const TextStyle(color: InkTheme.ink, fontSize: 16, fontWeight: FontWeight.w800),
-        ),
-      ),
-    );
-  }
-}
-
 class PopTitle extends StatelessWidget {
   const PopTitle(this.text, {super.key, this.size = 64});
 
@@ -228,6 +289,6 @@ class PopTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(alignment: Alignment.center, child: OutlineLabel(text.toUpperCase(), size: size, stroke: 6));
+    return Align(alignment: Alignment.center, child: OutlineLabel(text.toUpperCase(), size: size, stroke: 5));
   }
 }
