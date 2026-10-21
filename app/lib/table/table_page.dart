@@ -110,6 +110,16 @@ class _TablePageState extends State<TablePage> {
     widget.onHome!();
   }
 
+  Future<void> _askRestart() async {
+    final name = _match.currentPlayer.name;
+    final restart = await confirmRestart(context, name);
+    if (!restart || !mounted) return;
+    setState(() {
+      _match = _deal(_match.seed, _match.firstTurn);
+      _pendingCell = null;
+    });
+  }
+
   void _rematch() {
     final firstTurn = (_match.firstTurn + 1) % _match.players.length;
     final seed = DateTime.now().microsecondsSinceEpoch & 0x7fffffff;
@@ -148,9 +158,21 @@ class _TablePageState extends State<TablePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: PopBackButton(onPressed: _back, label: copy.back),
+                    Row(
+                      children: [
+                        PopBackButton(onPressed: _back, label: copy.back),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: PopIconButton(
+                            icon: Icons.restart_alt,
+                            label: copy.restart,
+                            onPressed: _askRestart,
+                            extent: 56,
+                            color: InkTheme.pinkFace,
+                          ),
+                        ),
+                      ],
                     ),
                     TweenAnimationBuilder<double>(
                       key: ValueKey(headline),

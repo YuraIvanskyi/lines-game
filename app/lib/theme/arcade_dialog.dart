@@ -5,7 +5,12 @@ import 'arcade_shell.dart';
 import 'ink_theme.dart';
 
 class ArcadeDialog extends StatelessWidget {
-  const ArcadeDialog({super.key, required this.title, required this.body, required this.actions});
+  const ArcadeDialog({
+    super.key,
+    required this.title,
+    required this.body,
+    required this.actions,
+  });
 
   final String title;
   final String body;
@@ -20,26 +25,34 @@ class ArcadeDialog extends StatelessWidget {
         side: const BorderSide(color: InkTheme.sun, width: 4),
       ),
       child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: InkTheme.cloud, fontSize: 26, fontWeight: FontWeight.w900),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: InkTheme.cloud,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
               ),
-              const SizedBox(height: 8),
-              Text(
-                body,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: InkTheme.muted, fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: InkTheme.muted,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(height: 14),
-              ...actions,
-            ],
-          ),
+            ),
+            const SizedBox(height: 14),
+            ...actions,
+          ],
+        ),
       ),
     );
   }
@@ -53,10 +66,40 @@ Future<bool> confirmLeave(BuildContext context) async {
       title: copy.leaveTitle,
       body: copy.leaveBody,
       actions: [
-        PopButton(label: copy.stay, color: InkTheme.blueFace, onPressed: () => Navigator.pop(context, false)),
-        PopButton(label: copy.leave, onPressed: () => Navigator.pop(context, true)),
+        PopButton(
+          label: copy.stay,
+          color: InkTheme.blueFace,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        PopButton(
+          label: copy.leave,
+          onPressed: () => Navigator.pop(context, true),
+        ),
       ],
     ),
   );
   return leave ?? false;
+}
+
+Future<bool> confirmRestart(BuildContext context, String name) async {
+  final copy = AppCopy.of(context);
+  final restart = await showDialog<bool>(
+    context: context,
+    builder: (context) => ArcadeDialog(
+      title: copy.restartAsk(name),
+      body: copy.restartBody,
+      actions: [
+        PopButton(
+          label: copy.cancel,
+          color: InkTheme.blueFace,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        PopButton(
+          label: copy.restart,
+          onPressed: () => Navigator.pop(context, true),
+        ),
+      ],
+    ),
+  );
+  return restart ?? false;
 }

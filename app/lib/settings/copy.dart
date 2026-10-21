@@ -41,6 +41,10 @@ class Copy {
     required this.stay,
     required this.leave,
     required this.back,
+    required this.restart,
+    required this.restartOf,
+    required this.restartBody,
+    required this.cancel,
     required this.sound,
     required this.soundOn,
     required this.soundOff,
@@ -85,6 +89,10 @@ class Copy {
   final String stay;
   final String leave;
   final String back;
+  final String restart;
+  final String restartOf;
+  final String restartBody;
+  final String cancel;
   final String sound;
   final String soundOn;
   final String soundOff;
@@ -96,6 +104,8 @@ class Copy {
   String turn(String name) => turnOf.replaceAll('{name}', name);
 
   String lostPlayer(String name) => lostOf.replaceAll('{name}', name);
+
+  String restartAsk(String name) => restartOf.replaceAll('{name}', name);
 
   static Copy forLanguage(AppLanguage language) {
     return switch (language) {
@@ -123,8 +133,7 @@ class Copy {
     creator: 'Creator',
     creatorName: 'Yurii Ivanskyi',
     thanks: 'Thanks',
-    thanksBody:
-        'To my best friend Bohdan, with whom a paper version of this game first appeared during our school years.',
+    thanksBody: 'To my best friend Bohdan, with whom a paper version of this game first appeared during our school years.',
     tech: 'Tech',
     techLines: [
       'Flutter and Dart.',
@@ -152,6 +161,10 @@ class Copy {
     stay: 'Stay',
     leave: 'Leave',
     back: 'Back',
+    restart: 'Restart',
+    restartOf: '{name} wants to restart?',
+    restartBody: 'This starts the current game over.',
+    cancel: 'Cancel',
     sound: 'Sound',
     soundOn: 'Sound on',
     soundOff: 'Sound off',
@@ -178,8 +191,7 @@ class Copy {
     creator: 'Автор',
     creatorName: 'Yurii Ivanskyi',
     thanks: 'Подяка',
-    thanksBody:
-        'Моєму найкращому другу Богдану, з яким паперова версія цієї гри вперше з’явилася ще в шкільні роки.',
+    thanksBody: 'Моєму найкращому другу Богдану, з яким паперова версія цієї гри вперше з’явилася ще в шкільні роки.',
     tech: 'Технології',
     techLines: [
       'Flutter і Dart.',
@@ -207,6 +219,10 @@ class Copy {
     stay: 'Залишитись',
     leave: 'Вийти',
     back: 'Назад',
+    restart: 'Заново',
+    restartOf: '{name} хоче почати спочатку?',
+    restartBody: 'Поточна гра почнеться з початку.',
+    cancel: 'Скасувати',
     sound: 'Звук',
     soundOn: 'Звук увімкнено',
     soundOff: 'Звук вимкнено',

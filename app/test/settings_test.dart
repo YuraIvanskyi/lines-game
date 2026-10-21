@@ -23,6 +23,11 @@ void main() {
     expect(copy.turn('Player 1'), "Player 1's turn");
     expect(copy.lostPlayer('Player 1'), 'Player 1 lost');
     expect(copy.passPhone, 'Pass the phone');
+    expect(copy.restartAsk('Player 2'), 'Player 2 wants to restart?');
+    expect(
+      Copy.ukrainian.restartAsk('Гравець 2'),
+      'Гравець 2 хоче почати спочатку?',
+    );
   });
 
   testWidgets('sound off does not start a cue', (tester) async {
@@ -65,7 +70,9 @@ void main() {
     expect(_button(tester, 'УКРАЇНСЬКА').color, InkTheme.blueFace);
   });
 
-  testWidgets('save stores sound and language and applies them', (tester) async {
+  testWidgets('save stores sound and language and applies them', (
+    tester,
+  ) async {
     await tester.binding.setSurfaceSize(const Size(402, 874));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final store = SharedPrefsSettingsStore();
@@ -73,7 +80,9 @@ void main() {
     await _openSettings(tester);
 
     final english = tester.getRect(find.widgetWithText(PopButton, 'ENGLISH'));
-    final ukrainian = tester.getRect(find.widgetWithText(PopButton, 'УКРАЇНСЬКА'));
+    final ukrainian = tester.getRect(
+      find.widgetWithText(PopButton, 'УКРАЇНСЬКА'),
+    );
     expect(english.width, closeTo(ukrainian.width, 0.01));
     expect(find.byType(PopIconButton), findsNWidgets(2));
 
@@ -88,7 +97,10 @@ void main() {
 
     await tester.tap(find.text('SAVE'));
     await tester.pumpAndSettle();
-    expect(await store.load(), const AppSettings(sound: false, language: AppLanguage.ukrainian));
+    expect(
+      await store.load(),
+      const AppSettings(sound: false, language: AppLanguage.ukrainian),
+    );
     expect(find.text('ЗБЕРЕГТИ'), findsOneWidget);
     expect(find.text('Звук'), findsOneWidget);
     expect(find.text('Мови'), findsOneWidget);
@@ -97,7 +109,12 @@ void main() {
 
     final saved = await store.load();
     await tester.pumpWidget(
-      LinesApp(key: const ValueKey('relaunch'), seed: 1, settingsStore: store, initialSettings: saved),
+      LinesApp(
+        key: const ValueKey('relaunch'),
+        seed: 1,
+        settingsStore: store,
+        initialSettings: saved,
+      ),
     );
     await tester.pumpAndSettle();
     expect(find.text('ГРАТИ'), findsOneWidget);
@@ -110,11 +127,15 @@ void main() {
     expect(find.text('Передайте телефон'), findsOneWidget);
   });
 
-  testWidgets('ukrainian copy reaches a table opened on its own', (tester) async {
+  testWidgets('ukrainian copy reaches a table opened on its own', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       AppCopy(
         copy: Copy.ukrainian,
-        child: MaterialApp(home: TablePage(seed: 1, mode: classicMode.copyWith(wallChance: 0))),
+        child: MaterialApp(
+          home: TablePage(seed: 1, mode: classicMode.copyWith(wallChance: 0)),
+        ),
       ),
     );
     expect(find.text('Хід: Player 1'), findsOneWidget);

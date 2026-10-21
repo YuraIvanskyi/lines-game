@@ -16,7 +16,9 @@ const four = [
 ];
 
 void main() {
-  testWidgets('a clear deal names player 1 and asks for the phone', (tester) async {
+  testWidgets('a clear deal names player 1 and asks for the phone', (
+    tester,
+  ) async {
     await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open)));
     expect(find.text("Player 1's turn"), findsOneWidget);
     expect(find.text('Pass the phone'), findsOneWidget);
@@ -31,7 +33,11 @@ void main() {
   });
 
   testWidgets('four seats cycle back to player 1', (tester) async {
-    await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open, players: four)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TablePage(seed: 1, mode: open, players: four),
+      ),
+    );
     var match = deal(open, seed: 1, players: four);
     for (var i = 0; i < 4; i++) {
       expect(find.text("${match.currentPlayer.name}'s turn"), findsOneWidget);
@@ -47,7 +53,11 @@ void main() {
     var wentHome = false;
     await tester.pumpWidget(
       MaterialApp(
-        home: TablePage(mode: open, initial: stuck, onHome: () => wentHome = true),
+        home: TablePage(
+          mode: open,
+          initial: stuck,
+          onHome: () => wentHome = true,
+        ),
       ),
     );
     expect(find.text('Player 1 lost'), findsOneWidget);
@@ -57,9 +67,65 @@ void main() {
     expect(wentHome, isTrue);
   });
 
+  testWidgets('restart sits opposite back and names who asked', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TablePage(seed: 1, mode: open, players: four),
+      ),
+    );
+    final back = tester.getCenter(find.byIcon(Icons.arrow_back));
+    final restart = tester.getCenter(find.byIcon(Icons.restart_alt));
+    expect(restart.dx, greaterThan(back.dx));
+    expect((restart.dy - back.dy).abs(), lessThan(8));
+
+    var match = deal(open, seed: 1, players: four);
+    for (var i = 0; i < 2; i++) {
+      final move = legalMoves(match).first;
+      await tapCell(tester, match, move.cell);
+      match = apply(match, move);
+    }
+    expect(find.text("Player 3's turn"), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Player 3 wants to restart?'), findsOneWidget);
+    expect(find.text('This starts the current game over.'), findsOneWidget);
+    await tester.tap(find.text('CANCEL'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text("Player 3's turn"), findsOneWidget);
+  });
+
+  testWidgets('confirming restart deals this game from the start again', (
+    tester,
+  ) async {
+    await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open)));
+    final opening = deal(open, seed: 1);
+    final first = legalMoves(opening).first;
+    await tapCell(tester, opening, first.cell);
+    expect(find.text("Player 2's turn"), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Player 2 wants to restart?'), findsOneWidget);
+    await tester.tap(find.text('RESTART'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text("Player 1's turn"), findsOneWidget);
+
+    await tapCell(tester, opening, first.cell);
+    expect(find.text("Player 2's turn"), findsOneWidget);
+  });
+
   testWidgets('back asks before leaving a live game', (tester) async {
     var wentHome = false;
-    await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open, onHome: () => wentHome = true)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TablePage(seed: 1, mode: open, onHome: () => wentHome = true),
+      ),
+    );
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
@@ -73,13 +139,19 @@ void main() {
 
   testWidgets('an illegal tap is not a growth', (tester) async {
     final feel = RecordingFeel();
-    await tester.pumpWidget(MaterialApp(home: TablePage(seed: 1, mode: open, feel: feel)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TablePage(seed: 1, mode: open, feel: feel),
+      ),
+    );
     final match = deal(open, seed: 1);
     await tapCell(tester, match, match.head);
     expect(feel.events, ['illegal']);
   });
 
-  testWidgets('a finished game cues a loss, not an illegal tap', (tester) async {
+  testWidgets('a finished game cues a loss, not an illegal tap', (
+    tester,
+  ) async {
     final feel = RecordingFeel();
     var match = dealClassic(seed: 1, width: 2, height: 2, wallChance: 0);
     late Move ending;
@@ -92,7 +164,11 @@ void main() {
       }
       match = apply(match, moves.first);
     }
-    await tester.pumpWidget(MaterialApp(home: TablePage(mode: open, initial: match, feel: feel)));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TablePage(mode: open, initial: match, feel: feel),
+      ),
+    );
     await tapCell(tester, match, ending.cell);
     expect(feel.events, ['growth', 'loss']);
   });
@@ -116,7 +192,10 @@ Future<void> tapCell(WidgetTester tester, Match match, int cell) async {
   final box = tester.renderObject<RenderBox>(find.byType(BoardView));
   final cellWidth = box.size.width / match.width;
   final cellHeight = box.size.height / match.height;
-  final target = Offset((match.xOf(cell) + 0.5) * cellWidth, (match.yOf(cell) + 0.5) * cellHeight);
+  final target = Offset(
+    (match.xOf(cell) + 0.5) * cellWidth,
+    (match.yOf(cell) + 0.5) * cellHeight,
+  );
   await tester.tapAt(box.localToGlobal(target));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
