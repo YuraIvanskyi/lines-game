@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
+import '../settings/copy.dart';
 import '../table/board_view.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
@@ -271,7 +272,7 @@ class _PlaySnippetState extends State<PlaySnippet>
                                 ),
                                 child: Transform.scale(
                                   scale: _lostScale(sample.lostT),
-                                  child: const _LostStamp(),
+                                  child: _LostStamp(AppCopy.of(context).lost),
                                 ),
                               ),
                             ),
@@ -290,7 +291,9 @@ class _PlaySnippetState extends State<PlaySnippet>
 }
 
 class _LostStamp extends StatelessWidget {
-  const _LostStamp();
+  const _LostStamp(this.label);
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -300,9 +303,9 @@ class _LostStamp extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: Colors.black, width: 2.5),
       ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        child: OutlineLabel('LOST', size: 12, stroke: 2),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+        child: OutlineLabel(label, size: 12, stroke: 2),
       ),
     );
   }

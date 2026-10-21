@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../settings/copy.dart';
 import 'arcade_shell.dart';
 import 'ink_theme.dart';
 
@@ -45,14 +46,15 @@ class ArcadeDialog extends StatelessWidget {
 }
 
 Future<bool> confirmLeave(BuildContext context) async {
+  final copy = AppCopy.of(context);
   final leave = await showDialog<bool>(
     context: context,
     builder: (context) => ArcadeDialog(
-      title: 'Leave this game?',
-      body: 'Stay keeps this match. Leave returns home.',
+      title: copy.leaveTitle,
+      body: copy.leaveBody,
       actions: [
-        PopButton(label: 'Stay', color: InkTheme.blueFace, onPressed: () => Navigator.pop(context, false)),
-        PopButton(label: 'Leave', onPressed: () => Navigator.pop(context, true)),
+        PopButton(label: copy.stay, color: InkTheme.blueFace, onPressed: () => Navigator.pop(context, false)),
+        PopButton(label: copy.leave, onPressed: () => Navigator.pop(context, true)),
       ],
     ),
   );

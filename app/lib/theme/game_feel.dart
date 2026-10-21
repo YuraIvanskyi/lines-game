@@ -1,4 +1,5 @@
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Cues for a committed growth, a rejected tap, a turn pass, and a loss.
@@ -29,7 +30,13 @@ class SilentFeel extends GameFeel {
 }
 
 class DeviceFeel extends GameFeel {
+  DeviceFeel({bool Function()? soundOn}) : _soundOn = soundOn ?? (() => true);
+
+  final bool Function() _soundOn;
   final Map<String, AudioPlayer> _players = {};
+
+  @visibleForTesting
+  int cuesStarted = 0;
 
   @override
   void growth() {
@@ -64,6 +71,8 @@ class DeviceFeel extends GameFeel {
   }
 
   void _play(String name) {
+    if (!_soundOn()) return;
+    cuesStarted++;
     final player = _players.putIfAbsent(name, AudioPlayer.new);
     player.play(AssetSource('sounds/$name.wav')).catchError((_) {});
   }

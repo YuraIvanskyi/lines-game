@@ -115,12 +115,18 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('settings and info open empty menus', (tester) async {
+  testWidgets('settings and info open their pages', (tester) async {
     await tester.pumpWidget(const LinesApp(seed: 1));
 
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
     expect(find.text('SETTINGS'), findsOneWidget);
+    expect(find.text('Sound'), findsOneWidget);
+    expect(find.text('Languages'), findsOneWidget);
+    expect(find.byIcon(Icons.volume_up), findsOneWidget);
+    expect(find.text('ENGLISH'), findsOneWidget);
+    expect(find.text('УКРАЇНСЬКА'), findsOneWidget);
+    expect(find.text('SAVE'), findsOneWidget);
     expect(find.text('PLAY'), findsNothing);
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();

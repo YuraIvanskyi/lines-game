@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
+import '../settings/copy.dart';
 import '../theme/arcade_dialog.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/game_feel.dart';
@@ -121,16 +122,17 @@ class _TablePageState extends State<TablePage> {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final copy = AppCopy.of(context);
     final headline = _match.isTerminal
-        ? '${_playerName(_match.loserId!)} lost'
+        ? copy.lostPlayer(_playerName(_match.loserId!))
         : _pendingCell != null
-        ? 'Which end?'
-        : "${_match.currentPlayer.name}'s turn";
+        ? copy.whichEnd
+        : copy.turn(_match.currentPlayer.name);
     final detail = _match.isTerminal
-        ? 'No growth left.'
+        ? copy.noGrowth
         : _pendingCell != null
-        ? 'Tap the ring or the square.'
-        : 'Pass the phone';
+        ? copy.tapEnd
+        : copy.passPhone;
     final ink = InkTheme.inks[_match.turn % InkTheme.inks.length];
     final chipColor = _match.isTerminal ? InkTheme.sun : InkTheme.cloud;
 
@@ -148,7 +150,7 @@ class _TablePageState extends State<TablePage> {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: PopBackButton(onPressed: _back),
+                      child: PopBackButton(onPressed: _back, label: copy.back),
                     ),
                     TweenAnimationBuilder<double>(
                       key: ValueKey(headline),
@@ -216,7 +218,7 @@ class _TablePageState extends State<TablePage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Tap a gold ring. The circle is the head, the square is the tail.',
+                      copy.hint,
                       textAlign: TextAlign.center,
                       style: text.bodyMedium?.copyWith(
                         color: InkTheme.muted,
@@ -249,13 +251,13 @@ class _TablePageState extends State<TablePage> {
                     if (_match.isTerminal) ...[
                       const SizedBox(height: 12),
                       PopButton(
-                        label: 'Rematch',
+                        label: copy.rematch,
                         onPressed: _rematch,
                         color: InkTheme.greenFace,
                       ),
                       if (widget.onHome != null)
                         PopButton(
-                          label: 'Home',
+                          label: copy.home,
                           onPressed: widget.onHome!,
                           color: InkTheme.blueFace,
                           compact: true,

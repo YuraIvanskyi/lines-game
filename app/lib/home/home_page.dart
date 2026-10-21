@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
@@ -25,6 +26,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final copy = AppCopy.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(
@@ -40,7 +42,7 @@ class HomePage extends StatelessWidget {
                     const Spacer(),
                     const PopTitle('ENDS'),
                     const SizedBox(height: 12),
-                    const PopBadge('Classic'),
+                    PopBadge(copy.classic),
                     const SizedBox(height: 28),
                     LayoutBuilder(
                       builder: (context, constraints) {
@@ -49,17 +51,17 @@ class HomePage extends StatelessWidget {
                         final side = (constraints.maxWidth / (count + (count - 1) * gapFactor) * 100).floorToDouble() / 100;
                         final gap = (constraints.maxWidth - side * count) / (count - 1);
                         final icons = <({IconData icon, String label, Color color, VoidCallback onPressed})>[
-                          (icon: Icons.settings, label: 'Settings', color: InkTheme.blueFace, onPressed: onSettings),
-                          (icon: Icons.priority_high, label: 'Info', color: InkTheme.blueFace, onPressed: onInfo),
-                          (icon: Icons.favorite, label: 'Store', color: InkTheme.pinkFace, onPressed: onStore),
-                          (icon: Icons.logout, label: 'Exit', color: InkTheme.blueFace, onPressed: onExit),
+                          (icon: Icons.settings, label: copy.settings, color: InkTheme.blueFace, onPressed: onSettings),
+                          (icon: Icons.priority_high, label: copy.info, color: InkTheme.blueFace, onPressed: onInfo),
+                          (icon: Icons.favorite, label: copy.store, color: InkTheme.pinkFace, onPressed: onStore),
+                          (icon: Icons.logout, label: copy.exit, color: InkTheme.blueFace, onPressed: onExit),
                         ];
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            PopButton(label: 'Play', onPressed: onPlay, extent: side, below: gap),
-                            PopButton(label: 'How to play', onPressed: onHowTo, color: InkTheme.blueFace, compact: true, extent: side, below: gap),
-                            PopButton(label: 'Players', onPressed: onSetup, color: InkTheme.greenFace, compact: true, extent: side, below: gap),
+                            PopButton(label: copy.play, onPressed: onPlay, extent: side, below: gap),
+                            PopButton(label: copy.howTo, onPressed: onHowTo, color: InkTheme.blueFace, compact: true, extent: side, below: gap),
+                            PopButton(label: copy.players, onPressed: onSetup, color: InkTheme.greenFace, compact: true, extent: side, below: gap),
                             Row(
                               children: [
                                 for (var i = 0; i < icons.length; i++) ...[

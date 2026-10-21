@@ -212,15 +212,16 @@ class _PopIconButtonState extends State<PopIconButton> {
 }
 
 class PopBackButton extends StatelessWidget {
-  const PopBackButton({super.key, required this.onPressed});
+  const PopBackButton({super.key, required this.onPressed, this.label = 'Back'});
 
   final VoidCallback onPressed;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: PopIconButton(icon: Icons.arrow_back, label: 'Back', onPressed: onPressed, extent: 56),
+      child: PopIconButton(icon: Icons.arrow_back, label: label, onPressed: onPressed, extent: 56),
     );
   }
 }
@@ -303,6 +304,9 @@ class PopTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(alignment: Alignment.center, child: OutlineLabel(text.toUpperCase(), size: size, stroke: 5));
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: OutlineLabel(text.toUpperCase(), size: size, stroke: 5),
+    );
   }
 }

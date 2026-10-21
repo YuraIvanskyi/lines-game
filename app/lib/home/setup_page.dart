@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
+import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
@@ -17,9 +18,17 @@ class SetupPage extends StatefulWidget {
 
 class _SetupPageState extends State<SetupPage> {
   int _count = 2;
-  late final List<TextEditingController> _names = [
-    for (var i = 1; i <= 4; i++) TextEditingController(text: 'Player $i'),
-  ];
+  final List<TextEditingController> _names = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_names.isNotEmpty) return;
+    final copy = AppCopy.of(context);
+    for (var i = 1; i <= 4; i++) {
+      _names.add(TextEditingController(text: copy.player(i)));
+    }
+  }
 
   @override
   void dispose() {
@@ -38,11 +47,12 @@ class _SetupPageState extends State<SetupPage> {
 
   String _seatName(int index) {
     final typed = _names[index].text.trim();
-    return typed.isEmpty ? 'Player ${index + 1}' : typed;
+    return typed.isEmpty ? AppCopy.of(context).player(index + 1) : typed;
   }
 
   @override
   Widget build(BuildContext context) {
+    final copy = AppCopy.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(
@@ -55,10 +65,10 @@ class _SetupPageState extends State<SetupPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: widget.onBack)),
-                    const PopTitle('Players', size: 40),
+                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: widget.onBack, label: copy.back)),
+                    PopTitle(copy.players, size: 40),
                     const SizedBox(height: 4),
-                    PopBadge(widget.mode.name),
+                    PopBadge(widget.mode.id == classicModeId ? copy.classic : widget.mode.name),
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -105,7 +115,7 @@ class _SetupPageState extends State<SetupPage> {
                         ],
                       ),
                     ),
-                    PopButton(label: 'Start', onPressed: _start, color: InkTheme.greenFace),
+                    PopButton(label: copy.start, onPressed: _start, color: InkTheme.greenFace),
                   ],
                 ),
               ),

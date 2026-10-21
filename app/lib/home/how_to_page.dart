@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 import 'play_snippet.dart';
@@ -11,6 +12,12 @@ class HowToPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final copy = AppCopy.of(context);
+    final tips = [
+      (demo: endsDemo, text: copy.tipEnds),
+      (demo: tapDemo, text: copy.tipTap),
+      (demo: lossDemo, text: copy.tipLoss),
+    ];
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(
@@ -25,24 +32,24 @@ class HowToPage extends StatelessWidget {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: PopBackButton(onPressed: onDone),
+                      child: PopBackButton(onPressed: onDone, label: copy.back),
                     ),
-                    const PopTitle('How to play', size: 40),
+                    PopTitle(copy.howTo, size: 40),
                     const SizedBox(height: 16),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            for (var i = 0; i < _tips.length; i++) ...[
+                            for (var i = 0; i < tips.length; i++) ...[
                               if (i > 0) const SizedBox(height: 12),
-                              _Tip(demo: _tips[i].demo, text: _tips[i].text),
+                              _Tip(demo: tips[i].demo, text: tips[i].text),
                             ],
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    PopButton(label: "Let's go", onPressed: onDone),
+                    PopButton(label: copy.letsGo, onPressed: onDone),
                   ],
                 ),
               ),
@@ -53,15 +60,6 @@ class HowToPage extends StatelessWidget {
     );
   }
 }
-
-final List<({HowToDemo demo, String text})> _tips = [
-  (
-    demo: endsDemo,
-    text: 'Grow the line from either end. The ring is the head. The square is the tail.',
-  ),
-  (demo: tapDemo, text: 'Tap a marked dot.'),
-  (demo: lossDemo, text: 'The player who cannot grow loses.'),
-];
 
 class _Tip extends StatelessWidget {
   const _Tip({required this.demo, required this.text});

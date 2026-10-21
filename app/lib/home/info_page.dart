@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
@@ -10,6 +11,7 @@ class InfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final copy = AppCopy.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(
@@ -24,33 +26,22 @@ class InfoPage extends StatelessWidget {
                   children: [
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: PopBackButton(onPressed: onBack),
+                      child: PopBackButton(onPressed: onBack, label: copy.back),
                     ),
-                    const PopTitle('Info', size: 40),
+                    PopTitle(copy.info, size: 40),
                     const SizedBox(height: 16),
-                    const Expanded(
+                    Expanded(
                       child: SingleChildScrollView(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _Credit('Creator', ['Yurii Ivanskyi']),
-                            SizedBox(height: 12),
-                            _Credit('Thanks', [
-                              'To my best friend Bohdan, with whom a paper version of this game first appeared during our school years.',
-                            ]),
-                            SizedBox(height: 12),
-                            _Credit('Tech', [
-                              'Flutter and Dart.',
-                              'The match rules are a pure Dart package, separate from the screens.',
-                              'The board is painted in Flutter.',
-                              'Sounds play through audioplayers, with a haptic on each cue.',
-                            ]),
-                            SizedBox(height: 12),
-                            _Credit('Assets', [
-                              'Nunito, a variable font by The Nunito Project Authors. SIL Open Font License\u00A01.1.',
-                              'Material Icons by Google. Apache License\u00A02.0.',
-                              'Short original cues for a growth, an illegal tap, a turn pass, and a loss.',
-                            ]),
+                            _Credit(copy.creator, [copy.creatorName]),
+                            const SizedBox(height: 12),
+                            _Credit(copy.thanks, [copy.thanksBody]),
+                            const SizedBox(height: 12),
+                            _Credit(copy.tech, copy.techLines),
+                            const SizedBox(height: 12),
+                            _Credit(copy.assets, copy.assetLines),
                           ],
                         ),
                       ),
