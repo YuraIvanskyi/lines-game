@@ -22,7 +22,10 @@ class InfoPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: onBack)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: PopBackButton(onPressed: onBack),
+                    ),
                     const PopTitle('Info', size: 40),
                     const SizedBox(height: 16),
                     const Expanded(
@@ -32,12 +35,21 @@ class InfoPage extends StatelessWidget {
                           children: [
                             _Credit('Creator', ['Yurii Ivanskyi']),
                             SizedBox(height: 12),
-                            _Credit('Tech', ['Flutter and Dart']),
+                            _Credit('Thanks', [
+                              'To my best friend Bohdan, with whom a paper version of this game first appeared during our school years.',
+                            ]),
+                            SizedBox(height: 12),
+                            _Credit('Tech', [
+                              'Flutter and Dart.',
+                              'The match rules are a pure Dart package, separate from the screens.',
+                              'The board is painted in Flutter.',
+                              'Sounds play through audioplayers, with a haptic on each cue.',
+                            ]),
                             SizedBox(height: 12),
                             _Credit('Assets', [
-                              'Nunito by The Nunito Project Authors. SIL Open Font License 1.1.',
-                              'Material Icons by Google. Apache License 2.0.',
-                              'Sounds made for this game.',
+                              'Nunito, a variable font by The Nunito Project Authors. SIL Open Font License\u00A01.1.',
+                              'Material Icons by Google. Apache License\u00A02.0.',
+                              'Short original cues for a growth, an illegal tap, a turn pass, and a loss.',
                             ]),
                           ],
                         ),
@@ -71,16 +83,30 @@ class _Credit extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(title, style: const TextStyle(color: InkTheme.ink, fontSize: 18, fontWeight: FontWeight.w900)),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: InkTheme.ink,
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
             const SizedBox(height: 6),
-            for (final line in lines)
+            for (var i = 0; i < lines.length; i++)
               Padding(
-                padding: const EdgeInsets.only(top: 2),
+                padding: EdgeInsets.only(top: i == 0 ? 0 : 8),
                 child: Text(
-                  line,
-                  style: const TextStyle(color: InkTheme.ink, fontSize: 16, fontWeight: FontWeight.w700, height: 1.3),
+                  lines[i],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: InkTheme.ink,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                  ),
                 ),
               ),
           ],

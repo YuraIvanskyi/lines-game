@@ -130,8 +130,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('INFO'), findsOneWidget);
     expect(find.text('Yurii Ivanskyi'), findsOneWidget);
-    expect(find.text('Flutter and Dart'), findsOneWidget);
+    expect(find.text('Flutter and Dart.'), findsOneWidget);
+    expect(find.textContaining('pure Dart package'), findsOneWidget);
+    expect(find.textContaining('audioplayers'), findsOneWidget);
+    expect(find.textContaining('Bohdan'), findsOneWidget);
+    expect(find.textContaining('paper version'), findsOneWidget);
     expect(find.textContaining('SIL Open Font License'), findsOneWidget);
+    expect(find.textContaining('variable font'), findsOneWidget);
+    expect(find.textContaining('illegal tap'), findsOneWidget);
+    for (final sample in ['Yurii Ivanskyi', 'Flutter and Dart.', 'Thanks']) {
+      expect(
+        tester.widget<Text>(find.text(sample)).textAlign,
+        TextAlign.center,
+      );
+    }
+    expect(
+      tester.widget<Text>(find.textContaining('Bohdan')).textAlign,
+      TextAlign.center,
+    );
     expect(find.text('PLAY'), findsNothing);
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();

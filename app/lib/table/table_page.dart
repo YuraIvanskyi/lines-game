@@ -39,7 +39,12 @@ class _TablePageState extends State<TablePage> {
   }
 
   Match _deal(int seed, int firstTurn) {
-    return deal(widget.mode, seed: seed, players: widget.players, firstTurn: firstTurn);
+    return deal(
+      widget.mode,
+      seed: seed,
+      players: widget.players,
+      firstTurn: firstTurn,
+    );
   }
 
   void _onCell(int? cell) {
@@ -127,8 +132,8 @@ class _TablePageState extends State<TablePage> {
         ? 'Tap the ring or the square.'
         : 'Pass the phone';
     final ink = InkTheme.inks[_match.turn % InkTheme.inks.length];
+    final chipColor = _match.isTerminal ? InkTheme.sun : InkTheme.cloud;
 
-    final onSky = text.titleLarge?.copyWith(color: InkTheme.cloud, fontWeight: FontWeight.w800);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(
@@ -141,36 +146,44 @@ class _TablePageState extends State<TablePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Align(alignment: Alignment.centerLeft, child: PopBackButton(onPressed: _back)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: PopBackButton(onPressed: _back),
+                    ),
                     TweenAnimationBuilder<double>(
                       key: ValueKey(headline),
-                      tween: Tween(begin: _match.isTerminal ? InkTheme.lossScaleStart : InkTheme.passScaleStart, end: 1),
-                      duration: _match.isTerminal ? InkTheme.lossDuration : InkTheme.passDuration,
-                      curve: _match.isTerminal ? InkTheme.lossCurve : InkTheme.passCurve,
-                      builder: (context, scale, child) => Transform.scale(scale: scale, child: child),
+                      tween: Tween(
+                        begin: _match.isTerminal
+                            ? InkTheme.lossScaleStart
+                            : InkTheme.passScaleStart,
+                        end: 1,
+                      ),
+                      duration: _match.isTerminal
+                          ? InkTheme.lossDuration
+                          : InkTheme.passDuration,
+                      curve: _match.isTerminal
+                          ? InkTheme.lossCurve
+                          : InkTheme.passCurve,
+                      builder: (context, scale, child) =>
+                          Transform.scale(scale: scale, child: child),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: InkTheme.panel,
+                          color: ink,
                           borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: Colors.black, width: 3),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 18,
-                                height: 18,
-                                decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  headline,
-                                  style: text.titleLarge?.copyWith(color: InkTheme.cloud, fontWeight: FontWeight.w900),
-                                ),
-                              ),
-                            ],
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            headline,
+                            textAlign: TextAlign.center,
+                            style: text.titleLarge?.copyWith(
+                              color: InkTheme.ink,
+                              fontWeight: FontWeight.w900,
+                            ),
                           ),
                         ),
                       ),
@@ -180,19 +193,35 @@ class _TablePageState extends State<TablePage> {
                       alignment: Alignment.center,
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: _match.isTerminal ? InkTheme.sun : InkTheme.blueFace,
+                          color: chipColor,
                           borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: Colors.black, width: 2.5),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                          child: Text(detail, style: onSky?.copyWith(color: InkTheme.cloud, fontSize: 16)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                          child: Text(
+                            detail,
+                            textAlign: TextAlign.center,
+                            style: text.titleLarge?.copyWith(
+                              color: InkTheme.ink,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Tap a gold ring. The circle is the head, the square is the tail.',
-                      style: text.bodyMedium?.copyWith(color: InkTheme.muted, fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                      style: text.bodyMedium?.copyWith(
+                        color: InkTheme.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Expanded(
@@ -207,7 +236,11 @@ class _TablePageState extends State<TablePage> {
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(10),
-                              child: BoardView(match: _match, pendingCell: _pendingCell, onCell: _onCell),
+                              child: BoardView(
+                                match: _match,
+                                pendingCell: _pendingCell,
+                                onCell: _onCell,
+                              ),
                             ),
                           ),
                         ),
@@ -215,9 +248,18 @@ class _TablePageState extends State<TablePage> {
                     ),
                     if (_match.isTerminal) ...[
                       const SizedBox(height: 12),
-                      PopButton(label: 'Rematch', onPressed: _rematch, color: InkTheme.greenFace),
+                      PopButton(
+                        label: 'Rematch',
+                        onPressed: _rematch,
+                        color: InkTheme.greenFace,
+                      ),
                       if (widget.onHome != null)
-                        PopButton(label: 'Home', onPressed: widget.onHome!, color: InkTheme.blueFace, compact: true),
+                        PopButton(
+                          label: 'Home',
+                          onPressed: widget.onHome!,
+                          color: InkTheme.blueFace,
+                          compact: true,
+                        ),
                     ],
                   ],
                 ),

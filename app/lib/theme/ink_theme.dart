@@ -40,6 +40,9 @@ abstract final class InkTheme {
   static const wallRadius = 0.14;
   static const dotRadius = 0.20;
   static const strokeWidth = 0.18;
+
+  /// Black margin outside a chain line and dot.
+  static const chainOutline = 0.03;
   static const markWidth = 0.07;
   static const headRadius = 0.28;
   static const tailExtent = 0.50;

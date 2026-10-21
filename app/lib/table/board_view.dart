@@ -6,7 +6,12 @@ import 'package:rules/rules.dart';
 import '../theme/ink_theme.dart';
 
 class BoardView extends StatefulWidget {
-  const BoardView({super.key, required this.match, required this.pendingCell, required this.onCell});
+  const BoardView({
+    super.key,
+    required this.match,
+    required this.pendingCell,
+    required this.onCell,
+  });
 
   final Match match;
   final int? pendingCell;
@@ -25,8 +30,10 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _draw = AnimationController(vsync: this, duration: InkTheme.drawDuration);
-    _pulse = AnimationController(vsync: this, duration: InkTheme.pulseDuration)..repeat(reverse: true);
-    _end = AnimationController(vsync: this, duration: InkTheme.endDuration)..value = 1;
+    _pulse = AnimationController(vsync: this, duration: InkTheme.pulseDuration)
+      ..repeat(reverse: true);
+    _end = AnimationController(vsync: this, duration: InkTheme.endDuration)
+      ..value = 1;
     if (widget.match.segments.isNotEmpty) _draw.value = 1;
     if (widget.match.isTerminal) _pulse.stop();
   }
@@ -37,7 +44,8 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
     if (widget.match.segments.length != oldWidget.match.segments.length) {
       _draw.forward(from: 0);
     }
-    if (widget.match.head != oldWidget.match.head || widget.match.tail != oldWidget.match.tail) {
+    if (widget.match.head != oldWidget.match.head ||
+        widget.match.tail != oldWidget.match.tail) {
       _end.forward(from: 0);
     }
     if (widget.match.isTerminal) {
@@ -64,7 +72,9 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
           behavior: HitTestBehavior.opaque,
           onPointerUp: (event) {
             final box = context.findRenderObject()! as RenderBox;
-            widget.onCell(cellAt(widget.match, box.size, box.globalToLocal(event.position)));
+            widget.onCell(
+              cellAt(widget.match, box.size, box.globalToLocal(event.position)),
+            );
           },
           child: RepaintBoundary(
             child: CustomPaint(
@@ -126,7 +136,10 @@ class BoardPainter extends CustomPainter {
     final unit = math.min(cellWidth, cellHeight);
 
     Offset centerOf(int cell) {
-      return Offset((match.xOf(cell) + 0.5) * cellWidth, (match.yOf(cell) + 0.5) * cellHeight);
+      return Offset(
+        (match.xOf(cell) + 0.5) * cellWidth,
+        (match.yOf(cell) + 0.5) * cellHeight,
+      );
     }
 
     Color inkOf(String playerId) {
@@ -147,7 +160,6 @@ class BoardPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = unit * InkTheme.markWidth
       ..color = InkTheme.ink;
-    final dot = Paint()..style = PaintingStyle.fill;
 
     for (var cell = 0; cell < match.cellCount; cell++) {
       final center = centerOf(cell);
@@ -168,23 +180,54 @@ class BoardPainter extends CustomPainter {
       }
     }
 
+    final outlinePad = unit * InkTheme.chainOutline;
+    final chainInk = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = unit * InkTheme.strokeWidth + outlinePad * 2
+      ..strokeCap = StrokeCap.round
+      ..color = Colors.black;
     final stroke = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = unit * InkTheme.strokeWidth
       ..strokeCap = StrokeCap.round;
-    for (var i = 0; i < match.segments.length; i++) {
-      final segment = match.segments[i];
-      final start = centerOf(segment.a);
-      final end = centerOf(segment.b);
-      final shown = i == match.segments.length - 1 ? Offset.lerp(start, end, draw)! : end;
-      stroke.color = inkOf(segment.playerId);
-      canvas.drawLine(start, shown, stroke);
+    final dotFill = Paint()..style = PaintingStyle.fill;
+    final dotRing = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.black;
+
+    void drawLines(Paint paint, {bool tint = false}) {
+      for (var i = 0; i < match.segments.length; i++) {
+        final segment = match.segments[i];
+        final start = centerOf(segment.a);
+        final end = centerOf(segment.b);
+        final shown = i == match.segments.length - 1
+            ? Offset.lerp(start, end, draw)!
+            : end;
+        if (tint) paint.color = inkOf(segment.playerId);
+        canvas.drawLine(start, shown, paint);
+      }
     }
 
+    bool chainDot(int cell) =>
+        match.occupied.test(cell) && !match.walls.test(cell);
+
+    // Black lines and dots first, then the colored line, then the colored dot.
+    // The colored stroke covers the black ring where it enters a dot, so the
+    // outline stays on the outside of the chain instead of crossing the joint.
+    drawLines(chainInk);
     for (var cell = 0; cell < match.cellCount; cell++) {
-      if (!match.occupied.test(cell) || match.walls.test(cell)) continue;
-      dot.color = dotColor(cell);
-      canvas.drawCircle(centerOf(cell), unit * InkTheme.dotRadius, dot);
+      if (!chainDot(cell)) continue;
+      canvas.drawCircle(
+        centerOf(cell),
+        unit * InkTheme.dotRadius + outlinePad,
+        dotRing,
+      );
+    }
+    drawLines(stroke, tint: true);
+    for (var cell = 0; cell < match.cellCount; cell++) {
+      if (!chainDot(cell)) continue;
+      dotFill.color = dotColor(cell);
+      canvas.drawCircle(centerOf(cell), unit * InkTheme.dotRadius, dotFill);
     }
 
     if (showTargets) {
@@ -192,10 +235,17 @@ class BoardPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = unit * InkTheme.targetWidth
         ..color = InkTheme.target;
-      final radius = unit * (InkTheme.targetRadiusMin + (InkTheme.targetRadiusMax - InkTheme.targetRadiusMin) * pulse);
+      final radius =
+          unit *
+          (InkTheme.targetRadiusMin +
+              (InkTheme.targetRadiusMax - InkTheme.targetRadiusMin) * pulse);
       for (final move in legalMoves(match)) {
         final pending = move.cell == pendingCell;
-        canvas.drawCircle(centerOf(move.cell), pending ? unit * InkTheme.pendingRadius : radius, target);
+        canvas.drawCircle(
+          centerOf(move.cell),
+          pending ? unit * InkTheme.pendingRadius : radius,
+          target,
+        );
       }
     }
 
@@ -204,7 +254,9 @@ class BoardPainter extends CustomPainter {
       final mark = Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = unit * InkTheme.markWidth
-        ..color = dotColor(cell) == InkTheme.anchor ? InkTheme.sun : InkTheme.cloud;
+        ..color = dotColor(cell) == InkTheme.anchor
+            ? InkTheme.sun
+            : InkTheme.cloud;
       canvas.save();
       canvas.translate(center.dx, center.dy);
       canvas.scale(endScale);
@@ -216,7 +268,13 @@ class BoardPainter extends CustomPainter {
           width: unit * InkTheme.tailExtent,
           height: unit * InkTheme.tailExtent,
         );
-        canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(unit * InkTheme.tailRadius)), mark);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            rect,
+            Radius.circular(unit * InkTheme.tailRadius),
+          ),
+          mark,
+        );
       }
       canvas.restore();
     }
