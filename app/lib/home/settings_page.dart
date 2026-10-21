@@ -65,11 +65,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 12),
                     _Block(
                       title: copy.languages,
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(child: _languageButton(AppLanguage.english)),
-                          const SizedBox(width: 8),
-                          Expanded(child: _languageButton(AppLanguage.ukrainian)),
+                          for (final language in AppLanguage.values) ...[
+                            if (language != AppLanguage.values.first) const SizedBox(height: 8),
+                            _languageButton(language),
+                          ],
                         ],
                       ),
                     ),

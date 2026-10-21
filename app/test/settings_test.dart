@@ -83,7 +83,9 @@ void main() {
     final ukrainian = tester.getRect(
       find.widgetWithText(PopButton, 'УКРАЇНСЬКА'),
     );
+    expect(english.left, closeTo(ukrainian.left, 0.01));
     expect(english.width, closeTo(ukrainian.width, 0.01));
+    expect(ukrainian.top, greaterThan(english.bottom));
     expect(find.byType(PopIconButton), findsNWidgets(2));
 
     await tester.tap(find.byIcon(Icons.volume_up));
