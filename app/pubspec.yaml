@@ -23,6 +23,6 @@ flutter:
   assets:
     - assets/sounds/
   fonts:
-    - family: Fredoka
+    - family: Nunito
       fonts:
-        - asset: assets/fonts/Fredoka.ttf
+        - asset: assets/fonts/Nunito-Variable.ttf

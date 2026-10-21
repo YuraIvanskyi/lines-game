@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Spacer(),
-                    const PopTitle('Lines'),
+                    const PopTitle('ENDS'),
                     const SizedBox(height: 12),
                     const PopBadge('Classic'),
                     const SizedBox(height: 28),

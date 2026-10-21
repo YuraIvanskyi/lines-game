@@ -35,11 +35,11 @@ abstract final class InkTheme {
     Color(0xFF7EC8FF),
   ];
 
-  static const quietRadius = 0.08;
+  static const quietRadius = 0.10;
   static const wallExtent = 0.62;
   static const wallRadius = 0.14;
-  static const dotRadius = 0.16;
-  static const strokeWidth = 0.14;
+  static const dotRadius = 0.20;
+  static const strokeWidth = 0.18;
   static const markWidth = 0.07;
   static const headRadius = 0.28;
   static const tailExtent = 0.50;

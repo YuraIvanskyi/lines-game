@@ -35,7 +35,7 @@ class InfoPage extends StatelessWidget {
                             _Credit('Tech', ['Flutter and Dart']),
                             SizedBox(height: 12),
                             _Credit('Assets', [
-                              'Fredoka by The Fredoka Project Authors. SIL Open Font License 1.1.',
+                              'Nunito by The Nunito Project Authors. SIL Open Font License 1.1.',
                               'Material Icons by Google. Apache License 2.0.',
                               'Sounds made for this game.',
                             ]),

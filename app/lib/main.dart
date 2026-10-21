@@ -66,10 +66,10 @@ class _LinesAppState extends State<LinesApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lines',
+      title: 'ENDS',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Fredoka',
+        fontFamily: 'Nunito',
         colorScheme: ColorScheme.fromSeed(seedColor: InkTheme.skyTop, surface: InkTheme.paper),
         scaffoldBackgroundColor: InkTheme.skyTop,
         useMaterial3: true,

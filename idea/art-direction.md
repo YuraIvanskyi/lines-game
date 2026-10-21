@@ -28,11 +28,11 @@ Sizes are fractions of the cell.
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `quietRadius` | 0.08 | Empty dot that cannot be played. Fill plus an `ink` outline. |
+| `quietRadius` | 0.10 | Empty dot that cannot be played. Fill plus an `ink` outline. |
 | `wallExtent` | 0.62 | Blocked cell, rounded square, `ink` outline. |
 | `wallRadius` | 0.14 | Corner of that square. |
-| `dotRadius` | 0.16 | Occupied dot. Fill stays with the player who entered it. |
-| `strokeWidth` | 0.14 | Ink segment, round caps. |
+| `dotRadius` | 0.20 | Occupied dot. Fill stays with the player who entered it. |
+| `strokeWidth` | 0.18 | Ink segment, round caps. |
 | `markWidth` | 0.07 | End marker stroke. Gold on the white anchor, white on a colored dot. |
 | `headRadius` | 0.28 | Head is a circle. |
 | `tailExtent` | 0.50 | Tail is a rounded square. |
