@@ -22,7 +22,7 @@ The docs describe the original planning pass. The app has moved past them. The b
 ## Structural mess
 
 - **Two iOS CI configs.** `.github/workflows/ios.yml` and `codemagic.yaml` do the same job. L8 names only GitHub Actions.
-- **Stub files.** `app/README.md` is the Flutter template. There is no root README. `lines-icon.jpg` and `lines-logo.jpg` sit loose at the root, referenced by nothing.
+- **Stub files.** `app/README.md` is the Flutter template. There is no root README. `lines-icon.png` (with its `lines-icon.svg` source, now also the iOS app icon) and `lines-logo.jpg` sit loose at the root.
 - **Dangling references.** `idea/classic-mode.md`, `monetization.md` (LG-020) and `online.md` (LG-021) are named but do not exist. `idea/README.md` and `decisions.md` say `classic-mode.md` would override `decisions.md`.
 - **Naming drift.** "ENDS" (app title), `lines_game` (repo, package), `lines-game` (CI repo name), "Litterally Pen Game" (prototype).
 - **Untracked work.** No tickets for settings, language, info and legal pages, sound toggle, restart, GAME MODE, `web-verify` tooling, or the skills.
