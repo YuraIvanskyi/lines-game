@@ -12,5 +12,6 @@ Read in this order:
 6. [ios-device.md](ios-device.md) — the owner's iPhone closes every iOS check a finger can feel.
 7. [art-direction.md](art-direction.md) — default Ink theme tokens.
 8. [tickets/BOARD.md](tickets/BOARD.md) — what to pick up next. Specs live in [tickets/](tickets/).
+9. [cleanup-plan.md](cleanup-plan.md) — **pending**: where these docs have drifted from the app, and the steps to fix it.
 
 A fuller classic-mode note, when it exists, should be `idea/classic-mode.md`. If it disagrees with [decisions.md](decisions.md), that note wins and the decision row is updated in the same change.
