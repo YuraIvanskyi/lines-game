@@ -81,6 +81,7 @@ class PopButton extends StatefulWidget {
     this.compact = false,
     this.extent,
     this.below = 8,
+    this.enabled = true,
   });
 
   final String label;
@@ -90,6 +91,7 @@ class PopButton extends StatefulWidget {
   final bool compact;
   final double? extent;
   final double below;
+  final bool enabled;
 
   @override
   State<PopButton> createState() => _PopButtonState();
@@ -98,7 +100,9 @@ class PopButton extends StatefulWidget {
 class _PopButtonState extends State<PopButton> {
   bool _down = false;
 
-  Color get _deep => widget.deep ?? _pair(widget.color).$1;
+  Color get _color => widget.enabled ? widget.color : InkTheme.mute;
+
+  Color get _deep => widget.enabled ? (widget.deep ?? _pair(widget.color).$1) : _pair(InkTheme.mute).$1;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +117,7 @@ class _PopButtonState extends State<PopButton> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color.lerp(widget.color, Colors.white, 0.28)!, widget.color, _deep],
+          colors: [Color.lerp(_color, Colors.white, 0.28)!, _color, _deep],
         ),
         border: Border.all(color: Colors.black, width: 3),
       ),
@@ -122,16 +126,19 @@ class _PopButtonState extends State<PopButton> {
 
     return Semantics(
       button: true,
+      enabled: widget.enabled,
       label: widget.label,
       child: Padding(
         padding: EdgeInsets.only(bottom: widget.below),
         child: GestureDetector(
-          onTapDown: (_) => setState(() => _down = true),
+          onTapDown: widget.enabled ? (_) => setState(() => _down = true) : null,
           onTapCancel: () => setState(() => _down = false),
-          onTapUp: (_) {
-            setState(() => _down = false);
-            widget.onPressed();
-          },
+          onTapUp: widget.enabled
+              ? (_) {
+                  setState(() => _down = false);
+                  widget.onPressed();
+                }
+              : null,
           child: DecoratedBox(
             decoration: BoxDecoration(color: Colors.black, borderRadius: radius),
             child: Padding(
@@ -273,9 +280,10 @@ class OutlineLabel extends StatelessWidget {
 }
 
 class PopBadge extends StatelessWidget {
-  const PopBadge(this.text, {super.key});
+  const PopBadge(this.text, {super.key, this.icon});
 
   final String text;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -289,7 +297,16 @@ class PopBadge extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-          child: OutlineLabel(text.toUpperCase(), size: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                ExcludeSemantics(child: Icon(icon, size: 18, color: InkTheme.cloud, shadows: _iconHalo)),
+                const SizedBox(width: 6),
+              ],
+              OutlineLabel(text.toUpperCase(), size: 14),
+            ],
+          ),
         ),
       ),
     );
@@ -307,6 +324,83 @@ class PopTitle extends StatelessWidget {
     return FittedBox(
       fit: BoxFit.scaleDown,
       child: OutlineLabel(text.toUpperCase(), size: size, stroke: 5),
+    );
+  }
+}
+
+class PopBlock extends StatelessWidget {
+  const PopBlock({super.key, required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: InkTheme.paper,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.black, width: 3),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: InkTheme.ink, fontSize: 18, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PopSavedChip extends StatelessWidget {
+  const PopSavedChip({super.key, required this.label, required this.visible});
+
+  final String label;
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      label: visible ? label : null,
+      child: ExcludeSemantics(
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutBack,
+          offset: visible ? Offset.zero : const Offset(0, 0.6),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 180),
+            opacity: visible ? 1 : 0,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: InkTheme.greenFace,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.black, width: 3),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 6, 16, 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_rounded, size: 22, color: InkTheme.cloud),
+                    const SizedBox(width: 6),
+                    OutlineLabel(label.toUpperCase(), size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

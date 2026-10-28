@@ -24,6 +24,7 @@ abstract final class InkTheme {
   static const foam = Color(0x332B7BFF);
   static const sunGlow = Color(0x33FFC107);
   static const muted = Color(0xFFD6ECFF);
+  static const mute = Color(0xFF7C8AA3);
   static const quiet = Color(0xFF3D7AD6);
   static const wall = Color(0xFF071E4A);
   static const target = Color(0xFFFFC107);

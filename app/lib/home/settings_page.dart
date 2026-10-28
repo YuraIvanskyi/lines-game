@@ -74,7 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     PopTitle(copy.settings, size: 40),
                     const SizedBox(height: 16),
-                    _Block(
+                    PopBlock(
                       title: copy.sound,
                       child: Align(
                         alignment: Alignment.center,
@@ -87,7 +87,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _Block(
+                    PopBlock(
                       title: copy.languages,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -104,7 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         alignment: Alignment.bottomCenter,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 12),
-                          child: _SavedChip(label: copy.saved, visible: _saved),
+                          child: PopSavedChip(label: copy.saved, visible: _saved),
                         ),
                       ),
                     ),
@@ -127,83 +127,6 @@ class _SettingsPageState extends State<SettingsPage> {
       below: 0,
       color: selected ? InkTheme.sun : InkTheme.blueFace,
       onPressed: () => _change(() => _language = language),
-    );
-  }
-}
-
-class _SavedChip extends StatelessWidget {
-  const _SavedChip({required this.label, required this.visible});
-
-  final String label;
-  final bool visible;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      label: visible ? label : null,
-      child: ExcludeSemantics(
-        child: AnimatedSlide(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOutBack,
-          offset: visible ? Offset.zero : const Offset(0, 0.6),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 180),
-            opacity: visible ? 1 : 0,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: InkTheme.greenFace,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.black, width: 3),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 6, 16, 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.check_rounded, size: 22, color: InkTheme.cloud),
-                    const SizedBox(width: 6),
-                    OutlineLabel(label.toUpperCase(), size: 18),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Block extends StatelessWidget {
-  const _Block({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: InkTheme.paper,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.black, width: 3),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: InkTheme.ink, fontSize: 18, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
-      ),
     );
   }
 }

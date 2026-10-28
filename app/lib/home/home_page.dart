@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../settings/copy.dart';
+import '../settings/game_setup.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({
     super.key,
+    required this.modeLabel,
+    required this.setup,
     required this.onPlay,
-    required this.onSetup,
     required this.onHowTo,
+    required this.onGameMode,
     required this.onSettings,
     required this.onInfo,
     required this.onStore,
     required this.onExit,
   });
 
+  final String modeLabel;
+  final GameSetup setup;
   final VoidCallback onPlay;
-  final VoidCallback onSetup;
   final VoidCallback onHowTo;
+  final VoidCallback onGameMode;
   final VoidCallback onSettings;
   final VoidCallback onInfo;
   final VoidCallback onStore;
@@ -42,7 +47,15 @@ class HomePage extends StatelessWidget {
                     const Spacer(),
                     const PopTitle('ENDS'),
                     const SizedBox(height: 12),
-                    PopBadge(copy.classic),
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        PopBadge(modeLabel),
+                        PopBadge(copy.playerCount(setup.playerCount), icon: _opponentIcon(setup.opponent)),
+                      ],
+                    ),
                     const SizedBox(height: 28),
                     LayoutBuilder(
                       builder: (context, constraints) {
@@ -61,7 +74,7 @@ class HomePage extends StatelessWidget {
                           children: [
                             PopButton(label: copy.play, onPressed: onPlay, extent: side, below: gap),
                             PopButton(label: copy.howTo, onPressed: onHowTo, color: InkTheme.blueFace, compact: true, extent: side, below: gap),
-                            PopButton(label: copy.players, onPressed: onSetup, color: InkTheme.greenFace, compact: true, extent: side, below: gap),
+                            PopButton(label: copy.gameMode, onPressed: onGameMode, color: InkTheme.greenFace, compact: true, extent: side, below: gap),
                             Row(
                               children: [
                                 for (var i = 0; i < icons.length; i++) ...[
@@ -90,4 +103,12 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+}
+
+IconData _opponentIcon(Opponent opponent) {
+  return switch (opponent) {
+    Opponent.samePhone => Icons.people,
+    Opponent.computer => Icons.computer,
+    Opponent.online => Icons.public,
+  };
 }

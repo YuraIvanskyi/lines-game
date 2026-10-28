@@ -2,26 +2,120 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lines_game/home/info_page.dart';
 import 'package:lines_game/home/play_snippet.dart';
-import 'package:lines_game/home/setup_page.dart';
+import 'package:lines_game/settings/game_setup.dart';
 import 'package:lines_game/legal_links.dart';
 import 'package:lines_game/main.dart';
+import 'package:lines_game/settings/copy.dart';
 import 'package:lines_game/table/board_view.dart';
 import 'package:lines_game/theme/arcade_shell.dart';
 import 'package:lines_game/theme/ink_theme.dart';
 import 'package:rules/rules.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   final open = classicMode.copyWith(wallChance: 0);
 
-  testWidgets('play reaches the board on the second tap', (tester) async {
+  testWidgets('play reaches the board in one tap', (tester) async {
     await tester.pumpWidget(LinesApp(seed: 1, mode: open));
     expect(find.text('PLAY'), findsOneWidget);
-    expect(find.text('PLAYERS'), findsOneWidget);
+    expect(find.text('GAME MODE'), findsOneWidget);
+    expect(find.text('PLAYERS'), findsNothing);
     await tester.tap(find.text('PLAY'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text("Player 1's turn"), findsOneWidget);
     expect(find.text('Pass the phone'), findsOneWidget);
+  });
+
+  testWidgets('home chips show the saved setup', (tester) async {
+    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    expect(find.text('CLASSIC'), findsOneWidget);
+    expect(find.text('2 PLAYERS'), findsOneWidget);
+    expect(find.byIcon(Icons.people), findsOneWidget);
+
+    await tester.pumpWidget(
+      LinesApp(
+        key: const ValueKey('computer'),
+        seed: 1,
+        initialSetup: const GameSetup(opponent: Opponent.computer),
+      ),
+    );
+    expect(find.byIcon(Icons.computer), findsOneWidget);
+    expect(find.byIcon(Icons.people), findsNothing);
+  });
+
+  testWidgets('game mode are saved, shown on home, and used by play', (tester) async {
+    await _phone(tester);
+    final store = MemoryGameSetupStore();
+    await tester.pumpWidget(LinesApp(seed: 1, mode: open, setupStore: store));
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    expect(find.text('CLASSIC'), findsOneWidget);
+    expect(find.text('SAME PHONE'), findsOneWidget);
+    expect(find.byType(TextField), findsNWidgets(2));
+    await tester.tap(find.text('3'));
+    await tester.pump();
+    expect(find.byType(TextField), findsNWidgets(3));
+    await tester.enterText(find.byType(TextField).first, 'Ada');
+    expect(await store.load(), GameSetup.defaults);
+    await tester.tap(find.text('SAVE'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('SAVED'), findsOneWidget);
+    await tester.pumpAndSettle();
+    final saved = await store.load();
+    expect(saved.playerCount, 3);
+    expect(saved.names, ['Ada', '', '', '']);
+
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    expect(find.text('3 PLAYERS'), findsOneWidget);
+
+    await tester.tap(find.text('PLAY'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text("Ada's turn"), findsOneWidget);
+  });
+
+  testWidgets('leaving game mode forgets an unsaved change', (tester) async {
+    await _phone(tester);
+    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('4'));
+    await tester.pump();
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    expect(find.text('2 PLAYERS'), findsOneWidget);
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TextField), findsNWidgets(2));
+  });
+
+  testWidgets('computer and online are listed but not available yet', (tester) async {
+    await _phone(tester);
+    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    for (final label in ['COMPUTER', 'ONLINE']) {
+      expect(tester.widget<PopButton>(find.widgetWithText(PopButton, label)).enabled, isFalse);
+      await tester.tap(find.text(label));
+      await tester.pump();
+    }
+    expect(find.byType(TextField), findsNWidgets(2));
+    expect(find.text('Computer and online play are coming soon.'), findsOneWidget);
+  });
+
+  test('saved setup survives the store and keeps default names blank', () async {
+    SharedPreferences.setMockInitialValues({});
+    final store = SharedPrefsGameSetupStore();
+    expect(await store.load(), GameSetup.defaults);
+    const saved = GameSetup(playerCount: 4, names: ['Ada', '', 'Bo', '']);
+    await store.save(saved);
+    expect(await store.load(), saved);
+    final players = saved.players(Copy.ukrainian);
+    expect(players.map((player) => player.name), ['Ada', 'Гравець 2', 'Bo', 'Гравець 4']);
+    expect(players.map((player) => player.id), ['p1', 'p2', 'p3', 'p4']);
   });
 
   testWidgets('how to play can be opened from home', (tester) async {
@@ -198,9 +292,9 @@ void main() {
     await tester.pumpWidget(const LinesApp(seed: 1));
     final play = tester.getRect(find.widgetWithText(PopButton, 'PLAY'));
     final howTo = tester.getRect(find.widgetWithText(PopButton, 'HOW TO PLAY'));
-    final players = tester.getRect(find.widgetWithText(PopButton, 'PLAYERS'));
+    final gameMode = tester.getRect(find.widgetWithText(PopButton, 'GAME MODE'));
     expect(howTo.height, closeTo(play.height, 0.01));
-    expect(players.height, closeTo(play.height, 0.01));
+    expect(gameMode.height, closeTo(play.height, 0.01));
 
     final icons = find.byType(PopIconButton);
     expect(icons, findsNWidgets(4));
@@ -242,42 +336,6 @@ void main() {
     expect(left, isTrue);
     expect(find.text('PLAY'), findsOneWidget);
   });
-
-  testWidgets('four players and a blank name still start', (tester) async {
-    List<Player>? started;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SetupPage(
-          mode: classicMode,
-          onBack: () {},
-          onStart: (players) => started = players,
-        ),
-      ),
-    );
-    expect(find.text('CLASSIC'), findsOneWidget);
-    expect(find.text('Seat 1'), findsNothing);
-    expect(find.byIcon(Icons.edit), findsNWidgets(2));
-    final first = tester.widget<TextField>(find.byType(TextField).at(0));
-    final second = tester.widget<TextField>(find.byType(TextField).at(1));
-    expect(first.textAlign, TextAlign.center);
-    expect(first.decoration?.labelText, isNull);
-    expect(first.decoration?.fillColor, isNot(second.decoration?.fillColor));
-    expect(first.decoration?.fillColor, isNot(InkTheme.paper));
-    await tester.tap(find.text('4'));
-    await tester.pumpAndSettle();
-    expect(find.byType(TextField), findsNWidgets(4));
-    await tester.enterText(find.byType(TextField).first, '   ');
-    await tester.tap(find.text('START'));
-    await tester.pump();
-    expect(started, hasLength(4));
-    expect(started!.first.name, 'Player 1');
-    expect(started!.map((player) => player.id).toList(), [
-      'p1',
-      'p2',
-      'p3',
-      'p4',
-    ]);
-  });
 }
 
 BoardPainter _board(WidgetTester tester, int index) {
@@ -296,4 +354,9 @@ Future<void> _elapse(WidgetTester tester, int milliseconds) async {
     await tester.pump(Duration(milliseconds: step));
     left -= step;
   }
+}
+
+Future<void> _phone(WidgetTester tester) async {
+  await tester.binding.setSurfaceSize(const Size(402, 874));
+  addTearDown(() => tester.binding.setSurfaceSize(null));
 }

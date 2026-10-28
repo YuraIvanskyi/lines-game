@@ -121,6 +121,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('ГРАТИ'), findsOneWidget);
     expect(find.text('КЛАСИКА'), findsOneWidget);
+    expect(find.text('2 ГРАВЦІ'), findsOneWidget);
 
     await tester.tap(find.text('ГРАТИ'));
     await tester.pump();

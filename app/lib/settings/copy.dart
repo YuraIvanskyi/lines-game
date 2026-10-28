@@ -17,7 +17,14 @@ class Copy {
     required this.tipTap,
     required this.tipLoss,
     required this.lost,
-    required this.start,
+    required this.gameMode,
+    required this.playersOf,
+    required this.mode,
+    required this.opponent,
+    required this.sameScreen,
+    required this.computer,
+    required this.online,
+    required this.comingSoon,
     required this.playerName,
     required this.creator,
     required this.creatorName,
@@ -70,7 +77,14 @@ class Copy {
   final String tipTap;
   final String tipLoss;
   final String lost;
-  final String start;
+  final String gameMode;
+  final String playersOf;
+  final String mode;
+  final String opponent;
+  final String sameScreen;
+  final String computer;
+  final String online;
+  final String comingSoon;
   final String playerName;
   final String creator;
   final String creatorName;
@@ -111,6 +125,8 @@ class Copy {
 
   String player(int number) => '$playerName $number';
 
+  String playerCount(int count) => playersOf.replaceAll('{count}', '$count');
+
   String turn(String name) => turnOf.replaceAll('{name}', name);
 
   String lostPlayer(String name) => lostOf.replaceAll('{name}', name);
@@ -138,7 +154,14 @@ class Copy {
     tipTap: 'Tap a marked dot.',
     tipLoss: 'The player who cannot grow loses.',
     lost: 'LOST',
-    start: 'Start',
+    gameMode: 'Game mode',
+    playersOf: '{count} players',
+    mode: 'Mode',
+    opponent: 'Opponent',
+    sameScreen: 'Same phone',
+    computer: 'Computer',
+    online: 'Online',
+    comingSoon: 'Computer and online play are coming soon.',
     playerName: 'Player',
     creator: 'Creator',
     creatorName: 'Yurii Ivanskyi',
@@ -201,7 +224,14 @@ class Copy {
     tipTap: 'Торкніться позначеної точки.',
     tipLoss: 'Програє той, хто не може подовжити лінію.',
     lost: 'ПРОГРАШ',
-    start: 'Старт',
+    gameMode: 'Режим гри',
+    playersOf: '{count} гравці',
+    mode: 'Режим',
+    opponent: 'Суперник',
+    sameScreen: 'Один телефон',
+    computer: 'Комп’ютер',
+    online: 'Онлайн',
+    comingSoon: 'Гра з комп’ютером і онлайн з’являться згодом.',
     playerName: 'Гравець',
     creator: 'Автор',
     creatorName: 'Yurii Ivanskyi',
