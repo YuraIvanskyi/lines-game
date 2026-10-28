@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lines_game/home/info_page.dart';
 import 'package:lines_game/home/play_snippet.dart';
 import 'package:lines_game/home/setup_page.dart';
+import 'package:lines_game/legal_links.dart';
 import 'package:lines_game/main.dart';
 import 'package:lines_game/table/board_view.dart';
 import 'package:lines_game/theme/arcade_shell.dart';
@@ -137,13 +139,13 @@ void main() {
     expect(find.text('INFO'), findsOneWidget);
     expect(find.text('Yurii Ivanskyi'), findsOneWidget);
     expect(find.text('Flutter and Dart.'), findsOneWidget);
-    expect(find.textContaining('pure Dart package'), findsOneWidget);
+    expect(find.textContaining('pure Dart package'), findsNothing);
     expect(find.textContaining('audioplayers'), findsOneWidget);
     expect(find.textContaining('Bohdan'), findsOneWidget);
     expect(find.textContaining('paper version'), findsOneWidget);
     expect(find.textContaining('SIL Open Font License'), findsOneWidget);
     expect(find.textContaining('variable font'), findsOneWidget);
-    expect(find.textContaining('illegal tap'), findsOneWidget);
+    expect(find.textContaining('illegal tap'), findsNothing);
     for (final sample in ['Yurii Ivanskyi', 'Flutter and Dart.', 'Thanks']) {
       expect(
         tester.widget<Text>(find.text(sample)).textAlign,
@@ -158,6 +160,36 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
     expect(find.text('PLAY'), findsOneWidget);
+  });
+
+  testWidgets('info lists legal links and keeps thanks last', (tester) async {
+    final opened = <Uri>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: InfoPage(
+          onBack: () {},
+          onOpenLink: (url) async => opened.add(url),
+        ),
+      ),
+    );
+
+    for (final label in ['PRIVACY POLICY', 'TERMS OF USE', 'SUPPORT']) {
+      await tester.ensureVisible(find.text(label));
+      await tester.tap(find.text(label));
+      await tester.pump();
+    }
+    expect(opened, [
+      LegalLinks.privacyPolicy,
+      LegalLinks.termsOfUse,
+      LegalLinks.support,
+    ]);
+    expect(find.text('LICENSES'), findsOneWidget);
+
+    final legal = tester.getTopLeft(find.text('Legal')).dy;
+    final thanks = tester.getTopLeft(find.text('Thanks')).dy;
+    final tech = tester.getTopLeft(find.text('Tech')).dy;
+    expect(tech, lessThan(legal));
+    expect(legal, lessThan(thanks));
   });
 
   testWidgets('icon row matches the main buttons and keeps square gaps', (

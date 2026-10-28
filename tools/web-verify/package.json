@@ -1,0 +1,17 @@
+{
+  "name": "web-verify",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "cd ../../app && flutter build web --release",
+    "verify": "node verify.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright-core": "^1.49.1"
+  },
+  "private": true,
+  "type": "module"
+}

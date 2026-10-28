@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rules/rules.dart';
@@ -77,10 +75,6 @@ class _LinesAppState extends State<LinesApp> {
 
   void _home() => setState(() => _place = _Place.home);
 
-  void _saveSettings(AppSettings next) {
-    unawaited(_persist(next));
-  }
-
   Future<void> _persist(AppSettings next) async {
     await _store.save(next);
     if (!mounted) return;
@@ -116,7 +110,7 @@ class _LinesAppState extends State<LinesApp> {
               onExit: widget.onExit ?? leaveApp,
             ),
             _Place.howTo => HowToPage(onDone: _home),
-            _Place.settings => SettingsPage(settings: _settings, onBack: _home, onSave: _saveSettings),
+            _Place.settings => SettingsPage(settings: _settings, onBack: _home, onSave: _persist),
             _Place.info => InfoPage(onBack: _home),
             _Place.setup => SetupPage(
               mode: widget.mode,

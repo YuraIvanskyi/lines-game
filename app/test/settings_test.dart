@@ -129,6 +129,38 @@ void main() {
     expect(find.text('Передайте телефон'), findsOneWidget);
   });
 
+  testWidgets('save shows a chip that fades and clears on a new change', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(402, 874));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      LinesApp(seed: 1, settingsStore: SharedPrefsSettingsStore()),
+    );
+    await _openSettings(tester);
+    double opacity() => tester
+        .widget<AnimatedOpacity>(find.byType(AnimatedOpacity))
+        .opacity;
+    expect(opacity(), 0);
+
+    await tester.tap(find.text('SAVE'));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
+    expect(find.text('SAVED'), findsOneWidget);
+    expect(opacity(), 1);
+
+    await tester.tap(find.byIcon(Icons.volume_up));
+    await tester.pump();
+    expect(opacity(), 0);
+
+    await tester.tap(find.text('SAVE'));
+    await tester.pump();
+    await tester.pump();
+    expect(opacity(), 1);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(opacity(), 0);
+  });
+
   testWidgets('ukrainian copy reaches a table opened on its own', (
     tester,
   ) async {

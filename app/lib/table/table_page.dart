@@ -238,15 +238,6 @@ class _TablePageState extends State<TablePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      copy.hint,
-                      textAlign: TextAlign.center,
-                      style: text.bodyMedium?.copyWith(
-                        color: InkTheme.muted,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                     const SizedBox(height: 8),
                     Expanded(
                       child: Center(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../settings/app_settings.dart';
@@ -14,7 +16,7 @@ class SettingsPage extends StatefulWidget {
   });
 
   final AppSettings settings;
-  final ValueChanged<AppSettings> onSave;
+  final Future<void> Function(AppSettings settings) onSave;
   final VoidCallback onBack;
 
   @override
@@ -24,9 +26,31 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   late bool _sound = widget.settings.sound;
   late AppLanguage _language = widget.settings.language;
+  bool _saved = false;
+  Timer? _savedTimer;
 
-  void _save() {
-    widget.onSave(AppSettings(sound: _sound, language: _language));
+  @override
+  void dispose() {
+    _savedTimer?.cancel();
+    super.dispose();
+  }
+
+  void _change(VoidCallback change) {
+    _savedTimer?.cancel();
+    setState(() {
+      change();
+      _saved = false;
+    });
+  }
+
+  Future<void> _save() async {
+    await widget.onSave(AppSettings(sound: _sound, language: _language));
+    if (!mounted) return;
+    _savedTimer?.cancel();
+    setState(() => _saved = true);
+    _savedTimer = Timer(const Duration(milliseconds: 1800), () {
+      if (mounted) setState(() => _saved = false);
+    });
   }
 
   @override
@@ -57,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: PopIconButton(
                           icon: _sound ? Icons.volume_up : Icons.volume_off,
                           label: _sound ? copy.soundOn : copy.soundOff,
-                          onPressed: () => setState(() => _sound = !_sound),
+                          onPressed: () => _change(() => _sound = !_sound),
                           extent: 64,
                         ),
                       ),
@@ -75,7 +99,15 @@ class _SettingsPageState extends State<SettingsPage> {
                         ],
                       ),
                     ),
-                    const Spacer(),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _SavedChip(label: copy.saved, visible: _saved),
+                        ),
+                      ),
+                    ),
                     PopButton(label: copy.save, color: InkTheme.greenFace, onPressed: _save),
                   ],
                 ),
@@ -94,7 +126,51 @@ class _SettingsPageState extends State<SettingsPage> {
       compact: true,
       below: 0,
       color: selected ? InkTheme.sun : InkTheme.blueFace,
-      onPressed: () => setState(() => _language = language),
+      onPressed: () => _change(() => _language = language),
+    );
+  }
+}
+
+class _SavedChip extends StatelessWidget {
+  const _SavedChip({required this.label, required this.visible});
+
+  final String label;
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      liveRegion: true,
+      label: visible ? label : null,
+      child: ExcludeSemantics(
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutBack,
+          offset: visible ? Offset.zero : const Offset(0, 0.6),
+          child: AnimatedOpacity(
+            duration: const Duration(milliseconds: 180),
+            opacity: visible ? 1 : 0,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: InkTheme.greenFace,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: Colors.black, width: 3),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 6, 16, 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.check_rounded, size: 22, color: InkTheme.cloud),
+                    const SizedBox(width: 6),
+                    OutlineLabel(label.toUpperCase(), size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

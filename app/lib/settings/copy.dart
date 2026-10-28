@@ -31,7 +31,6 @@ class Copy {
     required this.noGrowth,
     required this.tapEnd,
     required this.passPhone,
-    required this.hint,
     required this.rematch,
     required this.home,
     required this.turnOf,
@@ -50,6 +49,12 @@ class Copy {
     required this.soundOff,
     required this.languages,
     required this.save,
+    required this.saved,
+    required this.legal,
+    required this.privacyPolicy,
+    required this.termsOfUse,
+    required this.support,
+    required this.licenses,
   });
 
   final String classic;
@@ -79,7 +84,6 @@ class Copy {
   final String noGrowth;
   final String tapEnd;
   final String passPhone;
-  final String hint;
   final String rematch;
   final String home;
   final String turnOf;
@@ -98,6 +102,12 @@ class Copy {
   final String soundOff;
   final String languages;
   final String save;
+  final String saved;
+  final String legal;
+  final String privacyPolicy;
+  final String termsOfUse;
+  final String support;
+  final String licenses;
 
   String player(int number) => '$playerName $number';
 
@@ -137,21 +147,20 @@ class Copy {
     tech: 'Tech',
     techLines: [
       'Flutter and Dart.',
-      'The match rules are a pure Dart package, separate from the screens.',
-      'The board is painted in Flutter.',
-      'Sounds play through audioplayers, with a haptic on each cue.',
+      'audioplayers. MIT License.',
+      'shared_preferences, url_launcher. BSD 3-Clause License.',
+      'Settings are stored on this device only. The app collects no personal data and has no ads, accounts or analytics.',
     ],
     assets: 'Assets',
     assetLines: [
       'Nunito, a variable font by The Nunito Project Authors. SIL Open Font License\u00A01.1.',
       'Material Icons by Google. Apache License\u00A02.0.',
-      'Short original cues for a growth, an illegal tap, a turn pass, and a loss.',
+      'Sound effects: original, created for this app.',
     ],
     whichEnd: 'Which end?',
     noGrowth: 'No growth left.',
     tapEnd: 'Tap the ring or the square.',
     passPhone: 'Pass the phone',
-    hint: 'Tap a gold ring. The circle is the head, the square is the tail.',
     rematch: 'Rematch',
     home: 'Home',
     turnOf: "{name}'s turn",
@@ -170,6 +179,12 @@ class Copy {
     soundOff: 'Sound off',
     languages: 'Languages',
     save: 'Save',
+    saved: 'Saved',
+    legal: 'Legal',
+    privacyPolicy: 'Privacy Policy',
+    termsOfUse: 'Terms of Use',
+    support: 'Support',
+    licenses: 'Licenses',
   );
 
   static const ukrainian = Copy(
@@ -195,21 +210,20 @@ class Copy {
     tech: 'Технології',
     techLines: [
       'Flutter і Dart.',
-      'Правила партії — чистий пакет Dart, окремо від екранів.',
-      'Поле малюється у Flutter.',
-      'Звуки грають через audioplayers, і кожна подія має тактильний відгук.',
+      'audioplayers. Ліцензія MIT.',
+      'shared_preferences, url_launcher. Ліцензія BSD 3-Clause.',
+      'Налаштування зберігаються лише на цьому пристрої. Застосунок не збирає особистих даних, не має реклами, облікових записів і аналітики.',
     ],
     assets: 'Матеріали',
     assetLines: [
       'Nunito — варіативний шрифт The Nunito Project Authors. SIL Open Font License\u00A01.1.',
       'Material Icons від Google. Apache License\u00A02.0.',
-      'Короткі авторські сигнали росту, хибного дотику, передачі ходу й поразки.',
+      'Звукові ефекти: авторські, створені для цього застосунку.',
     ],
     whichEnd: 'Який кінець?',
     noGrowth: 'Подовжити вже нікуди.',
     tapEnd: 'Торкніться кільця або квадрата.',
     passPhone: 'Передайте телефон',
-    hint: 'Торкніться золотого кільця. Коло — голова, квадрат — хвіст.',
     rematch: 'Ще раз',
     home: 'На головну',
     turnOf: 'Хід: {name}',
@@ -228,6 +242,12 @@ class Copy {
     soundOff: 'Звук вимкнено',
     languages: 'Мови',
     save: 'Зберегти',
+    saved: 'Збережено',
+    legal: 'Правова інформація',
+    privacyPolicy: 'Конфіденційність',
+    termsOfUse: 'Умови використання',
+    support: 'Підтримка',
+    licenses: 'Ліцензії',
   );
 }
 

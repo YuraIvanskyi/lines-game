@@ -4,3 +4,6 @@ __pycache__
 **/build/
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
+# web-verify tool
+tools/web-verify/node_modules/
+tools/web-verify/out/

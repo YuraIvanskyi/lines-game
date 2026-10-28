@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../legal_links.dart';
 import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
 class InfoPage extends StatelessWidget {
-  const InfoPage({super.key, required this.onBack});
+  const InfoPage({super.key, required this.onBack, this.onOpenLink = openLink});
 
   final VoidCallback onBack;
+  final LinkOpener onOpenLink;
 
   @override
   Widget build(BuildContext context) {
@@ -37,11 +39,13 @@ class InfoPage extends StatelessWidget {
                           children: [
                             _Credit(copy.creator, [copy.creatorName]),
                             const SizedBox(height: 12),
-                            _Credit(copy.thanks, [copy.thanksBody]),
-                            const SizedBox(height: 12),
                             _Credit(copy.tech, copy.techLines),
                             const SizedBox(height: 12),
                             _Credit(copy.assets, copy.assetLines),
+                            const SizedBox(height: 12),
+                            _LegalBlock(title: copy.legal, copy: copy, open: onOpenLink),
+                            const SizedBox(height: 12),
+                            _Credit(copy.thanks, [copy.thanksBody]),
                           ],
                         ),
                       ),
@@ -57,11 +61,73 @@ class InfoPage extends StatelessWidget {
   }
 }
 
+class _LegalBlock extends StatelessWidget {
+  const _LegalBlock({required this.title, required this.copy, required this.open});
+
+  final String title;
+  final Copy copy;
+  final LinkOpener open;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Panel(
+      title: title,
+      children: [
+        _link(copy.privacyPolicy, () => open(LegalLinks.privacyPolicy)),
+        _link(copy.termsOfUse, () => open(LegalLinks.termsOfUse)),
+        _link(copy.support, () => open(LegalLinks.support)),
+        _link(
+          copy.licenses,
+          () => showLicensePage(
+            context: context,
+            applicationName: 'ENDS',
+            applicationLegalese: copy.creatorName,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _link(String label, VoidCallback onPressed) {
+    return PopButton(label: label, compact: true, below: 8, color: InkTheme.blueFace, onPressed: onPressed);
+  }
+}
+
 class _Credit extends StatelessWidget {
   const _Credit(this.title, this.lines);
 
   final String title;
   final List<String> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Panel(
+      title: title,
+      children: [
+        for (var i = 0; i < lines.length; i++)
+          Padding(
+            padding: EdgeInsets.only(top: i == 0 ? 0 : 8),
+            child: Text(
+              lines[i],
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: InkTheme.ink,
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                height: 1.3,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _Panel extends StatelessWidget {
+  const _Panel({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -86,20 +152,7 @@ class _Credit extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            for (var i = 0; i < lines.length; i++)
-              Padding(
-                padding: EdgeInsets.only(top: i == 0 ? 0 : 8),
-                child: Text(
-                  lines[i],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: InkTheme.ink,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    height: 1.3,
-                  ),
-                ),
-              ),
+            ...children,
           ],
         ),
       ),
