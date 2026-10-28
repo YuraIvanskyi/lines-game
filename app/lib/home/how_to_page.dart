@@ -14,8 +14,8 @@ class HowToPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final copy = AppCopy.of(context);
     final tips = [
-      (demo: endsDemo, text: copy.tipEnds),
       (demo: tapDemo, text: copy.tipTap),
+      (demo: endsDemo, text: copy.tipEnds),
       (demo: lossDemo, text: copy.tipLoss),
     ];
     return Scaffold(

@@ -38,7 +38,7 @@ void main() {
   });
 
   test('how-to demos play the lessons', () {
-    expect(howToDemos, [endsDemo, tapDemo, lossDemo]);
+    expect(howToDemos, [tapDemo, endsDemo, lossDemo]);
     for (final demo in howToDemos) {
       var match = demo.frames.first;
       for (final move in demo.moves) {
@@ -76,10 +76,10 @@ void main() {
     expect(fading.opacity, lessThan(0.05));
     expect(fading.match, tapDemo.frames.last);
 
-    expect(legalMoves(lossDemo.frames.first), isNotEmpty);
-    expect(lossDemo.moves.single.end, End.tail);
+    expect(lossDemo.moves, isEmpty);
+    expect(legalMoves(lossDemo.frames.first), isEmpty);
     expect(lossDemo.frames.last.isTerminal, isTrue);
-    expect(lossDemo.frames.last.loserId, 'p2');
+    expect(lossDemo.frames.last.loserId, 'p1');
     final lost = lossDemo.sampleAt(lossDemo.lossAt);
     expect(lost.showLost, isTrue);
     expect(lost.lostT, 1);
@@ -93,21 +93,21 @@ void main() {
     await tester.tap(find.text('HOW TO PLAY'));
     await tester.pump();
     expect(find.text('LOST'), findsNothing);
-    expect(_board(tester, 1).match.segments, isEmpty);
+    expect(_board(tester, 0).match.segments, isEmpty);
 
     final reach = tapDemo.reachAt(0);
     await _elapse(tester, reach);
-    expect(_board(tester, 1).pendingCell, tapDemo.moves.first.cell);
+    expect(_board(tester, 0).pendingCell, tapDemo.moves.first.cell);
 
     final loss = lossDemo.lossAt;
     await _elapse(tester, loss - reach);
     expect(find.text('LOST'), findsOneWidget);
     expect(
-      _board(tester, 1).match.segments.length,
+      _board(tester, 0).match.segments.length,
       tapDemo.sampleAt(loss).match.segments.length,
     );
     expect(
-      _board(tester, 0).match.segments.length,
+      _board(tester, 1).match.segments.length,
       endsDemo.sampleAt(loss).match.segments.length,
     );
 

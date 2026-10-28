@@ -39,29 +39,36 @@ final HowToDemo tapDemo = _demo(
   const [Move(end: End.head, cell: 5), Move(end: End.head, cell: 2)],
 );
 
-/// One open dot above the square. Taking it leaves the next player nothing to grow.
+/// The line fills the whole field, so the player to move cannot grow and loses.
 ///
 /// ```text
-/// · ■ ■
-/// □ ● ○
-/// ■ ■ ■
+/// □ ● ●
+/// ● ● ●
+/// ● ● ○
 /// ```
 final HowToDemo lossDemo = _demo(
-  _grid(
-    walls: const [1, 2, 6, 7, 8],
-    occupied: const [3, 4, 5],
-    head: 5,
-    tail: 3,
-    segments: const [
-      Segment(a: 4, b: 5, playerId: 'p1'),
-      Segment(a: 4, b: 3, playerId: 'p2'),
-    ],
+  settle(
+    _grid(
+      occupied: const [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      head: 0,
+      tail: 8,
+      segments: const [
+        Segment(a: 4, b: 5, playerId: 'p1'),
+        Segment(a: 4, b: 3, playerId: 'p2'),
+        Segment(a: 5, b: 2, playerId: 'p1'),
+        Segment(a: 3, b: 6, playerId: 'p2'),
+        Segment(a: 2, b: 1, playerId: 'p1'),
+        Segment(a: 6, b: 7, playerId: 'p2'),
+        Segment(a: 1, b: 0, playerId: 'p1'),
+        Segment(a: 7, b: 8, playerId: 'p2'),
+      ],
+    ),
   ),
-  const [Move(end: End.tail, cell: 0)],
+  const [],
   terminal: true,
 );
 
-final howToDemos = [endsDemo, tapDemo, lossDemo];
+final howToDemos = [tapDemo, endsDemo, lossDemo];
 
 class SnippetSample {
   const SnippetSample({
