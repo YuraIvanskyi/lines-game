@@ -52,6 +52,7 @@ enum _Place { home, howTo, gameMode, settings, info, table }
 class _LinesAppState extends State<LinesApp> {
   _Place _place = _Place.home;
   List<Player> _players = defaultPlayers;
+  Map<String, Bot> _bots = const {};
   late int _tableSeed = widget.seed ?? DateTime.now().millisecondsSinceEpoch & 0x7fffffff;
   late AppSettings _settings = widget.initialSettings ?? AppSettings.defaults;
   late final SettingsStore _store = widget.settingsStore ?? MemorySettingsStore();
@@ -68,6 +69,7 @@ class _LinesAppState extends State<LinesApp> {
   void _play() {
     setState(() {
       _players = _setup.players(Copy.forLanguage(_settings.language));
+      _bots = _setup.bots();
       _tableSeed = _nextSeed();
       _place = _Place.table;
     });
@@ -129,6 +131,7 @@ class _LinesAppState extends State<LinesApp> {
               seed: _tableSeed,
               mode: widget.mode,
               players: _players,
+              bots: _bots,
               onHome: _home,
               feel: _feel,
             ),

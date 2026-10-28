@@ -53,7 +53,10 @@ class HomePage extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         PopBadge(modeLabel),
-                        PopBadge(copy.playerCount(setup.playerCount), icon: _opponentIcon(setup.opponent)),
+                        PopBadge(
+                          setup.vsComputer ? copy.difficultyName(setup.difficulty) : copy.playerCount(setup.seatCount),
+                          icon: _opponentIcon(setup.opponent),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 28),

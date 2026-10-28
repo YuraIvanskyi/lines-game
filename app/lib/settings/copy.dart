@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:rules/rules.dart';
 
 import 'app_settings.dart';
 
@@ -23,6 +24,11 @@ class Copy {
     required this.opponent,
     required this.sameScreen,
     required this.computer,
+    required this.difficulty,
+    required this.easy,
+    required this.hard,
+    required this.yourMove,
+    required this.thinking,
     required this.online,
     required this.comingSoon,
     required this.playerName,
@@ -83,6 +89,11 @@ class Copy {
   final String opponent;
   final String sameScreen;
   final String computer;
+  final String difficulty;
+  final String easy;
+  final String hard;
+  final String yourMove;
+  final String thinking;
   final String online;
   final String comingSoon;
   final String playerName;
@@ -123,6 +134,8 @@ class Copy {
   final String support;
   final String licenses;
 
+  String difficultyName(Difficulty level) => level == Difficulty.easy ? easy : hard;
+
   String player(int number) => '$playerName $number';
 
   String playerCount(int count) => playersOf.replaceAll('{count}', '$count');
@@ -160,8 +173,13 @@ class Copy {
     opponent: 'Opponent',
     sameScreen: 'Same phone',
     computer: 'Computer',
+    difficulty: 'Difficulty',
+    easy: 'Easy',
+    hard: 'Hard',
+    yourMove: 'Your move',
+    thinking: 'Thinking…',
     online: 'Online',
-    comingSoon: 'Computer and online play are coming soon.',
+    comingSoon: 'Online play is coming soon.',
     playerName: 'Player',
     creator: 'Creator',
     creatorName: 'Yurii Ivanskyi',
@@ -230,8 +248,13 @@ class Copy {
     opponent: 'Суперник',
     sameScreen: 'Один телефон',
     computer: 'Комп’ютер',
+    difficulty: 'Складність',
+    easy: 'Легко',
+    hard: 'Важко',
+    yourMove: 'Ваш хід',
+    thinking: 'Думає…',
     online: 'Онлайн',
-    comingSoon: 'Гра з комп’ютером і онлайн з’являться згодом.',
+    comingSoon: 'Онлайн з’явиться згодом.',
     playerName: 'Гравець',
     creator: 'Автор',
     creatorName: 'Yurii Ivanskyi',

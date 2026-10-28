@@ -29,6 +29,7 @@ class GameModePage extends StatefulWidget {
 class _GameModePageState extends State<GameModePage> {
   late Opponent _opponent = widget.setup.opponent;
   late int _count = widget.setup.playerCount;
+  late Difficulty _difficulty = widget.setup.difficulty;
   final List<TextEditingController> _names = [];
   bool _saved = false;
   Timer? _savedTimer;
@@ -68,7 +69,7 @@ class _GameModePageState extends State<GameModePage> {
       for (var i = 0; i < maxPlayers; i++)
         _names[i].text.trim() == copy.player(i + 1) ? '' : _names[i].text.trim(),
     ];
-    await widget.onSave(GameSetup(opponent: _opponent, playerCount: _count, names: names));
+    await widget.onSave(GameSetup(opponent: _opponent, playerCount: _count, names: names, difficulty: _difficulty));
     if (!mounted) return;
     _savedTimer?.cancel();
     setState(() => _saved = true);
@@ -117,7 +118,7 @@ class _GameModePageState extends State<GameModePage> {
                                 children: [
                                   _opponentButton(Opponent.samePhone, copy.sameScreen, available: true),
                                   const SizedBox(height: 8),
-                                  _opponentButton(Opponent.computer, copy.computer, available: false),
+                                  _opponentButton(Opponent.computer, copy.computer, available: true),
                                   const SizedBox(height: 8),
                                   _opponentButton(Opponent.online, copy.online, available: false),
                                   const SizedBox(height: 12),
@@ -129,7 +130,11 @@ class _GameModePageState extends State<GameModePage> {
                                 ],
                               ),
                             ),
-                            if (_opponent == Opponent.samePhone) ...[
+                            if (_opponent == Opponent.computer) ...[
+                              const SizedBox(height: 12),
+                              PopBlock(title: copy.difficulty, child: _difficulties(copy)),
+                            ],
+                            if (_opponent != Opponent.online) ...[
                               const SizedBox(height: 12),
                               PopBlock(title: copy.players, child: _players()),
                             ],
@@ -163,30 +168,54 @@ class _GameModePageState extends State<GameModePage> {
     );
   }
 
+  Widget _difficulties(Copy copy) {
+    return Row(
+      children: [
+        for (final level in Difficulty.values) ...[
+          if (level != Difficulty.values.first) const SizedBox(width: 8),
+          Expanded(
+            child: PopButton(
+              label: copy.difficultyName(level),
+              compact: true,
+              below: 0,
+              color: _difficulty == level ? InkTheme.sun : InkTheme.blueFace,
+              onPressed: () => _change(() => _difficulty = level),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  /// Name fields for the people at the phone. The computer keeps its own name.
   Widget _players() {
+    final vsComputer = _opponent == Opponent.computer;
+    final seats = vsComputer ? 1 : _count;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            for (var count = minPlayers; count <= maxPlayers; count++) ...[
-              if (count != minPlayers) const SizedBox(width: 8),
-              Expanded(
-                child: PopButton(
-                  label: '$count',
-                  compact: true,
-                  below: 0,
-                  color: _count == count ? InkTheme.sun : InkTheme.blueFace,
-                  onPressed: () => _change(() => _count = count),
+        if (!vsComputer) ...[
+          Row(
+            children: [
+              for (var count = minPlayers; count <= maxPlayers; count++) ...[
+                if (count != minPlayers) const SizedBox(width: 8),
+                Expanded(
+                  child: PopButton(
+                    label: '$count',
+                    compact: true,
+                    below: 0,
+                    color: _count == count ? InkTheme.sun : InkTheme.blueFace,
+                    onPressed: () => _change(() => _count = count),
+                  ),
                 ),
-              ),
+              ],
             ],
-          ],
-        ),
-        const SizedBox(height: 12),
-        for (var i = 0; i < _count; i++)
+          ),
+          const SizedBox(height: 12),
+        ],
+        for (var i = 0; i < seats; i++)
           Padding(
-            padding: EdgeInsets.only(bottom: i == _count - 1 ? 0 : 8),
+            padding: EdgeInsets.only(bottom: i == seats - 1 ? 0 : 8),
             child: TextField(
               controller: _names[i],
               textAlign: TextAlign.center,

@@ -14,24 +14,51 @@ class GameSetup {
     this.opponent = Opponent.samePhone,
     this.playerCount = minPlayers,
     this.names = const ['', '', '', ''],
+    this.difficulty = Difficulty.easy,
   });
 
   final Opponent opponent;
   final int playerCount;
   final List<String> names;
+  final Difficulty difficulty;
 
   static const defaults = GameSetup();
 
+  /// The human takes seat 1 and the computer seat 2, whatever player count was saved.
+  static const computerSeat = 'p2';
+
+  bool get vsComputer => opponent == Opponent.computer;
+
+  int get seatCount => vsComputer ? 2 : playerCount;
+
   List<Player> players(Copy copy) {
     return [
-      for (var i = 0; i < playerCount; i++)
-        Player(id: 'p${i + 1}', name: names[i].trim().isEmpty ? copy.player(i + 1) : names[i].trim()),
+      for (var i = 0; i < seatCount; i++)
+        Player(
+          id: 'p${i + 1}',
+          name: vsComputer && i == 1
+              ? copy.computer
+              : names[i].trim().isEmpty
+              ? copy.player(i + 1)
+              : names[i].trim(),
+        ),
     ];
+  }
+
+  /// Seats the app plays for. Empty when everyone shares the phone.
+  Map<String, Bot> bots() {
+    if (!vsComputer) return const {};
+    return {computerSeat: Bot.forDifficulty(difficulty)};
   }
 
   @override
   bool operator ==(Object other) {
-    if (other is! GameSetup || other.opponent != opponent || other.playerCount != playerCount) return false;
+    if (other is! GameSetup ||
+        other.opponent != opponent ||
+        other.playerCount != playerCount ||
+        other.difficulty != difficulty) {
+      return false;
+    }
     for (var i = 0; i < names.length; i++) {
       if (names[i] != other.names[i]) return false;
     }
@@ -39,7 +66,7 @@ class GameSetup {
   }
 
   @override
-  int get hashCode => Object.hash(opponent, playerCount, Object.hashAll(names));
+  int get hashCode => Object.hash(opponent, playerCount, difficulty, Object.hashAll(names));
 }
 
 abstract class GameSetupStore {
@@ -66,6 +93,7 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
   static const opponentKey = 'opponent';
   static const playerCountKey = 'playerCount';
   static const namesKey = 'playerNames';
+  static const difficultyKey = 'difficulty';
 
   @override
   Future<GameSetup> load() async {
@@ -73,8 +101,10 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
     final opponent = Opponent.values.asNameMap()[prefs.getString(opponentKey)] ?? Opponent.samePhone;
     final count = (prefs.getInt(playerCountKey) ?? minPlayers).clamp(minPlayers, maxPlayers);
     final stored = prefs.getStringList(namesKey) ?? const [];
+    final difficulty = Difficulty.values.asNameMap()[prefs.getString(difficultyKey)] ?? Difficulty.easy;
     return GameSetup(
       opponent: opponent,
+      difficulty: difficulty,
       playerCount: count,
       names: [for (var i = 0; i < maxPlayers; i++) i < stored.length ? stored[i] : ''],
     );
@@ -86,5 +116,6 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
     await prefs.setString(opponentKey, setup.opponent.name);
     await prefs.setInt(playerCountKey, setup.playerCount);
     await prefs.setStringList(namesKey, setup.names);
+    await prefs.setString(difficultyKey, setup.difficulty.name);
   }
 }

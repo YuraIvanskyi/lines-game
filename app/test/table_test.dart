@@ -173,6 +173,102 @@ void main() {
     expect(feel.events, ['growth', 'loss']);
   });
 
+  group('against a bot', () {
+    const delay = Duration(seconds: 5);
+
+    Future<void> mount(WidgetTester tester, Map<String, Bot> bots, {Match? initial}) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: TablePage(seed: 1, mode: open, bots: bots, botDelay: delay, initial: initial),
+        ),
+      );
+    }
+
+    testWidgets('answers after its pause and hands the turn back', (tester) async {
+      final bot = _Scripted();
+      await mount(tester, {'p2': bot});
+      expect(find.text('Your move'), findsOneWidget);
+
+      final opening = deal(open, seed: 1);
+      final first = legalMoves(opening).first;
+      await tapCell(tester, opening, first.cell);
+      expect(find.text("Player 2's turn"), findsOneWidget);
+      expect(find.text('Thinking…'), findsOneWidget);
+      expect(bot.asked, 0);
+
+      await tester.pump(delay);
+      expect(bot.asked, 1);
+      expect(find.text("Player 1's turn"), findsOneWidget);
+      expect(find.text('Your move'), findsOneWidget);
+    });
+
+    testWidgets('taps are ignored while the bot is thinking', (tester) async {
+      final feel = RecordingFeel();
+      final bot = _Scripted();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TablePage(seed: 1, mode: open, bots: {'p2': bot}, botDelay: delay, feel: feel),
+        ),
+      );
+      final opening = deal(open, seed: 1);
+      await tapCell(tester, opening, legalMoves(opening).first.cell);
+      final mine = apply(opening, legalMoves(opening).first);
+      feel.events.clear();
+
+      await tapCell(tester, mine, legalMoves(mine).last.cell);
+      expect(feel.events, isEmpty);
+      expect(find.text("Player 2's turn"), findsOneWidget);
+      await tester.pump(delay);
+      expect(bot.asked, 1);
+    });
+
+    testWidgets('moves first when it is dealt the first turn', (tester) async {
+      final bot = _Scripted();
+      await mount(tester, {'p2': bot}, initial: deal(open, seed: 1, firstTurn: 1));
+      expect(find.text('Thinking…'), findsOneWidget);
+      await tester.pump(delay);
+      expect(bot.asked, 1);
+      expect(find.text('Your move'), findsOneWidget);
+    });
+
+    testWidgets('a bot that gets stuck loses and the game ends', (tester) async {
+      final bot = _Scripted();
+      final nearlyOver = dealClassic(seed: 1, width: 2, height: 1, wallChance: 0, firstTurn: 1);
+      await mount(tester, {'p2': bot}, initial: nearlyOver);
+      await tester.pump(delay);
+      expect(find.text('Player 1 lost'), findsOneWidget);
+      expect(find.text('REMATCH'), findsOneWidget);
+      await tester.pump(delay * 3);
+      expect(bot.asked, 1);
+    });
+
+    testWidgets('restart cancels the pending move and asks the person', (tester) async {
+      final bot = _Scripted();
+      await mount(tester, {'p2': bot});
+      final opening = deal(open, seed: 1);
+      await tapCell(tester, opening, legalMoves(opening).first.cell);
+
+      await tester.tap(find.byIcon(Icons.restart_alt));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Player 1 wants to restart?'), findsOneWidget);
+      await tester.tap(find.text('RESTART'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text("Player 1's turn"), findsOneWidget);
+      await tester.pump(delay * 2);
+      expect(bot.asked, 0);
+    });
+
+    testWidgets('leaving the table cancels the pending move', (tester) async {
+      final bot = _Scripted();
+      await mount(tester, {'p2': bot}, initial: deal(open, seed: 1, firstTurn: 1));
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(delay * 2);
+      expect(bot.asked, 0);
+    });
+  });
+
   test('cell hit stays inside its own dot', () {
     final match = deal(open, seed: 1);
     const size = Size(400, 400);
@@ -215,4 +311,15 @@ class RecordingFeel extends GameFeel {
 
   @override
   void loss() => events.add('loss');
+}
+
+/// Plays the first legal growth and counts how often it was asked.
+class _Scripted extends Bot {
+  int asked = 0;
+
+  @override
+  Move choose(Match match) {
+    asked++;
+    return legalMoves(match).first;
+  }
 }

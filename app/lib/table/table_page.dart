@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
@@ -14,6 +16,8 @@ class TablePage extends StatefulWidget {
     this.seed = 1,
     this.mode = classicMode,
     this.players = defaultPlayers,
+    this.bots = const {},
+    this.botDelay = const Duration(milliseconds: 700),
     this.initial,
     this.onHome,
     this.feel = const SilentFeel(),
@@ -22,6 +26,12 @@ class TablePage extends StatefulWidget {
   final int seed;
   final GameMode mode;
   final List<Player> players;
+
+  /// Seats the app plays, by player id. Everyone else plays by tapping.
+  final Map<String, Bot> bots;
+
+  /// How long a bot holds before it grows the line, so the move can be followed.
+  final Duration botDelay;
   final Match? initial;
   final VoidCallback? onHome;
   final GameFeel feel;
@@ -33,10 +43,28 @@ class TablePage extends StatefulWidget {
 class _TablePageState extends State<TablePage> {
   late Match _match;
   int? _pendingCell;
+  Timer? _botTimer;
+
   @override
   void initState() {
     super.initState();
     _match = widget.initial ?? _deal(widget.seed, 0);
+    _scheduleBot();
+  }
+
+  @override
+  void dispose() {
+    _botTimer?.cancel();
+    super.dispose();
+  }
+
+  bool get _botTurn => !_match.isTerminal && widget.bots.containsKey(_match.currentPlayer.id);
+
+  void _scheduleBot() {
+    _botTimer?.cancel();
+    if (!_botTurn) return;
+    final bot = widget.bots[_match.currentPlayer.id]!;
+    _botTimer = Timer(widget.botDelay, () => _play(bot.choose(_match)));
   }
 
   Match _deal(int seed, int firstTurn) {
@@ -49,7 +77,7 @@ class _TablePageState extends State<TablePage> {
   }
 
   void _onCell(int? cell) {
-    if (_match.isTerminal) return;
+    if (_match.isTerminal || _botTurn) return;
     if (cell == null) {
       _miss();
       return;
@@ -94,6 +122,7 @@ class _TablePageState extends State<TablePage> {
     } else {
       widget.feel.passTurn();
     }
+    _scheduleBot();
   }
 
   void _miss() {
@@ -111,13 +140,18 @@ class _TablePageState extends State<TablePage> {
   }
 
   Future<void> _askRestart() async {
-    final name = _match.currentPlayer.name;
+    // The computer never asks, so the question goes to the first person at the phone.
+    final asker = _botTurn
+        ? _match.players.firstWhere((player) => !widget.bots.containsKey(player.id), orElse: () => _match.currentPlayer)
+        : _match.currentPlayer;
+    final name = asker.name;
     final restart = await confirmRestart(context, name);
     if (!restart || !mounted) return;
     setState(() {
       _match = _deal(_match.seed, _match.firstTurn);
       _pendingCell = null;
     });
+    _scheduleBot();
   }
 
   void _rematch() {
@@ -127,6 +161,7 @@ class _TablePageState extends State<TablePage> {
       _match = _deal(seed, firstTurn);
       _pendingCell = null;
     });
+    _scheduleBot();
   }
 
   @override
@@ -142,6 +177,10 @@ class _TablePageState extends State<TablePage> {
         ? copy.noGrowth
         : _pendingCell != null
         ? copy.tapEnd
+        : _botTurn
+        ? copy.thinking
+        : widget.bots.isNotEmpty
+        ? copy.yourMove
         : copy.passPhone;
     final ink = InkTheme.inks[_match.turn % InkTheme.inks.length];
     final chipColor = _match.isTerminal ? InkTheme.sun : InkTheme.cloud;

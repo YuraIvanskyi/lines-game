@@ -92,30 +92,92 @@ void main() {
     expect(find.byType(TextField), findsNWidgets(2));
   });
 
-  testWidgets('computer and online are listed but not available yet', (tester) async {
+  testWidgets('online is listed but not available yet', (tester) async {
     await _phone(tester);
     await tester.pumpWidget(LinesApp(seed: 1, mode: open));
     await tester.tap(find.text('GAME MODE'));
     await tester.pumpAndSettle();
-    for (final label in ['COMPUTER', 'ONLINE']) {
-      expect(tester.widget<PopButton>(find.widgetWithText(PopButton, label)).enabled, isFalse);
-      await tester.tap(find.text(label));
-      await tester.pump();
-    }
+    expect(tester.widget<PopButton>(find.widgetWithText(PopButton, 'ONLINE')).enabled, isFalse);
+    await tester.tap(find.text('ONLINE'));
+    await tester.pump();
     expect(find.byType(TextField), findsNWidgets(2));
-    expect(find.text('Computer and online play are coming soon.'), findsOneWidget);
+    expect(find.text('Online play is coming soon.'), findsOneWidget);
+  });
+
+  testWidgets('computer play is chosen, saved and started from game mode', (tester) async {
+    await _phone(tester);
+    final store = MemoryGameSetupStore();
+    await tester.pumpWidget(LinesApp(seed: 1, mode: open, setupStore: store));
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Difficulty'), findsNothing);
+
+    await tester.tap(find.text('COMPUTER'));
+    await tester.pump();
+    expect(find.text('Difficulty'), findsOneWidget);
+    expect(find.text('EASY'), findsOneWidget);
+    expect(find.text('HARD'), findsOneWidget);
+    // Only the person's own name is editable, and the player count is fixed at two.
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.text('3'), findsNothing);
+
+    await tester.tap(find.text('HARD'));
+    await tester.pump();
+    await tester.tap(find.text('SAVE'));
+    await tester.pumpAndSettle();
+    final saved = await store.load();
+    expect(saved.opponent, Opponent.computer);
+    expect(saved.difficulty, Difficulty.hard);
+
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await tester.pumpAndSettle();
+    // The computer badge names the difficulty in place of a player count.
+    expect(find.text('2 PLAYERS'), findsNothing);
+    expect(find.text('HARD'), findsOneWidget);
+    expect(find.byIcon(Icons.computer), findsOneWidget);
+
+    await tester.tap(find.text('PLAY'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text("Player 1's turn"), findsOneWidget);
+    expect(find.text('Your move'), findsOneWidget);
+    // Tear the table down before the computer's pending move fires.
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  test('a computer setup seats the person first and the bot second', () {
+    const setup = GameSetup(
+      opponent: Opponent.computer,
+      playerCount: 4,
+      names: ['Ada', 'Bo', '', ''],
+      difficulty: Difficulty.hard,
+    );
+    expect(setup.seatCount, 2);
+    expect(setup.players(Copy.english).map((player) => player.name), ['Ada', 'Computer']);
+    expect(setup.players(Copy.ukrainian).last.name, 'Комп’ютер');
+    expect(setup.bots().keys, ['p2']);
+    expect(setup.bots()['p2'], isA<SearchBot>());
+    expect(const GameSetup(opponent: Opponent.computer).bots()['p2'], isA<RandomBot>());
+    expect(GameSetup.defaults.bots(), isEmpty);
+    expect(GameSetup.defaults.seatCount, 2);
+    expect(const GameSetup(playerCount: 3).seatCount, 3);
   });
 
   test('saved setup survives the store and keeps default names blank', () async {
     SharedPreferences.setMockInitialValues({});
     final store = SharedPrefsGameSetupStore();
     expect(await store.load(), GameSetup.defaults);
-    const saved = GameSetup(playerCount: 4, names: ['Ada', '', 'Bo', '']);
+    const saved = GameSetup(
+      opponent: Opponent.computer,
+      playerCount: 4,
+      names: ['Ada', '', 'Bo', ''],
+      difficulty: Difficulty.hard,
+    );
     await store.save(saved);
     expect(await store.load(), saved);
-    final players = saved.players(Copy.ukrainian);
-    expect(players.map((player) => player.name), ['Ada', 'Гравець 2', 'Bo', 'Гравець 4']);
-    expect(players.map((player) => player.id), ['p1', 'p2', 'p3', 'p4']);
+    final shared = GameSetup(playerCount: 4, names: saved.names).players(Copy.ukrainian);
+    expect(shared.map((player) => player.name), ['Ada', 'Гравець 2', 'Bo', 'Гравець 4']);
+    expect(shared.map((player) => player.id), ['p1', 'p2', 'p3', 'p4']);
   });
 
   testWidgets('how to play can be opened from home', (tester) async {
