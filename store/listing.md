@@ -73,5 +73,5 @@ ENDS — невелика стратегічна гра для друзів, щ�
 | Account / login | None. App review notes: "Tap PLAY for a 2-player game on one phone; Game mode → Computer for a solo game." |
 | Age rating content | No violence, no user content, no chat, no gambling, no purchases |
 | Target audience (Play) | 13+ unless you want Families policy obligations |
-| Contact email | _to choose_ |
+| Contact email | ends.support@gmail.com |
 | Privacy / Terms / Support URLs | `https://yuraivanskyi.github.io/ends-site/privacy.html`, `…/terms.html`, `…/support.html` (publish steps in the sibling repo `ends-site`, README) |

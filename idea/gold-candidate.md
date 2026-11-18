@@ -18,7 +18,7 @@ Legend: **[owner]** needs you · **[code]** a repo change · **[console]** fille
 
 ## 1. Owner to-do (in order)
 
-1. **[owner] Support email.** Create a dedicated address for ENDS. Then replace `SUPPORT_EMAIL` in the `ends-site` pages (sibling repo `d:\projects\ends-site`) and the contact row in `store/listing.md`.
+1. ✅ **Support email** ends.support@gmail.com, on the live pages and in `store/listing.md`.
 2. **[owner] Publish the site.** The sibling repo `d:\projects\ends-site` is committed locally. Follow its README: create the public GitHub repo `ends-site`, push, and turn on Pages. The app already links to `https://yuraivanskyi.github.io/ends-site/…`.
 3. **[console] Apple Developer Program** ($99/yr):
    - register `com.ivanskyi.ends`;
