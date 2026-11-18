@@ -1,6 +1,6 @@
 // Drives the built Flutter web app in a real browser and reports what happened.
 //
-//   node verify.mjs <scenario> [--out DIR] [--port N] [--headed] [--size 390x844] [--url URL]
+//   node verify.mjs <scenario> [--out DIR] [--port N] [--headed] [--size 390x844] [--scale 2] [--platform ios] [--url URL]
 //
 // <scenario> is a file in ./scenarios (name with or without .mjs) or a path.
 // Serves ../../app/build/web unless --url is given (e.g. a `flutter run -d web-server` instance).
@@ -62,7 +62,13 @@ const log = (m) => console.log(m);
 
 const url = flag('url') ?? (await serve());
 const browser = await launch();
-const context = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: 2, hasTouch: true, isMobile: true });
+// --platform ios makes Flutter's defaultTargetPlatform report iOS (it reads navigator.platform / userAgent).
+const ios = flag('platform') === 'ios';
+const context = await browser.newContext({
+  viewport: { width: w, height: h }, deviceScaleFactor: Number(flag('scale', '2')), hasTouch: true, isMobile: true,
+  ...(ios ? { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1' } : {}),
+});
+if (ios) await context.addInitScript(() => Object.defineProperty(Navigator.prototype, 'platform', { get: () => 'iPhone' }));
 const page = await context.newPage();
 page.on('console', (m) => { if (m.type() === 'error') problems.push(`console.error: ${m.text()}`); else if (has('verbose')) log(`[console.${m.type()}] ${m.text()}`); });
 page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
@@ -77,7 +83,15 @@ const ctx = {
     await page.waitForSelector('flutter-view, flt-glass-pane', { timeout: 60000 });
     await page.waitForSelector('flt-semantics-placeholder', { state: 'attached', timeout: 30000 });
     // The placeholder is offscreen on purpose; a DOM click enables the accessibility tree.
-    await page.evaluate(() => document.querySelector('flt-semantics-placeholder')?.click());
+    await page.evaluate(() => {
+      const el = document.querySelector('flt-semantics-placeholder');
+      if (!el) return;
+      // Desktop enabler takes a click; the mobile (iOS) enabler wants pointer/touch events inside the placeholder.
+      const r = el.getBoundingClientRect();
+      const at = { bubbles: true, cancelable: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 };
+      for (const type of ['pointerdown', 'pointerup']) el.dispatchEvent(new PointerEvent(type, { ...at, pointerType: 'touch' }));
+      el.dispatchEvent(new MouseEvent('click', at));
+    });
     await page.waitForSelector('flt-semantics', { timeout: 15000 });
     await page.waitForTimeout(500);
   },
@@ -123,10 +137,16 @@ const ctx = {
     await page.waitForTimeout(400);
     log(`tapAt: ${Math.round(px)},${Math.round(py)}`);
   },
-  /** Tap a board cell (0-based row/col of the 6x6 grid). Calibrated for the default 390x844 viewport only. */
+  /** Tap a board cell (0-based row/col of the 6x6 grid) during play. Calibrated at 390x844
+   *  (cell 56.35, first centre 54,364); the board is width-bound and centred vertically, so other
+   *  portrait sizes scale with the column width (max 420) and shift by half the extra height. */
   async tapCell(row, col) {
-    if (w !== 390 || h !== 844) throw new Error('tapCell is calibrated for --size 390x844');
-    await ctx.tapAt(54 + 56.35 * col, 364 + 56.35 * row);
+    const column = Math.min(w, 420);
+    const k = (column - 32) / (390 - 32);
+    const cell = 56.35 * k;
+    const x0 = (w - column) / 2 + 16 + (54 - 16) * k;
+    const yMid = 364 + 2.5 * 56.35 + (h - 844) / 2;
+    await ctx.tapAt(x0 + cell * col, yMid + cell * (row - 2.5));
   },
   async expectLabel(text, { timeout = 5000 } = {}) {
     try { await page.waitForFunction((t) => [...document.querySelectorAll('flt-semantics')]
