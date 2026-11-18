@@ -1,6 +1,90 @@
+# ENDS builds. All workflows are manual (Start new build in Codemagic) to save minutes.
+# One-time setup in Codemagic, names must match the references below:
+#   Team integrations → Developer Portal → App Store Connect API key named "ENDS ASC key"
+#   Code signing identities → Android keystore with reference name "ends_upload_key"
+#   Environment variables → group "google_play" with GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (Play service account JSON)
+# Build numbers come from Codemagic's per-workflow counter ($BUILD_NUMBER), so every upload is unique.
+
+definitions:
+  tests: &tests
+    name: Rules and app tests
+    script: |
+      set -euo pipefail
+      cd "$CM_BUILD_DIR/packages/rules" && dart pub get && dart test
+      cd "$CM_BUILD_DIR/app" && flutter pub get && flutter test
+
 workflows:
-  lines-game-ipa:
-    name: ENDS - Unsigned IPA
+  ios-release:
+    name: ENDS iOS → TestFlight
+    instance_type: mac_mini_m2
+    max_build_duration: 45
+    integrations:
+      app_store_connect: ENDS ASC key
+    environment:
+      flutter: stable
+      xcode: latest
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.ivanskyi.ends
+    triggering:
+      events: []
+    scripts:
+      - *tests
+      - name: Apply signing profiles
+        script: |
+          cd "$CM_BUILD_DIR/app"
+          xcode-project use-profiles
+      - name: Build signed IPA
+        script: |
+          cd "$CM_BUILD_DIR/app"
+          flutter build ipa --release --build-number="$BUILD_NUMBER" \
+            --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - app/build/ios/ipa/*.ipa
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  android-release:
+    name: ENDS Android → Play internal
+    instance_type: linux_x2
+    max_build_duration: 30
+    environment:
+      flutter: stable
+      android_signing:
+        - ends_upload_key
+      groups:
+        - google_play
+    triggering:
+      events: []
+    scripts:
+      - *tests
+      - name: Write key.properties
+        script: |
+          cat > "$CM_BUILD_DIR/app/android/key.properties" <<EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=$CM_KEYSTORE_PATH
+          EOF
+      - name: Build signed app bundle
+        script: |
+          cd "$CM_BUILD_DIR/app"
+          flutter build appbundle --release --build-number="$BUILD_NUMBER"
+    artifacts:
+      - app/build/app/outputs/bundle/release/*.aab
+    publishing:
+      # Play's API cannot create an app's first release: upload the first .aab by hand in
+      # Play Console (it is in this build's artifacts), then later builds publish here.
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+        submit_as_draft: true
+
+  # Free-Apple-ID sideload build (Sideloadly, decisions L8). Unsigned; not for the store.
+  ends-ipa:
+    name: ENDS - Unsigned IPA (sideload)
     instance_type: mac_mini_m2
     max_build_duration: 30
 
@@ -8,7 +92,6 @@ workflows:
       flutter: stable
       xcode: "26.4"
 
-    # Manual builds only to conserve free minutes
     triggering:
       events: []
 
@@ -27,7 +110,7 @@ workflows:
           set -euo pipefail
           APP="$CM_BUILD_DIR/app/build/ios/iphoneos/Runner.app"
           PAYLOAD_DIR="$CM_BUILD_DIR/app/build/ios/package/Payload"
-          IPA="$CM_BUILD_DIR/app/build/ios/ipa/lines_game.ipa"
+          IPA="$CM_BUILD_DIR/app/build/ios/ipa/ends.ipa"
 
           if [[ ! -d "$APP" ]]; then
             APP="$(find "$CM_BUILD_DIR/app/build/ios" -type d -name Runner.app | head -n 1)"
@@ -40,4 +123,4 @@ workflows:
           unzip -t "$IPA"
 
     artifacts:
-      - app/build/ios/ipa/lines_game.ipa
+      - app/build/ios/ipa/ends.ipa
