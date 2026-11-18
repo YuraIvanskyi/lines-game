@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lines_game/table/board_view.dart';
-import 'package:lines_game/table/table_page.dart';
-import 'package:lines_game/theme/game_feel.dart';
-import 'package:lines_game/theme/ink_theme.dart';
+import 'package:ends/table/board_view.dart';
+import 'package:ends/table/table_page.dart';
+import 'package:ends/theme/game_feel.dart';
+import 'package:ends/theme/ink_theme.dart';
 import 'package:rules/rules.dart';
 
 final open = classicMode.copyWith(wallChance: 0);

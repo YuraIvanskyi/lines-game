@@ -1,4 +1,4 @@
-package com.linesgame.lines_game
+package com.ivanskyi.ends
 
 import io.flutter.embedding.android.FlutterActivity
 

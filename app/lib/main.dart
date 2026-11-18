@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rules/rules.dart';
@@ -8,6 +9,8 @@ import 'home/info_page.dart';
 import 'home/game_mode_page.dart';
 import 'home/settings_page.dart';
 import 'leave_app.dart';
+import 'legal_links.dart';
+import 'store_links.dart';
 import 'settings/app_settings.dart';
 import 'settings/copy.dart';
 import 'settings/game_setup.dart';
@@ -23,7 +26,7 @@ Future<void> main() async {
   final setupStore = SharedPrefsGameSetupStore();
   final setup = await setupStore.load();
   runApp(
-    LinesApp(
+    EndsApp(
       settingsStore: settingsStore,
       initialSettings: settings,
       setupStore: setupStore,
@@ -32,24 +35,25 @@ Future<void> main() async {
   );
 }
 
-class LinesApp extends StatefulWidget {
-  const LinesApp({super.key, this.seed, this.mode = classicMode, this.onExit, this.settingsStore, this.initialSettings, this.setupStore, this.initialSetup});
+class EndsApp extends StatefulWidget {
+  const EndsApp({super.key, this.seed, this.mode = classicMode, this.onExit, this.onOpenLink = openLink, this.settingsStore, this.initialSettings, this.setupStore, this.initialSetup});
 
   final int? seed;
   final GameMode mode;
   final VoidCallback? onExit;
+  final LinkOpener onOpenLink;
   final SettingsStore? settingsStore;
   final AppSettings? initialSettings;
   final GameSetupStore? setupStore;
   final GameSetup? initialSetup;
 
   @override
-  State<LinesApp> createState() => _LinesAppState();
+  State<EndsApp> createState() => _EndsAppState();
 }
 
 enum _Place { home, howTo, gameMode, settings, info, table }
 
-class _LinesAppState extends State<LinesApp> {
+class _EndsAppState extends State<EndsApp> {
   _Place _place = _Place.home;
   List<Player> _players = defaultPlayers;
   Map<String, Bot> _bots = const {};
@@ -120,12 +124,13 @@ class _LinesAppState extends State<LinesApp> {
               onGameMode: () => setState(() => _place = _Place.gameMode),
               onSettings: () => setState(() => _place = _Place.settings),
               onInfo: () => setState(() => _place = _Place.info),
-              onStore: () {},
-              onExit: widget.onExit ?? leaveApp,
+              onStore: () => widget.onOpenLink(StoreLinks.forPlatform(defaultTargetPlatform)),
+              // Apple's HIG: iOS apps never quit themselves, so no Exit button there.
+              onExit: defaultTargetPlatform == TargetPlatform.iOS ? null : widget.onExit ?? leaveApp,
             ),
             _Place.howTo => HowToPage(onDone: _home),
             _Place.settings => SettingsPage(settings: _settings, onBack: _home, onSave: _persist),
-            _Place.info => InfoPage(onBack: _home),
+            _Place.info => InfoPage(onBack: _home, onOpenLink: widget.onOpenLink),
             _Place.gameMode => GameModePage(mode: widget.mode, setup: _setup, onBack: _home, onSave: _persistSetup),
             _Place.table => TablePage(
               seed: _tableSeed,

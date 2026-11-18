@@ -1,7 +1,7 @@
-name: lines_game
-description: Hot-seat lines on a 6x6 field.
+name: ends
+description: ENDS, a hot-seat line game on a 6x6 field.
 publish_to: 'none'
-version: 0.1.0+1
+version: 1.0.0+1
 
 environment:
   sdk: ^3.13.5

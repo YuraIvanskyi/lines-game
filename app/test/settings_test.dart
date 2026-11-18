@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lines_game/main.dart';
-import 'package:lines_game/settings/app_settings.dart';
-import 'package:lines_game/settings/copy.dart';
-import 'package:lines_game/table/table_page.dart';
-import 'package:lines_game/theme/arcade_shell.dart';
-import 'package:lines_game/theme/game_feel.dart';
-import 'package:lines_game/theme/ink_theme.dart';
+import 'package:ends/main.dart';
+import 'package:ends/settings/app_settings.dart';
+import 'package:ends/settings/copy.dart';
+import 'package:ends/table/table_page.dart';
+import 'package:ends/theme/arcade_shell.dart';
+import 'package:ends/theme/game_feel.dart';
+import 'package:ends/theme/ink_theme.dart';
 import 'package:rules/rules.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -51,7 +51,7 @@ void main() {
 
   testWidgets('leaving settings forgets an unsaved change', (tester) async {
     final store = SharedPrefsSettingsStore();
-    await tester.pumpWidget(LinesApp(seed: 1, settingsStore: store));
+    await tester.pumpWidget(EndsApp(seed: 1, settingsStore: store));
 
     await _openSettings(tester);
     await tester.tap(find.byIcon(Icons.volume_up));
@@ -76,7 +76,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(402, 874));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     final store = SharedPrefsSettingsStore();
-    await tester.pumpWidget(LinesApp(seed: 1, settingsStore: store));
+    await tester.pumpWidget(EndsApp(seed: 1, settingsStore: store));
     await _openSettings(tester);
 
     final english = tester.getRect(find.widgetWithText(PopButton, 'ENGLISH'));
@@ -111,7 +111,7 @@ void main() {
 
     final saved = await store.load();
     await tester.pumpWidget(
-      LinesApp(
+      EndsApp(
         key: const ValueKey('relaunch'),
         seed: 1,
         settingsStore: store,
@@ -136,7 +136,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(402, 874));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      LinesApp(seed: 1, settingsStore: SharedPrefsSettingsStore()),
+      EndsApp(seed: 1, settingsStore: SharedPrefsSettingsStore()),
     );
     await _openSettings(tester);
     double opacity() => tester

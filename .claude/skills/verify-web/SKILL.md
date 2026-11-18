@@ -48,5 +48,5 @@ Options: `--size 390x844` (default, portrait phone), `--headed` (watch it), `--o
 
 ## Making it better (suggest to the user, don't do unasked)
 
-- Read a `?seed=` query parameter on web (`LinesApp(seed: ...)` already exists) so scenarios can play deterministic games.
+- Read a `?seed=` query parameter on web (`EndsApp(seed: ...)` already exists) so scenarios can play deterministic games.
 - Wrap board cells in `Semantics(label: 'cell r,c', button: true)` so scenarios can tap and assert by name instead of coordinates.

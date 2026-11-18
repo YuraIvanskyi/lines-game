@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Public pages that App Store review expects to reach from inside the app.
-/// Replace these with the live URLs before submitting a build.
+/// Served by GitHub Pages from the public `ends-site` repo (sibling folder `../ends-site`).
 abstract final class LegalLinks {
-  static final privacyPolicy = Uri.parse('https://example.com/ends/privacy');
-  static final termsOfUse = Uri.parse('https://example.com/ends/terms');
-  static final support = Uri.parse('https://example.com/ends/support');
+  static const base = 'https://yuraivanskyi.github.io/ends-site';
+  static final privacyPolicy = Uri.parse('$base/privacy.html');
+  static final termsOfUse = Uri.parse('$base/terms.html');
+  static final support = Uri.parse('$base/support.html');
 }
 
 typedef LinkOpener = Future<void> Function(Uri url);

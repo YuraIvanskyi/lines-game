@@ -1,14 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lines_game/home/info_page.dart';
-import 'package:lines_game/home/play_snippet.dart';
-import 'package:lines_game/settings/game_setup.dart';
-import 'package:lines_game/legal_links.dart';
-import 'package:lines_game/main.dart';
-import 'package:lines_game/settings/copy.dart';
-import 'package:lines_game/table/board_view.dart';
-import 'package:lines_game/theme/arcade_shell.dart';
-import 'package:lines_game/theme/ink_theme.dart';
+import 'package:ends/home/info_page.dart';
+import 'package:ends/home/play_snippet.dart';
+import 'package:ends/settings/game_setup.dart';
+import 'package:ends/legal_links.dart';
+import 'package:ends/store_links.dart';
+import 'package:ends/main.dart';
+import 'package:ends/settings/copy.dart';
+import 'package:ends/table/board_view.dart';
+import 'package:ends/theme/arcade_shell.dart';
+import 'package:ends/theme/ink_theme.dart';
 import 'package:rules/rules.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,7 +18,7 @@ void main() {
   final open = classicMode.copyWith(wallChance: 0);
 
   testWidgets('play reaches the board in one tap', (tester) async {
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
     expect(find.text('PLAY'), findsOneWidget);
     expect(find.text('GAME MODE'), findsOneWidget);
     expect(find.text('PLAYERS'), findsNothing);
@@ -28,13 +30,13 @@ void main() {
   });
 
   testWidgets('home chips show the saved setup', (tester) async {
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
     expect(find.text('CLASSIC'), findsOneWidget);
     expect(find.text('2 PLAYERS'), findsOneWidget);
     expect(find.byIcon(Icons.people), findsOneWidget);
 
     await tester.pumpWidget(
-      LinesApp(
+      EndsApp(
         key: const ValueKey('computer'),
         seed: 1,
         initialSetup: const GameSetup(opponent: Opponent.computer),
@@ -47,7 +49,7 @@ void main() {
   testWidgets('game mode are saved, shown on home, and used by play', (tester) async {
     await _phone(tester);
     final store = MemoryGameSetupStore();
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open, setupStore: store));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open, setupStore: store));
     await tester.tap(find.text('GAME MODE'));
     await tester.pumpAndSettle();
     expect(find.text('CLASSIC'), findsOneWidget);
@@ -79,7 +81,7 @@ void main() {
 
   testWidgets('leaving game mode forgets an unsaved change', (tester) async {
     await _phone(tester);
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
     await tester.tap(find.text('GAME MODE'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('4'));
@@ -94,7 +96,7 @@ void main() {
 
   testWidgets('online is listed but not available yet', (tester) async {
     await _phone(tester);
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
     await tester.tap(find.text('GAME MODE'));
     await tester.pumpAndSettle();
     expect(tester.widget<PopButton>(find.widgetWithText(PopButton, 'ONLINE')).enabled, isFalse);
@@ -107,7 +109,7 @@ void main() {
   testWidgets('computer play is chosen, saved and started from game mode', (tester) async {
     await _phone(tester);
     final store = MemoryGameSetupStore();
-    await tester.pumpWidget(LinesApp(seed: 1, mode: open, setupStore: store));
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open, setupStore: store));
     await tester.tap(find.text('GAME MODE'));
     await tester.pumpAndSettle();
     expect(find.text('Difficulty'), findsNothing);
@@ -181,7 +183,7 @@ void main() {
   });
 
   testWidgets('how to play can be opened from home', (tester) async {
-    await tester.pumpWidget(const LinesApp(seed: 1));
+    await tester.pumpWidget(const EndsApp(seed: 1));
     expect(find.text('SKIP'), findsNothing);
     expect(find.text('The line grows from either end.'), findsNothing);
     await tester.tap(find.text('HOW TO PLAY'));
@@ -247,7 +249,7 @@ void main() {
   });
 
   testWidgets('how-to boards play the tap and the loss', (tester) async {
-    await tester.pumpWidget(const LinesApp(seed: 1));
+    await tester.pumpWidget(const EndsApp(seed: 1));
     await tester.tap(find.text('HOW TO PLAY'));
     await tester.pump();
     expect(find.text('LOST'), findsNothing);
@@ -274,7 +276,7 @@ void main() {
   });
 
   testWidgets('settings and info open their pages', (tester) async {
-    await tester.pumpWidget(const LinesApp(seed: 1));
+    await tester.pumpWidget(const EndsApp(seed: 1));
 
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
@@ -351,7 +353,7 @@ void main() {
   testWidgets('icon row matches the main buttons and keeps square gaps', (
     tester,
   ) async {
-    await tester.pumpWidget(const LinesApp(seed: 1));
+    await tester.pumpWidget(const EndsApp(seed: 1));
     final play = tester.getRect(find.widgetWithText(PopButton, 'PLAY'));
     final howTo = tester.getRect(find.widgetWithText(PopButton, 'HOW TO PLAY'));
     final gameMode = tester.getRect(find.widgetWithText(PopButton, 'GAME MODE'));
@@ -385,18 +387,48 @@ void main() {
     expect(boxes.first.left, closeTo(play.left, 0.01));
     expect(boxes.last.right, closeTo(play.right, 0.01));
 
+  });
+
+  testWidgets('store opens the store page for the platform', (tester) async {
+    final opened = <Uri>[];
+    Future<void> open(Uri url) async => opened.add(url);
+    await tester.pumpWidget(EndsApp(seed: 1, onOpenLink: open));
+
     await tester.tap(find.byIcon(Icons.favorite));
     await tester.pump();
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.tap(find.byIcon(Icons.favorite));
+    await tester.pump();
+    debugDefaultTargetPlatformOverride = null;
+
+    expect(opened, [StoreLinks.playStore, StoreLinks.appStore]);
+    expect(StoreLinks.playStore.toString(), 'https://play.google.com/store/apps/details?id=com.ivanskyi.ends');
     expect(find.text('PLAY'), findsOneWidget);
   });
 
   testWidgets('exit leaves through the app hook', (tester) async {
     var left = false;
-    await tester.pumpWidget(LinesApp(seed: 1, onExit: () => left = true));
+    await tester.pumpWidget(EndsApp(seed: 1, onExit: () => left = true));
     await tester.tap(find.byIcon(Icons.logout));
     await tester.pump();
     expect(left, isTrue);
     expect(find.text('PLAY'), findsOneWidget);
+  });
+
+  testWidgets('iOS has no exit and three icons still span the play button', (tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(EndsApp(seed: 1, onExit: () {}));
+    final icons = find.byType(PopIconButton);
+    final buttons = tester.widgetList<PopIconButton>(icons).map((b) => b.icon).toList();
+    final play = tester.getRect(find.widgetWithText(PopButton, 'PLAY'));
+    final first = tester.getRect(icons.first);
+    final last = tester.getRect(icons.last);
+    debugDefaultTargetPlatformOverride = null;
+
+    expect(buttons, [Icons.settings, Icons.priority_high, Icons.favorite]);
+    expect(find.byIcon(Icons.logout), findsNothing);
+    expect(first.left, closeTo(play.left, 0.01));
+    expect(last.right, closeTo(play.right, 0.01));
   });
 }
 

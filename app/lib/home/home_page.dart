@@ -16,7 +16,7 @@ class HomePage extends StatelessWidget {
     required this.onSettings,
     required this.onInfo,
     required this.onStore,
-    required this.onExit,
+    this.onExit,
   });
 
   final String modeLabel;
@@ -27,7 +27,9 @@ class HomePage extends StatelessWidget {
   final VoidCallback onSettings;
   final VoidCallback onInfo;
   final VoidCallback onStore;
-  final VoidCallback onExit;
+
+  /// Null hides the Exit button (iOS: apps must not quit themselves).
+  final VoidCallback? onExit;
 
   @override
   Widget build(BuildContext context) {
@@ -62,16 +64,20 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 28),
                     LayoutBuilder(
                       builder: (context, constraints) {
-                        const count = 4;
-                        const gapFactor = 0.36;
-                        final side = (constraints.maxWidth / (count + (count - 1) * gapFactor) * 100).floorToDouble() / 100;
-                        final gap = (constraints.maxWidth - side * count) / (count - 1);
+                        final exit = onExit;
                         final icons = <({IconData icon, String label, Color color, VoidCallback onPressed})>[
                           (icon: Icons.settings, label: copy.settings, color: InkTheme.blueFace, onPressed: onSettings),
                           (icon: Icons.priority_high, label: copy.info, color: InkTheme.blueFace, onPressed: onInfo),
                           (icon: Icons.favorite, label: copy.store, color: InkTheme.pinkFace, onPressed: onStore),
-                          (icon: Icons.logout, label: copy.exit, color: InkTheme.blueFace, onPressed: onExit),
+                          if (exit != null) (icon: Icons.logout, label: copy.exit, color: InkTheme.blueFace, onPressed: exit),
                         ];
+                        // Sizes come from four slots so the menu keeps its proportions; when Exit is
+                        // hidden the remaining icons spread to the same edges with wider gaps.
+                        const slots = 4;
+                        const gapFactor = 0.36;
+                        final side = (constraints.maxWidth / (slots + (slots - 1) * gapFactor) * 100).floorToDouble() / 100;
+                        final gap = (constraints.maxWidth - side * slots) / (slots - 1);
+                        final iconGap = (constraints.maxWidth - side * icons.length) / (icons.length - 1);
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
@@ -81,7 +87,7 @@ class HomePage extends StatelessWidget {
                             Row(
                               children: [
                                 for (var i = 0; i < icons.length; i++) ...[
-                                  if (i > 0) SizedBox(width: gap),
+                                  if (i > 0) SizedBox(width: iconGap),
                                   PopIconButton(
                                     icon: icons[i].icon,
                                     label: icons[i].label,

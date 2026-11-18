@@ -89,12 +89,12 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.linesgame" "\0"
+            VALUE "CompanyName", "Yurii Ivanskyi" "\0"
             VALUE "FileDescription", "ENDS" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "lines_game" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.linesgame. All rights reserved." "\0"
-            VALUE "OriginalFilename", "lines_game.exe" "\0"
+            VALUE "InternalName", "ends" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Yurii Ivanskyi. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ends.exe" "\0"
             VALUE "ProductName", "ENDS" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
