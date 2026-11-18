@@ -19,12 +19,15 @@ Legend: **[owner]** needs you · **[code]** a repo change · **[console]** fille
 ## 1. Owner to-do (in order)
 
 1. ✅ **Support email** ends.support@gmail.com, on the live pages and in `store/listing.md`.
-2. **[owner] Publish the site.** The sibling repo `d:\projects\ends-site` is committed locally. Follow its README: create the public GitHub repo `ends-site`, push, and turn on Pages. The app already links to `https://yuraivanskyi.github.io/ends-site/…`.
+2. ✅ **Site published.** `privacy.html`, `terms.html` and `support.html` are live under `https://yuraivanskyi.github.io/ends-site/` (checked 2026-11-18).
 3. **[console] Apple Developer Program** ($99/yr):
    - register `com.ivanskyi.ends`;
    - create the app record (name ENDS);
    - create an App Store Connect API key (App Manager role).
-4. **[console] Play Console** ($25, identity verification). Create the app, then generate the upload keystore and **back it up off-machine**.
+4. **[console] Play Console.** ✅ Account created. Next, create the app (ENDS, Game, Free); new personal accounts also verify a real Android device in the Play Console mobile app.
+   - ✅ Upload keystore generated 2026-11-18: `%USERPROFILE%\keys\ends-upload.jks`, alias `upload`. The password is in `ends-upload-credentials.txt` in the same folder, and the gitignored `app/android/key.properties` points at it for local release builds. Upload cert SHA-256 `8E:8E:9F:AA:…:E4:82:A8:E6`.
+   - [ ] **[owner] Back up the `keys` folder off-machine** (password manager or cloud drive).
+   - [ ] **[console]** Service account for Codemagic: in Google Cloud, enable the Google Play Android Developer API, create a service account and a JSON key, then invite its email in Play Console → Users and permissions with release rights for ENDS.
 5. **[owner] Codemagic setup.** The names must match `codemagic.yaml`:
    - the API key as team integration `ENDS ASC key`;
    - the keystore as `ends_upload_key`;
@@ -61,7 +64,8 @@ Android
 - ✅ The https VIEW query for links.
 - ✅ Release signing from `key.properties`.
 - ✅ The `android-release` workflow: signed AAB to the internal track, as a draft.
-- [ ] **[check]** On the first CI build, confirm the target API level meets Play's minimum, and that edge-to-edge (Android 15+) clears the gesture bar. Nothing Android has been built yet: this PC has no SDK.
+- ✅ Local Android build (2026-11-18): this PC now has the SDK and a `Pixel_9_API_36` emulator. Release APK and AAB build with target API 36 and play correctly on Android 16, gesture bar included.
+- ✅ Fixed a release-only startup hang: `shared_preferences_android` 2.5.1 lost its JNI methods to R8 (`NoSuchMethodError`, stuck on splash). The lockfile now pins 2.5.4; the fix landed in 2.5.2.
 
 ## 3. Store answers (quick reference)
 
