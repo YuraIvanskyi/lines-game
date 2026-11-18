@@ -6,7 +6,7 @@ The earlier warm paper palette, and the prototype notebook, can return later as 
 
 Menu type sits on the same shapes as the buttons. The title is white with an `ink` offset. The mode name is a `sun` pill. Supporting copy sits on a `paper` card with an `ink` outline. Secondary actions are compact pills: `paper` or a player ink, never plain text on the sky.
 
-A turn should read in about a second: the pass line is immediate, the stroke finishes in 280 ms, and the new targets appear when that stroke ends. On an iPhone 16 Pro the board sits in the safe area of a 402×874 pt portrait screen. With 16 pt of padding, an 8×8 cell is about 46 pt and the hit radius is `0.48` of the cell, about a 44 pt thumb target.
+A turn should read in about a second: the pass line is immediate, the stroke finishes in 280 ms, and the new targets appear when that stroke ends. On an iPhone 16 Pro the board sits in the safe area of a 402×874 pt portrait screen. With 16 pt of padding, a 6×6 cell is about 57 pt and the hit radius is `0.48` of the cell, comfortably above a 44 pt thumb target.
 
 ## Tokens
 

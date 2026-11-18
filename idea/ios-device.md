@@ -20,7 +20,7 @@ On 2026-10-13 the owner deferred this install. Tickets keep their phone sections
 | --- | --- |
 | Rules, move log, widget tests that do not need a finger | Windows, `dart test` / `flutter test` |
 | Click through a game before an iOS artifact exists | Chrome on this PC (`flutter run -d chrome` in `app/`). Visual Studio is not installed, so the Windows desktop build is not available. |
-| Portrait lock, safe area, 8×8 hit targets | iPhone |
+| Portrait lock, safe area, 6×6 hit targets | iPhone |
 | A full hot-seat game, pass-the-phone, sound, haptics | iPhone |
 | Kill and reopen mid-game | iPhone |
 

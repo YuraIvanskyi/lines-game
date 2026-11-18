@@ -1,12 +1,12 @@
 # Plan
 
-Classic hot-seat on an iPhone, played offline, with an 8×8 field and the prototype's line rules. The build is one Flutter app ([tech-proposal.md](tech-proposal.md)). Android, cosmetics, extra modes, and online play are later phases of that same app.
+Classic hot-seat on an iPhone, played offline, with an 6×6 field and the prototype's line rules. The build is one Flutter app ([tech-proposal.md](tech-proposal.md)). Android, cosmetics, extra modes, and online play are later phases of that same app.
 
 The Pygame project is the reference for rules. It is not the UI to port.
 
 ## Player path the phases are aiming at
 
-1. Open the app and tap Play. Two players, classic 8×8, no account.
+1. Open the app and tap Play. Two players, classic 6×6, no account.
 2. Optional: set 3 or 4 players and names before the deal.
 3. See whose turn it is, see the two ends, see the dots that can grow.
 4. Tap a dot. If both ends can reach it, pick the end. The ink draws, then the phone is passed.
@@ -21,10 +21,10 @@ Work is sequential. A phase opens when the previous phase's exit is true. Ticket
 | Phase | Name | Exit |
 | --- | --- | --- |
 | 0 | Phone shell | The placeholder runs on the owner's iPhone 16 Pro, installed from a GitHub Actions artifact via Sideloadly. `packages/rules` tests pass on the Windows machine. The prototype still launches separately. |
-| 1 | Classic rules | Dart tests cover an 8×8 deal, legal growth, crossing, walls, turn order, chosen end, loss, and log replay. No phone required. |
+| 1 | Classic rules | Dart tests cover an 6×6 deal, legal growth, crossing, walls, turn order, chosen end, loss, and log replay. No phone required. |
 | 2 | Table | On the iPhone, a full hot-seat classic game can be tapped through to game over and a rematch. |
 | 3 | Pickup | On the iPhone, cold start reaches that table in two taps. Player count, names, a single how-to, and the pass-the-phone beat are in the flow. |
-| 4 | Mode seam | Classic is a mode record (8×8, wall chance 0.05, this rule set). Starting a game asks for a mode id. Only classic is listed. |
+| 4 | Mode seam | Classic is a mode record (6×6, wall chance 0.05, this rule set). Starting a game asks for a mode id. Only classic is listed. |
 | 5 | Feel | On the iPhone, ink, ends, targets, pass, and game over move, sound, and haptic like a finished toy. Colors come from theme tokens. |
 | 6 | Android | The same classic flow completes on an Android emulator or device. |
 | 7 | On-device memory | On the iPhone, force-quit restores an unfinished match. Local names and results survive a restart. |
@@ -77,7 +77,7 @@ Motion, sound, and haptics on the flow that already exists, judged on the iPhone
 
 Tickets: LG-015, LG-016.
 
-Not in this phase: a store, ads, or replacing rules to shorten the 8×8 game.
+Not in this phase: a store, ads, or replacing rules to shorten the 6×6 game.
 
 ## Phase 6 — Android
 

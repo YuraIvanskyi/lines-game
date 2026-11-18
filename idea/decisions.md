@@ -8,13 +8,14 @@ Locked rows are in force. Proposed rows are the defaults Phase 1 will implement 
 | --- | --- |
 | L1 | Two or more players alternate. A turn grows the single polyline from one of its two ends. The player who faces no legal growth loses. |
 | L2 | Classic mode uses the prototype's play rules: king-move adjacency (8 directions), walls, no crossing an already drawn opposite diagonal, one anchor that starts as both ends, no wrap. |
-| L3 | Classic field is **8×8**. The Pygame window was 4×4. Size is the intentional change. Wall chance stays 0.05. The anchor is never a wall. |
+| L3 | Classic field is **6×6** (changed from the planned 8×8 on 2026-11-17, owner's call; the code already shipped 6×6). Other sizes belong to future modes, not to classic. The Pygame window was 4×4. Wall chance stays 0.05. The anchor is never a wall. |
 | L4 | First ship is offline hot-seat. Online is a later transport over the same match log. |
 | L5 | iOS is the first finished build. The test device is the owner's **iPhone 16 Pro** (portrait layout 402×874 pt, Dynamic Island, USB-C). Android is the same project, later. |
 | L6 | Monetization, if it ships, sells presentation: boards, inks, dots, flourishes. It does not sell rules, moves, or the classic field. |
 | L7 | Stack is the one in [tech-proposal.md](tech-proposal.md), once that file is accepted. |
-| L8 | There is no Mac. Dart tests run on this Windows machine. iOS compiles on a GitHub-hosted macOS runner for `YuraIvanskyi/lines-game`, which uploads an unsigned build. The owner installs that build on the 16 Pro from Windows with Sideloadly and a free Apple ID, over USB-C. A paid developer account and TestFlight can replace Sideloadly later. |
+| L8 | There is no Mac. Dart tests run on this Windows machine and in GitHub Actions (tests only). All builds run on **Codemagic** (`codemagic.yaml`, chosen 2026-11-17): signed iOS to TestFlight, signed Android bundle to Play, and the unsigned IPA the owner sideloads with Sideloadly and a free Apple ID until TestFlight replaces it. |
 | L9 | The phone app follows [port-patterns.md](port-patterns.md). Classic behavior is ported. `Node`, `Connection`, sprite drawing, direction-string moves, and `itertools.cycle` are not. |
+| L10 | The product is **ENDS**, one name everywhere: store listings, home-screen label, Dart package `ends`, app class `EndsApp`. Bundle ID and application ID are both `com.ivanskyi.ends` (permanent after first store upload). The GitHub repo and local folder keep `lines-game` / `lines_game` until renamed on purpose. |
 
 ## Proposed
 
