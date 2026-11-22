@@ -1,6 +1,6 @@
 # ENDS builds. All workflows are manual (Start new build in Codemagic) to save minutes.
 # One-time setup in Codemagic, names must match the references below:
-#   Team integrations → Developer Portal → App Store Connect API key named "ENDS ASC key"
+#   Team integrations → Developer Portal → App Store Connect API key named "ENDSKEY"
 #   Code signing identities → Android keystore with reference name "ends_upload_key"
 #   Environment variables → group "google_play" with GCLOUD_SERVICE_ACCOUNT_CREDENTIALS (Play service account JSON)
 # Build numbers come from Codemagic's per-workflow counter ($BUILD_NUMBER), so every upload is unique.
@@ -19,7 +19,7 @@ workflows:
     instance_type: mac_mini_m2
     max_build_duration: 45
     integrations:
-      app_store_connect: ENDS ASC key
+      app_store_connect: ENDSKEY
     environment:
       flutter: stable
       xcode: latest
