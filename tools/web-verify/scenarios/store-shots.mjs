@@ -4,9 +4,9 @@
 //   Play phone:   --size 360x720 --scale 3   (1080x2160, Play caps the aspect at 2:1)
 const uk = process.env.STORE_LANG === 'uk';
 const L = uk
-  ? { lang: 'українська', save: 'зберегти', back: 'назад', play: 'грати',
+  ? { lang: 'українська', save: 'зберегти', play: 'грати',
       gameMode: 'режим гри', computer: 'комп’ютер', hard: 'важко', home: 'на головну', which: 'який кінець', rematch: 'ще раз' }
-  : { play: 'play', save: 'save', back: 'back', gameMode: 'game mode', computer: 'computer', hard: 'hard', home: 'home',
+  : { play: 'play', save: 'save', gameMode: 'game mode', computer: 'computer', hard: 'hard', home: 'home',
       which: 'which end', rematch: 'rematch' };
 
 const cells = [];
@@ -33,8 +33,7 @@ export default async function (t) {
     // The app boots in English; the switch applies on save.
     await t.tap('settings');
     await t.tap(L.lang);
-    await t.tap('save');
-    await t.tap(L.back);
+    await t.tap('save');                  // Save returns home
   }
   await t.wait(600);
   await t.shot('home');
@@ -61,8 +60,7 @@ export default async function (t) {
   await t.tap(L.hard);
   await t.wait(300);
   await t.shot('game-mode');
-  await t.tap(L.save);
-  await t.tap(L.back);
+  await t.tap(L.save);                    // Save returns home
   await t.tap(L.play);
   await t.wait(900);
   for (let i = 0; i < 4; i++) {

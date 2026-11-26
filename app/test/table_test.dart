@@ -68,6 +68,42 @@ void main() {
     expect(wentHome, isTrue);
   });
 
+  testWidgets('a star keeps the turn and says so', (tester) async {
+    final feel = RecordingFeel();
+    // 4×1 strip, anchor on 0, star on 2: the star is two steps away, like a real deal.
+    final start = Match(
+      width: 4,
+      height: 1,
+      seed: 1,
+      modeId: starsModeId,
+      wallChance: 0,
+      walls: BitGrid.empty(4),
+      stars: BitGrid.of(4, [2]),
+      occupied: BitGrid.of(4, [0]),
+      head: 0,
+      tail: 0,
+      segments: const [],
+      players: defaultPlayers,
+      turn: 0,
+      firstTurn: 0,
+    );
+    await tester.pumpWidget(MaterialApp(home: TablePage(mode: starsMode, initial: start, feel: feel)));
+    final painter = tester.widget<CustomPaint>(find.descendant(of: find.byType(BoardView), matching: find.byType(CustomPaint))).painter! as BoardPainter;
+    expect(painter.match.openStars, [2]);
+
+    await tapCell(tester, start, 1);
+    expect(find.text("Player 2's turn"), findsOneWidget);
+    final second = apply(start, const Move(end: End.head, cell: 1));
+    await tapCell(tester, second, 2);
+    expect(find.text('Player 2 goes again!'), findsOneWidget);
+    expect(find.text('Star! One more move.'), findsOneWidget);
+    expect(feel.events, ['growth', 'pass', 'growth', 'star']);
+
+    final third = apply(second, const Move(end: End.head, cell: 2));
+    await tapCell(tester, third, 3);
+    expect(find.text('Player 1 is boxed in!'), findsOneWidget);
+  });
+
   testWidgets('restart after the game is over skips the question', (tester) async {
     final start = dealClassic(seed: 1, width: 2, height: 1, wallChance: 0);
     final finished = apply(start, legalMoves(start).single);
@@ -325,6 +361,9 @@ class RecordingFeel extends GameFeel {
 
   @override
   void loss() => events.add('loss');
+
+  @override
+  void star() => events.add('star');
 }
 
 /// Plays the first legal growth and counts how often it was asked.

@@ -160,6 +160,12 @@ class BoardPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = unit * InkTheme.markWidth
       ..color = InkTheme.ink;
+    final starFill = Paint()..color = InkTheme.star;
+    final starEdge = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = unit * InkTheme.starEdge
+      ..strokeJoin = StrokeJoin.round
+      ..color = Colors.black;
 
     for (var cell = 0; cell < match.cellCount; cell++) {
       final center = centerOf(cell);
@@ -174,10 +180,15 @@ class BoardPainter extends CustomPainter {
         canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), outline);
         continue;
       }
-      if (!match.occupied.test(cell)) {
-        canvas.drawCircle(center, unit * InkTheme.quietRadius, quiet);
-        canvas.drawCircle(center, unit * InkTheme.quietRadius, outline);
+      if (match.occupied.test(cell)) continue;
+      if (match.stars.test(cell)) {
+        final star = starPath(center, unit * InkTheme.starRadius);
+        canvas.drawPath(star, starFill);
+        canvas.drawPath(star, starEdge);
+        continue;
       }
+      canvas.drawCircle(center, unit * InkTheme.quietRadius, quiet);
+      canvas.drawCircle(center, unit * InkTheme.quietRadius, outline);
     }
 
     final outlinePad = unit * InkTheme.chainOutline;
@@ -194,6 +205,7 @@ class BoardPainter extends CustomPainter {
     final dotRing = Paint()
       ..style = PaintingStyle.fill
       ..color = Colors.black;
+    final spentStar = Paint()..color = InkTheme.cloud;
 
     void drawLines(Paint paint, {bool tint = false}) {
       for (var i = 0; i < match.segments.length; i++) {
@@ -228,6 +240,10 @@ class BoardPainter extends CustomPainter {
       if (!chainDot(cell)) continue;
       dotFill.color = dotColor(cell);
       canvas.drawCircle(centerOf(cell), unit * InkTheme.dotRadius, dotFill);
+      // A spent star stays visible as a small white star on its dot.
+      if (match.stars.test(cell)) {
+        canvas.drawPath(starPath(centerOf(cell), unit * InkTheme.spentStarRadius), spentStar);
+      }
     }
 
     if (showTargets) {
@@ -300,6 +316,23 @@ class BoardPainter extends CustomPainter {
         oldDelegate.match.turn != match.turn ||
         oldDelegate.match.loserId != match.loserId ||
         oldDelegate.match.segments.length != match.segments.length ||
-        oldDelegate.match.walls != match.walls;
+        oldDelegate.match.walls != match.walls ||
+        oldDelegate.match.stars != match.stars;
   }
+}
+
+/// Five-pointed star around [center], point up.
+Path starPath(Offset center, double radius) {
+  final path = Path();
+  for (var i = 0; i < 10; i++) {
+    final r = i.isEven ? radius : radius * 0.46;
+    final angle = -math.pi / 2 + i * math.pi / 5;
+    final point = center + Offset(math.cos(angle) * r, math.sin(angle) * r);
+    if (i == 0) {
+      path.moveTo(point.dx, point.dy);
+    } else {
+      path.lineTo(point.dx, point.dy);
+    }
+  }
+  return path..close();
 }

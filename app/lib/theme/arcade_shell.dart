@@ -218,6 +218,142 @@ class _PopIconButtonState extends State<PopIconButton> {
   }
 }
 
+/// A glossy pressable face with a black lip, like [PopButton], around any [child].
+/// [selected] adds a check badge in the corner; a disabled tile greys out and can carry a [tag].
+class PopTile extends StatefulWidget {
+  const PopTile({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    required this.child,
+    this.color = InkTheme.blueFace,
+    this.enabled = true,
+    this.selected = false,
+    this.showCheck = false,
+    this.tag,
+    this.radius = 18,
+    this.padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+  });
+
+  /// What a screen reader says for the tile.
+  final String label;
+  final VoidCallback onPressed;
+  final Widget child;
+  final Color color;
+  final bool enabled;
+  final bool selected;
+  final bool showCheck;
+  final String? tag;
+  final double radius;
+  final EdgeInsets padding;
+
+  @override
+  State<PopTile> createState() => _PopTileState();
+}
+
+class _PopTileState extends State<PopTile> {
+  bool _down = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.enabled ? widget.color : InkTheme.mute;
+    final deep = _pair(color).$1;
+    final radius = BorderRadius.circular(widget.radius);
+    final face = AnimatedContainer(
+      duration: const Duration(milliseconds: 140),
+      curve: Curves.easeOut,
+      padding: widget.padding,
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color.lerp(color, Colors.white, 0.28)!, color, deep],
+        ),
+        border: Border.all(color: Colors.black, width: 3),
+      ),
+      child: widget.child,
+    );
+    final tag = widget.tag;
+    return Semantics(
+      button: true,
+      enabled: widget.enabled,
+      selected: widget.selected,
+      label: tag == null ? widget.label : '${widget.label}, $tag',
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: widget.enabled ? (_) => setState(() => _down = true) : null,
+        onTapCancel: () => setState(() => _down = false),
+        onTapUp: widget.enabled
+            ? (_) {
+                setState(() => _down = false);
+                widget.onPressed();
+              }
+            : null,
+        child: Stack(
+          clipBehavior: Clip.none,
+          // Fill the width a row or grid hands the tile, instead of hugging the content.
+          fit: StackFit.passthrough,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(color: Colors.black, borderRadius: radius),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: _lip),
+                child: Transform.translate(offset: Offset(0, _down ? _lip - 1 : 0), child: face),
+              ),
+            ),
+            if (widget.showCheck)
+              Positioned(
+                top: -8,
+                right: -6,
+                child: AnimatedScale(
+                  scale: widget.selected ? 1 : 0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutBack,
+                  child: const _Badge(color: InkTheme.greenFace, child: Icon(Icons.check_rounded, size: 18, color: InkTheme.cloud, shadows: _iconHalo)),
+                ),
+              ),
+            if (tag != null)
+              Positioned(
+                top: -9,
+                right: -4,
+                child: _Badge(
+                  color: InkTheme.pinkFace,
+                  wide: true,
+                  child: OutlineLabel(tag.toUpperCase(), size: 11, stroke: 2),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({required this.color, required this.child, this.wide = false});
+
+  final Color color;
+  final Widget child;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.black, width: 2.5),
+      ),
+      child: Padding(
+        padding: wide ? const EdgeInsets.symmetric(horizontal: 7, vertical: 3) : const EdgeInsets.all(2),
+        child: child,
+      ),
+    );
+  }
+}
+
 class PopBackButton extends StatelessWidget {
   const PopBackButton({super.key, required this.onPressed, this.label = 'Back'});
 
@@ -234,11 +370,13 @@ class PopBackButton extends StatelessWidget {
 }
 
 class OutlineLabel extends StatelessWidget {
-  const OutlineLabel(this.text, {super.key, required this.size, this.stroke = 2.5});
+  const OutlineLabel(this.text, {super.key, required this.size, this.stroke = 2.5, this.maxLines, this.textAlign});
 
   final String text;
   final double size;
   final double stroke;
+  final int? maxLines;
+  final TextAlign? textAlign;
 
   @override
   Widget build(BuildContext context) {
@@ -257,11 +395,14 @@ class OutlineLabel extends StatelessWidget {
     ];
     return Text(
       text,
+      maxLines: maxLines,
+      textAlign: textAlign,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
       style: TextStyle(
         fontSize: size,
         fontWeight: FontWeight.w900,
         letterSpacing: 0.6,
-        height: 1,
+        height: maxLines == null ? 1 : 1.1,
         color: InkTheme.cloud,
         shadows: ring,
       ),

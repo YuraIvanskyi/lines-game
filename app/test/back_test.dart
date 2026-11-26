@@ -9,9 +9,10 @@ Future<void> _settle(WidgetTester tester) async {
 
 void main() {
   final open = classicMode.copyWith(wallChance: 0);
+  final openModes = [open, starsMode.copyWith(wallChance: 0)];
 
   testWidgets('the system back gesture asks before leaving a live game', (tester) async {
-    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, modes: openModes));
     await tester.tap(find.text('PLAY'));
     await _settle(tester);
     expect(find.text("Player 1's turn"), findsOneWidget);
@@ -34,11 +35,11 @@ void main() {
   });
 
   testWidgets('the system back gesture leaves menus straight away', (tester) async {
-    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
+    await tester.pumpWidget(EndsApp(seed: 1, modes: openModes));
     await tester.tap(find.text('GAME MODE'));
-    await tester.pumpAndSettle();
+    await _settle(tester);
     await tester.binding.handlePopRoute();
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(find.text('PLAY'), findsOneWidget);
   });
 }

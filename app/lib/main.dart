@@ -36,10 +36,12 @@ Future<void> main() async {
 }
 
 class EndsApp extends StatefulWidget {
-  const EndsApp({super.key, this.seed, this.mode = classicMode, this.onExit, this.onOpenLink = openLink, this.settingsStore, this.initialSettings, this.setupStore, this.initialSetup});
+  const EndsApp({super.key, this.seed, this.modes = gameModes, this.onExit, this.onOpenLink = openLink, this.settingsStore, this.initialSettings, this.setupStore, this.initialSetup});
 
   final int? seed;
-  final GameMode mode;
+
+  /// Modes on offer. The saved setup picks one by id; an unknown id falls back to the first.
+  final List<GameMode> modes;
   final VoidCallback? onExit;
   final LinkOpener onOpenLink;
   final SettingsStore? settingsStore;
@@ -83,6 +85,8 @@ class _EndsAppState extends State<EndsApp> {
 
   void _home() => setState(() => _place = _Place.home);
 
+  GameMode get _mode => widget.modes.firstWhere((mode) => mode.id == _setup.modeId, orElse: () => widget.modes.first);
+
 
   Future<void> _persistSetup(GameSetup next) async {
     await _setupStore.save(next);
@@ -118,7 +122,7 @@ class _EndsAppState extends State<EndsApp> {
           },
           child: switch (_place) {
             _Place.home => HomePage(
-              modeLabel: widget.mode.id == classicModeId ? copy.classic : widget.mode.name,
+              modeLabel: copy.modeName(_mode),
               setup: _setup,
               onPlay: _play,
               onHowTo: () => setState(() => _place = _Place.howTo),
@@ -132,10 +136,15 @@ class _EndsAppState extends State<EndsApp> {
             _Place.howTo => HowToPage(onDone: _home),
             _Place.settings => SettingsPage(settings: _settings, onBack: _home, onSave: _persist),
             _Place.info => InfoPage(onBack: _home, onOpenLink: widget.onOpenLink),
-            _Place.gameMode => GameModePage(mode: widget.mode, setup: _setup, onBack: _home, onSave: _persistSetup),
+            _Place.gameMode => GameModePage(
+              modes: widget.modes,
+              setup: _setup,
+              onBack: _home,
+              onSave: _persistSetup,
+            ),
             _Place.table => TablePage(
               seed: _tableSeed,
-              mode: widget.mode,
+              mode: _mode,
               players: _players,
               bots: _bots,
               onHome: _home,

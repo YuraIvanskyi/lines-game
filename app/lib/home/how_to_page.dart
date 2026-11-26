@@ -17,6 +17,7 @@ class HowToPage extends StatelessWidget {
       (demo: tapDemo, text: copy.tipTap),
       (demo: endsDemo, text: copy.tipEnds),
       (demo: lossDemo, text: copy.tipLoss),
+      (demo: starsDemo, text: copy.tipStars),
     ];
     return Scaffold(
       backgroundColor: Colors.transparent,

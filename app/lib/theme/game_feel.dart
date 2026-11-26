@@ -2,7 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-/// Cues for a committed growth, a rejected tap, a turn pass, and a loss.
+/// Cues for a committed growth, a rejected tap, a turn pass, a star bonus, and a loss.
 abstract class GameFeel {
   const GameFeel();
 
@@ -10,6 +10,9 @@ abstract class GameFeel {
   void illegal();
   void passTurn();
   void loss();
+
+  /// The growth landed on a star and the same player goes again.
+  void star() {}
   void dispose() {}
 }
 
@@ -72,6 +75,12 @@ class DeviceFeel extends GameFeel {
   void loss() {
     HapticFeedback.mediumImpact();
     _play('loss');
+  }
+
+  @override
+  void star() {
+    HapticFeedback.mediumImpact();
+    _play('star');
   }
 
   @override

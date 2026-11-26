@@ -21,12 +21,15 @@ String clipName(String name) {
 /// What PLAY starts. Blank names follow the app language.
 class GameSetup {
   const GameSetup({
+    this.modeId = classicModeId,
     this.opponent = Opponent.samePhone,
     this.playerCount = minPlayers,
     this.names = const ['', '', '', ''],
     this.difficulty = Difficulty.easy,
   });
 
+  /// A [GameMode.id]; see [gameModes].
+  final String modeId;
   final Opponent opponent;
   final int playerCount;
   final List<String> names;
@@ -64,6 +67,7 @@ class GameSetup {
   @override
   bool operator ==(Object other) {
     if (other is! GameSetup ||
+        other.modeId != modeId ||
         other.opponent != opponent ||
         other.playerCount != playerCount ||
         other.difficulty != difficulty ||
@@ -77,7 +81,18 @@ class GameSetup {
   }
 
   @override
-  int get hashCode => Object.hash(opponent, playerCount, difficulty, Object.hashAll(names));
+  int get hashCode => Object.hash(modeId, opponent, playerCount, difficulty, Object.hashAll(names));
+
+  /// The setup with [modeId] swapped for another mode.
+  GameSetup withMode(String modeId) {
+    return GameSetup(
+      modeId: modeId,
+      opponent: opponent,
+      playerCount: playerCount,
+      names: names,
+      difficulty: difficulty,
+    );
+  }
 }
 
 abstract class GameSetupStore {
@@ -101,6 +116,7 @@ class MemoryGameSetupStore implements GameSetupStore {
 
 /// The saved setup kept on the device.
 class SharedPrefsGameSetupStore implements GameSetupStore {
+  static const modeKey = 'mode';
   static const opponentKey = 'opponent';
   static const playerCountKey = 'playerCount';
   static const namesKey = 'playerNames';
@@ -114,6 +130,7 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
     final stored = prefs.getStringList(namesKey) ?? const [];
     final difficulty = Difficulty.values.asNameMap()[prefs.getString(difficultyKey)] ?? Difficulty.easy;
     return GameSetup(
+      modeId: prefs.getString(modeKey) ?? classicModeId,
       opponent: opponent,
       difficulty: difficulty,
       playerCount: count,
@@ -124,6 +141,7 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
   @override
   Future<void> save(GameSetup setup) async {
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(modeKey, setup.modeId);
     await prefs.setString(opponentKey, setup.opponent.name);
     await prefs.setInt(playerCountKey, setup.playerCount);
     await prefs.setStringList(namesKey, setup.names);

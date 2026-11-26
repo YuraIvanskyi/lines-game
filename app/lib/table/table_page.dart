@@ -119,6 +119,8 @@ class _TablePageState extends State<TablePage> {
     widget.feel.growth();
     if (lost) {
       widget.feel.loss();
+    } else if (next.onStar) {
+      widget.feel.star();
     } else {
       widget.feel.passTurn();
     }
@@ -173,6 +175,8 @@ class _TablePageState extends State<TablePage> {
         ? copy.lostPlayer(_playerName(_match.loserId!))
         : _pendingCell != null
         ? copy.whichEnd
+        : _match.onStar
+        ? copy.again(_match.currentPlayer.name)
         : copy.turn(_match.currentPlayer.name);
     final detail = _match.isTerminal
         ? copy.winners([
@@ -183,6 +187,8 @@ class _TablePageState extends State<TablePage> {
         ? copy.tapEnd
         : _botTurn
         ? copy.thinking
+        : _match.onStar
+        ? copy.starBonus
         : widget.bots.isNotEmpty
         ? copy.yourMove
         : copy.passPhone;

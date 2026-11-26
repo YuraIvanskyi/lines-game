@@ -68,7 +68,26 @@ final HowToDemo lossDemo = _demo(
   terminal: true,
 );
 
-final howToDemos = [tapDemo, endsDemo, lossDemo];
+/// The second player steps onto the star, so the same ink grows again straight up.
+///
+/// ```text
+/// · · ·
+/// · · ★
+/// □ ○ ·
+/// ```
+final HowToDemo starsDemo = _demo(
+  _grid(
+    occupied: const [6, 7],
+    head: 7,
+    tail: 6,
+    stars: const [5],
+    turn: 1,
+    segments: const [Segment(a: 6, b: 7, playerId: 'p1')],
+  ),
+  const [Move(end: End.head, cell: 5), Move(end: End.head, cell: 2)],
+);
+
+final howToDemos = [tapDemo, endsDemo, lossDemo, starsDemo];
 
 class SnippetSample {
   const SnippetSample({
@@ -423,6 +442,8 @@ Match _grid({
   required List<int> occupied,
   required int head,
   required int tail,
+  List<int> stars = const [],
+  int turn = 0,
   List<Segment> segments = const [],
 }) {
   final cells = _side * _side;
@@ -433,12 +454,13 @@ Match _grid({
     modeId: 'how-to',
     wallChance: 0,
     walls: BitGrid.of(cells, walls),
+    stars: BitGrid.of(cells, stars),
     occupied: BitGrid.of(cells, occupied),
     head: head,
     tail: tail,
     segments: segments,
     players: _players,
-    turn: 0,
+    turn: turn,
     firstTurn: 0,
   );
 }

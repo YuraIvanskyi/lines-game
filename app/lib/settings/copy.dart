@@ -6,6 +6,13 @@ import 'app_settings.dart';
 class Copy {
   const Copy({
     required this.classic,
+    required this.soon,
+    required this.starBonus,
+    required this.againOf,
+    required this.tipStars,
+    required this.starsRule,
+    required this.classicRule,
+    required this.stars,
     required this.play,
     required this.howTo,
     required this.players,
@@ -30,7 +37,6 @@ class Copy {
     required this.yourMove,
     required this.thinking,
     required this.online,
-    required this.comingSoon,
     required this.playerName,
     required this.creator,
     required this.creatorName,
@@ -71,6 +77,13 @@ class Copy {
   });
 
   final String classic;
+  final String soon;
+  final String starBonus;
+  final String againOf;
+  final String tipStars;
+  final String starsRule;
+  final String classicRule;
+  final String stars;
   final String play;
   final String howTo;
   final String players;
@@ -95,7 +108,6 @@ class Copy {
   final String yourMove;
   final String thinking;
   final String online;
-  final String comingSoon;
   final String playerName;
   final String creator;
   final String creatorName;
@@ -136,6 +148,18 @@ class Copy {
 
   String difficultyName(Difficulty level) => level == Difficulty.easy ? easy : hard;
 
+  /// Menu name of a mode. Modes the copy doesn't know keep the rules package's name.
+  String modeName(GameMode mode) => switch (mode.id) {
+    classicModeId => classic,
+    starsModeId => stars,
+    _ => mode.name,
+  };
+
+  /// One line on how a mode plays.
+  String modeRule(GameMode mode) => mode.stars > 0 ? starsRule : classicRule;
+
+  String again(String name) => againOf.replaceAll('{name}', name);
+
   String player(int number) => '$playerName $number';
 
   String playerCount(int count) => playersOf.replaceAll('{count}', '$count');
@@ -158,6 +182,13 @@ class Copy {
 
   static const english = Copy(
     classic: 'Classic',
+    soon: 'Soon',
+    starBonus: 'Star! One more move.',
+    againOf: '{name} goes again!',
+    tipStars: 'Stars mode: land on a star and you move again right away.',
+    starsRule: 'Land on a star to move again.',
+    classicRule: 'Grow the line. No move left? You lose.',
+    stars: 'Stars',
     play: 'Play',
     howTo: 'How to play',
     players: 'Players',
@@ -182,7 +213,6 @@ class Copy {
     yourMove: 'Your move',
     thinking: 'Thinking…',
     online: 'Online',
-    comingSoon: 'Online play is coming soon.',
     playerName: 'Player',
     creator: 'Creator',
     creatorName: 'Yurii Ivanskyi',
@@ -233,6 +263,13 @@ class Copy {
 
   static const ukrainian = Copy(
     classic: 'Класика',
+    soon: 'Скоро',
+    starBonus: 'Зірка! Ще один хід.',
+    againOf: '{name} ходить ще раз!',
+    tipStars: 'Режим «Зірки»: дійшли до зірки — ходите ще раз.',
+    starsRule: 'Став лінію на зірку — і ходи ще раз.',
+    classicRule: 'Подовжуй лінію. Немає ходу — поразка.',
+    stars: 'Зірки',
     play: 'Грати',
     howTo: 'Як грати',
     players: 'Гравці',
@@ -257,7 +294,6 @@ class Copy {
     yourMove: 'Ваш хід',
     thinking: 'Думає…',
     online: 'Онлайн',
-    comingSoon: 'Онлайн з’явиться згодом.',
     playerName: 'Гравець',
     creator: 'Автор',
     creatorName: 'Yurii Ivanskyi',

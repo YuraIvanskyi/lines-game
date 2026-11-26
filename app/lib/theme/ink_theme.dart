@@ -29,6 +29,7 @@ abstract final class InkTheme {
   static const wall = Color(0xFF071E4A);
   static const target = Color(0xFFFFC107);
   static const anchor = Color(0xFFFFFFFF);
+  static const star = Color(0xFFFFD84D);
   static const inks = <Color>[
     pinkFace,
     Color(0xFF3DDC97),
@@ -52,6 +53,9 @@ abstract final class InkTheme {
   static const targetRadiusMin = 0.20;
   static const targetRadiusMax = 0.26;
   static const pendingRadius = 0.32;
+  static const starRadius = 0.22;
+  static const starEdge = 0.05;
+  static const spentStarRadius = 0.12;
   static const hitReach = 0.48;
   static const endScaleStart = 0.86;
   static const passScaleStart = 0.96;
