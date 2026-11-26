@@ -8,16 +8,14 @@ export default async function (t) {
   console.log('game mode labels:', JSON.stringify(await t.labels()));
   await t.shot('game-mode');
 
-  // Disabled opponents do nothing.
-  await t.tap('computer');
+  // Online is not available yet: tapping it keeps Same phone and its player picker.
   await t.tap('online');
+  await t.expectLabel('3');
 
   await t.tap('3');
   await t.shot('game-mode-three-unsaved');
+  // Save returns home on its own.
   await t.tap('save');
-  await t.expectLabel('saved');
-  await t.shot('game-mode-saved');
-  await t.tap('back');
   await t.expectLabel('3 players');
   await t.shot('home-three');
 
@@ -36,5 +34,5 @@ export default async function (t) {
   await t.tap('game mode');
   await t.tap('2');
   await t.tap('save');
-  await t.expectLabel('saved');
+  await t.expectLabel('2 players');
 }

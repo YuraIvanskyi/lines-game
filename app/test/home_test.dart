@@ -61,16 +61,13 @@ void main() {
     await tester.enterText(find.byType(TextField).first, 'Ada');
     expect(await store.load(), GameSetup.defaults);
     await tester.tap(find.text('SAVE'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('SAVED'), findsOneWidget);
     await tester.pumpAndSettle();
     final saved = await store.load();
     expect(saved.playerCount, 3);
     expect(saved.names, ['Ada', '', '', '']);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
-    await tester.pumpAndSettle();
+    // Save goes straight back home, no extra Back tap.
+    expect(find.text('SAVE'), findsNothing);
     expect(find.text('3 PLAYERS'), findsOneWidget);
 
     await tester.tap(find.text('PLAY'));
@@ -131,8 +128,6 @@ void main() {
     expect(saved.opponent, Opponent.computer);
     expect(saved.difficulty, Difficulty.hard);
 
-    await tester.tap(find.byIcon(Icons.arrow_back));
-    await tester.pumpAndSettle();
     // The computer badge names the difficulty in place of a player count.
     expect(find.text('2 PLAYERS'), findsNothing);
     expect(find.text('HARD'), findsOneWidget);

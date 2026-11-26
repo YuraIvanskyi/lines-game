@@ -10,12 +10,12 @@ export default async function (t) {
   await t.expectLabel('sound off');
   await t.shot('sound-off-unsaved');
 
-  // Pick Ukrainian, then Save: confirmation chip shows, UI switches language.
+  // Pick Ukrainian, then Save: back on home at once, in the new language.
   await t.tap('Українська');
   await t.shot('ukrainian-selected');
   await t.tap('save');
-  await t.expectLabel('Збережено');
-  await t.shot('saved-ukrainian');
+  await t.expectLabel('Грати');
+  await t.shot('saved-ukrainian-home');
 
   // Reload (same browser context -> localStorage survives): settings must persist.
   await t.boot();
@@ -30,6 +30,6 @@ export default async function (t) {
   await t.tap('Звук вимкнено');
   await t.expectLabel('Звук увімкнено');
   await t.tap('Зберегти');
-  await t.expectLabel('Saved');
+  await t.expectLabel('Play');
   await t.shot('restored-english');
 }

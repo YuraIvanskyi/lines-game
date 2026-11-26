@@ -103,6 +103,9 @@ void main() {
       await store.load(),
       const AppSettings(sound: false, language: AppLanguage.ukrainian),
     );
+    // Save returns home, already in the new language.
+    expect(find.text('ГРАТИ'), findsOneWidget);
+    await _openSettings(tester);
     expect(find.text('ЗБЕРЕГТИ'), findsOneWidget);
     expect(find.text('Звук'), findsOneWidget);
     expect(find.text('Мови'), findsOneWidget);
@@ -130,36 +133,24 @@ void main() {
     expect(find.text('Передайте телефон'), findsOneWidget);
   });
 
-  testWidgets('save shows a chip that fades and clears on a new change', (
-    tester,
-  ) async {
+  testWidgets('save returns home without a back tap', (tester) async {
     await tester.binding.setSurfaceSize(const Size(402, 874));
     addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.pumpWidget(
-      EndsApp(seed: 1, settingsStore: SharedPrefsSettingsStore()),
-    );
+    final store = SharedPrefsSettingsStore();
+    await tester.pumpWidget(EndsApp(seed: 1, settingsStore: store));
     await _openSettings(tester);
-    double opacity() => tester
-        .widget<AnimatedOpacity>(find.byType(AnimatedOpacity))
-        .opacity;
-    expect(opacity(), 0);
-
-    await tester.tap(find.text('SAVE'));
-    await tester.pumpAndSettle(const Duration(milliseconds: 100));
-    expect(find.text('SAVED'), findsOneWidget);
-    expect(opacity(), 1);
-
     await tester.tap(find.byIcon(Icons.volume_up));
     await tester.pump();
-    expect(opacity(), 0);
 
     await tester.tap(find.text('SAVE'));
-    await tester.pump();
-    await tester.pump();
-    expect(opacity(), 1);
-    await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
-    expect(opacity(), 0);
+    expect(find.text('SAVE'), findsNothing);
+    expect(find.text('PLAY'), findsOneWidget);
+    expect((await store.load()).sound, isFalse);
+
+    // The page opens again on what was saved.
+    await _openSettings(tester);
+    expect(find.byIcon(Icons.volume_off), findsOneWidget);
   });
 
   testWidgets('ukrainian copy reaches a table opened on its own', (

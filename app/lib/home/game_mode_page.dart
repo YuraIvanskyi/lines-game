@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
@@ -31,8 +29,7 @@ class _GameModePageState extends State<GameModePage> {
   late int _count = widget.setup.playerCount;
   late Difficulty _difficulty = widget.setup.difficulty;
   final List<TextEditingController> _names = [];
-  bool _saved = false;
-  Timer? _savedTimer;
+  bool _saving = false;
 
   @override
   void didChangeDependencies() {
@@ -47,22 +44,18 @@ class _GameModePageState extends State<GameModePage> {
 
   @override
   void dispose() {
-    _savedTimer?.cancel();
     for (final name in _names) {
       name.dispose();
     }
     super.dispose();
   }
 
-  void _change(VoidCallback change) {
-    _savedTimer?.cancel();
-    setState(() {
-      change();
-      _saved = false;
-    });
-  }
+  void _change(VoidCallback change) => setState(change);
 
+  /// Stores the setup, then returns to the menu that opened this page.
   Future<void> _save() async {
+    if (_saving) return;
+    _saving = true;
     final copy = AppCopy.of(context);
     // A name left at its default keeps following the app language.
     final names = [
@@ -70,12 +63,7 @@ class _GameModePageState extends State<GameModePage> {
         _names[i].text.trim() == copy.player(i + 1) ? '' : _names[i].text.trim(),
     ];
     await widget.onSave(GameSetup(opponent: _opponent, playerCount: _count, names: names, difficulty: _difficulty));
-    if (!mounted) return;
-    _savedTimer?.cancel();
-    setState(() => _saved = true);
-    _savedTimer = Timer(const Duration(milliseconds: 1800), () {
-      if (mounted) setState(() => _saved = false);
-    });
+    if (mounted) widget.onBack();
   }
 
   @override
@@ -142,10 +130,7 @@ class _GameModePageState extends State<GameModePage> {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Align(alignment: Alignment.bottomCenter, child: PopSavedChip(label: copy.saved, visible: _saved)),
-                    ),
+                    const SizedBox(height: 16),
                     PopButton(label: copy.save, color: InkTheme.greenFace, onPressed: _save),
                   ],
                 ),

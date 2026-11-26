@@ -62,7 +62,6 @@ class Copy {
     required this.soundOff,
     required this.languages,
     required this.save,
-    required this.saved,
     required this.legal,
     required this.privacyPolicy,
     required this.termsOfUse,
@@ -127,7 +126,6 @@ class Copy {
   final String soundOff;
   final String languages;
   final String save;
-  final String saved;
   final String legal;
   final String privacyPolicy;
   final String termsOfUse;
@@ -220,7 +218,6 @@ class Copy {
     soundOff: 'Sound off',
     languages: 'Languages',
     save: 'Save',
-    saved: 'Saved',
     legal: 'Legal',
     privacyPolicy: 'Privacy Policy',
     termsOfUse: 'Terms of Use',
@@ -295,7 +292,6 @@ class Copy {
     soundOff: 'Звук вимкнено',
     languages: 'Мови',
     save: 'Зберегти',
-    saved: 'Збережено',
     legal: 'Правова інформація',
     privacyPolicy: 'Конфіденційність',
     termsOfUse: 'Умови використання',

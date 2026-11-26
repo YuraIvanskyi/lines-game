@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../settings/app_settings.dart';
@@ -26,31 +24,16 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   late bool _sound = widget.settings.sound;
   late AppLanguage _language = widget.settings.language;
-  bool _saved = false;
-  Timer? _savedTimer;
+  bool _saving = false;
 
-  @override
-  void dispose() {
-    _savedTimer?.cancel();
-    super.dispose();
-  }
+  void _change(VoidCallback change) => setState(change);
 
-  void _change(VoidCallback change) {
-    _savedTimer?.cancel();
-    setState(() {
-      change();
-      _saved = false;
-    });
-  }
-
+  /// Stores the choice, then returns to the menu that opened this page.
   Future<void> _save() async {
+    if (_saving) return;
+    _saving = true;
     await widget.onSave(AppSettings(sound: _sound, language: _language));
-    if (!mounted) return;
-    _savedTimer?.cancel();
-    setState(() => _saved = true);
-    _savedTimer = Timer(const Duration(milliseconds: 1800), () {
-      if (mounted) setState(() => _saved = false);
-    });
+    if (mounted) widget.onBack();
   }
 
   @override
@@ -99,15 +82,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         ],
                       ),
                     ),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: PopSavedChip(label: copy.saved, visible: _saved),
-                        ),
-                      ),
-                    ),
+                    const Spacer(),
+                    const SizedBox(height: 12),
                     PopButton(label: copy.save, color: InkTheme.greenFace, onPressed: _save),
                   ],
                 ),
