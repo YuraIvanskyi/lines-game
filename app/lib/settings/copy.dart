@@ -6,6 +6,9 @@ import 'app_settings.dart';
 class Copy {
   const Copy({
     required this.classic,
+    required this.colorNames,
+    required this.takenOf,
+    required this.colorOf,
     required this.soon,
     required this.starBonus,
     required this.againOf,
@@ -77,6 +80,9 @@ class Copy {
   });
 
   final String classic;
+  final List<String> colorNames;
+  final String takenOf;
+  final String colorOf;
   final String soon;
   final String starBonus;
   final String againOf;
@@ -160,6 +166,12 @@ class Copy {
 
   String again(String name) => againOf.replaceAll('{name}', name);
 
+  /// What a screen reader says for a seat's color button.
+  String colorLabel(int color) => colorOf.replaceAll('{color}', colorNames[color]);
+
+  /// A palette color another seat already has.
+  String taken(int color, String name) => takenOf.replaceAll('{color}', colorNames[color]).replaceAll('{name}', name);
+
   String player(int number) => '$playerName $number';
 
   String playerCount(int count) => playersOf.replaceAll('{count}', '$count');
@@ -182,6 +194,9 @@ class Copy {
 
   static const english = Copy(
     classic: 'Classic',
+    colorNames: ['Pink', 'Mint', 'Gold', 'Sky', 'Orange', 'Violet', 'Lime', 'Orchid'],
+    takenOf: '{color}, taken by {name}',
+    colorOf: 'Color: {color}',
     soon: 'Soon',
     starBonus: 'Star! One more move.',
     againOf: '{name} goes again!',
@@ -263,6 +278,9 @@ class Copy {
 
   static const ukrainian = Copy(
     classic: 'Класика',
+    colorNames: ['Рожевий', 'М’ятний', 'Золотий', 'Блакитний', 'Помаранчевий', 'Фіолетовий', 'Лаймовий', 'Бузковий'],
+    takenOf: '{color}, зараз у: {name}',
+    colorOf: 'Колір: {color}',
     soon: 'Скоро',
     starBonus: 'Зірка! Ще один хід.',
     againOf: '{name} ходить ще раз!',

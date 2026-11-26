@@ -21,6 +21,7 @@ class TablePage extends StatefulWidget {
     this.initial,
     this.onHome,
     this.feel = const SilentFeel(),
+    this.inks,
   });
 
   final int seed;
@@ -35,6 +36,9 @@ class TablePage extends StatefulWidget {
   final Match? initial;
   final VoidCallback? onHome;
   final GameFeel feel;
+
+  /// Ink per seat, in player order. Null uses [InkTheme.inks].
+  final List<Color>? inks;
 
   @override
   State<TablePage> createState() => _TablePageState();
@@ -192,7 +196,8 @@ class _TablePageState extends State<TablePage> {
         : widget.bots.isNotEmpty
         ? copy.yourMove
         : copy.passPhone;
-    final ink = InkTheme.inks[_match.turn % InkTheme.inks.length];
+    final inks = widget.inks ?? InkTheme.inks;
+    final ink = inks[_match.turn % inks.length];
     final chipColor = _match.isTerminal ? InkTheme.sun : InkTheme.cloud;
 
     return PopScope(
@@ -316,6 +321,7 @@ class _TablePageState extends State<TablePage> {
                                 match: _match,
                                 pendingCell: _pendingCell,
                                 onCell: _onCell,
+                                inks: widget.inks,
                               ),
                             ),
                           ),

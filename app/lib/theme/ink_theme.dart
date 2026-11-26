@@ -30,12 +30,21 @@ abstract final class InkTheme {
   static const target = Color(0xFFFFC107);
   static const anchor = Color(0xFFFFFFFF);
   static const star = Color(0xFFFFD84D);
-  static const inks = <Color>[
+  /// Colors a seat can pick, spread round the hue wheel and light enough for the dark field.
+  /// The first four are the default seats.
+  static const palette = <Color>[
     pinkFace,
     Color(0xFF3DDC97),
     Color(0xFFFFC83D),
     Color(0xFF7EC8FF),
+    Color(0xFFFF8A3D),
+    Color(0xFFA98BFF),
+    Color(0xFFB5E61D),
+    Color(0xFFE27BFF),
   ];
+
+  /// Seat inks when nobody has picked: seat 1 pink, 2 mint, 3 gold, 4 sky.
+  static final inks = palette.sublist(0, 4);
 
   static const quietRadius = 0.10;
   static const wallExtent = 0.62;

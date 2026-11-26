@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:rules/rules.dart';
 
@@ -11,11 +12,15 @@ class BoardView extends StatefulWidget {
     required this.match,
     required this.pendingCell,
     required this.onCell,
+    this.inks,
   });
 
   final Match match;
   final int? pendingCell;
   final ValueChanged<int?> onCell;
+
+  /// Ink per seat, in player order. Null uses [InkTheme.inks].
+  final List<Color>? inks;
 
   @override
   State<BoardView> createState() => _BoardViewState();
@@ -85,6 +90,7 @@ class _BoardViewState extends State<BoardView> with TickerProviderStateMixin {
                 showTargets: _draw.status != AnimationStatus.forward,
                 pulse: InkTheme.pulseCurve.transform(_pulse.value),
                 endScale: _endScale,
+                inks: widget.inks,
               ),
               child: const SizedBox.expand(),
             ),
@@ -120,7 +126,8 @@ class BoardPainter extends CustomPainter {
     required this.showTargets,
     required this.pulse,
     required this.endScale,
-  });
+    List<Color>? inks,
+  }) : inks = inks ?? InkTheme.inks;
 
   final Match match;
   final int? pendingCell;
@@ -128,6 +135,7 @@ class BoardPainter extends CustomPainter {
   final bool showTargets;
   final double pulse;
   final double endScale;
+  final List<Color> inks;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -144,7 +152,7 @@ class BoardPainter extends CustomPainter {
 
     Color inkOf(String playerId) {
       final index = match.players.indexWhere((player) => player.id == playerId);
-      return InkTheme.inks[(index < 0 ? 0 : index) % InkTheme.inks.length];
+      return inks[(index < 0 ? 0 : index) % inks.length];
     }
 
     Color dotColor(int cell) {
@@ -317,7 +325,8 @@ class BoardPainter extends CustomPainter {
         oldDelegate.match.loserId != match.loserId ||
         oldDelegate.match.segments.length != match.segments.length ||
         oldDelegate.match.walls != match.walls ||
-        oldDelegate.match.stars != match.stars;
+        oldDelegate.match.stars != match.stars ||
+        !listEquals(oldDelegate.inks, inks);
   }
 }
 

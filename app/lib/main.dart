@@ -58,6 +58,7 @@ enum _Place { home, howTo, gameMode, settings, info, table }
 class _EndsAppState extends State<EndsApp> {
   _Place _place = _Place.home;
   List<Player> _players = defaultPlayers;
+  List<Color> _inks = InkTheme.inks;
   Map<String, Bot> _bots = const {};
   late int _tableSeed = widget.seed ?? DateTime.now().millisecondsSinceEpoch & 0x7fffffff;
   late AppSettings _settings = widget.initialSettings ?? AppSettings.defaults;
@@ -75,6 +76,7 @@ class _EndsAppState extends State<EndsApp> {
   void _play() {
     setState(() {
       _players = _setup.players(Copy.forLanguage(_settings.language));
+      _inks = [for (var seat = 0; seat < _players.length; seat++) InkTheme.palette[_setup.colors[seat]]];
       _bots = _setup.bots();
       _tableSeed = _nextSeed();
       _place = _Place.table;
@@ -149,6 +151,7 @@ class _EndsAppState extends State<EndsApp> {
               bots: _bots,
               onHome: _home,
               feel: _feel,
+              inks: _inks,
             ),
           },
         ),

@@ -35,6 +35,11 @@ class _GameModePageState extends State<GameModePage> {
   late Opponent _opponent = widget.setup.opponent;
   late int _count = widget.setup.playerCount;
   late Difficulty _difficulty = widget.setup.difficulty;
+  late List<int> _colors = cleanColors(widget.setup.colors);
+
+  /// The seat whose color palette is open, if any.
+  int? _paletteSeat;
+  final _paletteKeys = List.generate(maxPlayers, (_) => GlobalKey());
   final List<TextEditingController> _names = [];
   bool _saving = false;
 
@@ -70,7 +75,14 @@ class _GameModePageState extends State<GameModePage> {
         _names[i].text.trim() == copy.player(i + 1) ? '' : clipName(_names[i].text),
     ];
     await widget.onSave(
-      GameSetup(modeId: _modeId, opponent: _opponent, playerCount: _count, names: names, difficulty: _difficulty),
+      GameSetup(
+        modeId: _modeId,
+        opponent: _opponent,
+        playerCount: _count,
+        names: names,
+        difficulty: _difficulty,
+        colors: _colors,
+      ),
     );
     if (mounted) widget.onBack();
   }
@@ -262,14 +274,167 @@ class _GameModePageState extends State<GameModePage> {
         for (var i = 0; i < seats; i++)
           Padding(
             padding: EdgeInsets.only(bottom: i == seats - 1 ? 0 : 8),
-            child: vsComputer && i == 1 ? _computerSeat(copy) : _nameField(i),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                vsComputer && i == 1 ? _computerSeat(copy) : _nameField(copy, i),
+                _palette(copy, i, seats),
+              ],
+            ),
           ),
       ],
     );
   }
 
-  Widget _nameField(int seat) {
-    final ink = InkTheme.inks[seat];
+  /// The name a seat shows right now, for "taken by" labels.
+  String _seatName(Copy copy, int seat) {
+    if (_opponent == Opponent.computer && seat == 1) return copy.computer;
+    final typed = clipName(_names[seat].text);
+    return typed.isEmpty ? copy.player(seat + 1) : typed;
+  }
+
+  /// A round button in the seat's color. It opens that seat's palette.
+  Widget _swatch(Copy copy, int seat) {
+    final open = _paletteSeat == seat;
+    return Semantics(
+      button: true,
+      expanded: open,
+      label: copy.colorLabel(_colors[seat]),
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          _change(() => _paletteSeat = open ? null : seat);
+          if (!open) _reveal(seat);
+        },
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOutBack,
+              width: open ? 34 : 30,
+              height: open ? 34 : 30,
+              decoration: BoxDecoration(
+                color: InkTheme.palette[_colors[seat]],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black, width: 2.5),
+              ),
+              child: Icon(open ? Icons.expand_less : Icons.palette, size: 16, color: InkTheme.cloud, shadows: _halo),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Scrolls a freshly opened palette into view once it has finished growing.
+  void _reveal(int seat) {
+    Future<void>.delayed(const Duration(milliseconds: 240), () {
+      final context = _paletteKeys[seat].currentContext;
+      if (!mounted || _paletteSeat != seat || context == null || !context.mounted) return;
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+    });
+  }
+
+  /// The colors under a seat, four to a row. Picking one another seat holds swaps the two.
+  Widget _palette(Copy copy, int seat, int seats) {
+    final open = _paletteSeat == seat;
+    return AnimatedSize(
+      key: _paletteKeys[seat],
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: !open
+          ? const SizedBox(width: double.infinity)
+          : Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  const columns = 4;
+                  const gap = 8.0;
+                  final cell = (constraints.maxWidth - gap * (columns - 1)) / columns;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (var color = 0; color < InkTheme.palette.length; color++)
+                        SizedBox(width: cell, child: _paletteColor(copy, seat, seats, color)),
+                    ],
+                  );
+                },
+              ),
+            ),
+    );
+  }
+
+  Widget _paletteColor(Copy copy, int seat, int seats, int color) {
+    final mine = _colors[seat] == color;
+    final holder = _colors.indexOf(color);
+    final heldByOther = holder >= 0 && holder != seat && holder < seats;
+    return Semantics(
+      button: true,
+      selected: mine,
+      label: heldByOther ? copy.taken(color, _seatName(copy, holder)) : copy.colorNames[color],
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _change(() {
+          _colors = pickColor(_colors, seat, color);
+          _paletteSeat = null;
+        }),
+        child: SizedBox(
+          height: 48,
+          child: Center(
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: InkTheme.palette[color],
+                    shape: BoxShape.circle,
+                    border: Border.all(color: mine ? InkTheme.cloud : Colors.black, width: 3),
+                    boxShadow: mine ? const [BoxShadow(color: Colors.black, spreadRadius: 3)] : null,
+                  ),
+                  child: mine ? const Icon(Icons.check_rounded, size: 24, color: InkTheme.cloud, shadows: _halo) : null,
+                ),
+                if (heldByOther)
+                  Positioned(
+                    right: -5,
+                    bottom: -3,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: InkTheme.ink,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: InkTheme.cloud, width: 2),
+                      ),
+                      child: Text(
+                        '${holder + 1}',
+                        style: const TextStyle(color: InkTheme.cloud, fontSize: 11, fontWeight: FontWeight.w900, height: 1),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _nameField(Copy copy, int seat) {
+    final ink = InkTheme.palette[_colors[seat]];
     return TextField(
       controller: _names[seat],
       textAlign: TextAlign.center,
@@ -281,7 +446,7 @@ class _GameModePageState extends State<GameModePage> {
         filled: true,
         fillColor: Color.lerp(ink, Colors.white, 0.68),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
-        prefixIcon: ExcludeSemantics(child: Icon(Icons.edit, color: ink, size: 22)),
+        prefixIcon: _swatch(copy, seat),
         prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
         suffixIcon: const SizedBox.shrink(),
         suffixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
@@ -294,7 +459,7 @@ class _GameModePageState extends State<GameModePage> {
 
   /// The computer's seat: its name is fixed, so it reads like a field without being one.
   Widget _computerSeat(Copy copy) {
-    final ink = InkTheme.inks[1];
+    final ink = InkTheme.palette[_colors[1]];
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Color.lerp(ink, Colors.white, 0.68),
@@ -305,7 +470,7 @@ class _GameModePageState extends State<GameModePage> {
         height: 54,
         child: Row(
           children: [
-            SizedBox(width: 48, child: ExcludeSemantics(child: Icon(Icons.computer, color: ink, size: 22))),
+            _swatch(copy, 1),
             Expanded(
               child: Text(
                 copy.computer,
@@ -313,7 +478,7 @@ class _GameModePageState extends State<GameModePage> {
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: InkTheme.ink),
               ),
             ),
-            const SizedBox(width: 48),
+            const SizedBox(width: 48, child: ExcludeSemantics(child: Icon(Icons.computer, color: InkTheme.ink, size: 22))),
           ],
         ),
       ),

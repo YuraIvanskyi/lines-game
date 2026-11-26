@@ -12,6 +12,35 @@ const maxPlayers = 4;
 /// Long enough for a nickname, short enough for `<name>'s turn` on one line.
 const maxNameLength = 12;
 
+/// How many seat colors there are to pick from (`InkTheme.palette`).
+const paletteSize = 8;
+
+/// Seat colors when nobody has picked: palette slots 0..3.
+const defaultColors = [0, 1, 2, 3];
+
+/// [colors] with [seat] set to palette slot [color]. A seat that already had that color
+/// takes the picker's old one, so no two seats ever share a color.
+List<int> pickColor(List<int> colors, int seat, int color) {
+  final next = List<int>.of(colors);
+  final holder = next.indexOf(color);
+  if (holder >= 0 && holder != seat) next[holder] = next[seat];
+  next[seat] = color;
+  return next;
+}
+
+/// A stored color list made safe: one valid, distinct slot per seat, gaps filled in order.
+List<int> cleanColors(Iterable<int>? stored) {
+  final kept = <int>[];
+  for (final color in stored ?? const <int>[]) {
+    if (kept.length == maxPlayers) break;
+    if (color >= 0 && color < paletteSize && !kept.contains(color)) kept.add(color);
+  }
+  for (var color = 0; kept.length < maxPlayers; color++) {
+    if (!kept.contains(color)) kept.add(color);
+  }
+  return kept;
+}
+
 /// [name] trimmed and cut to [maxNameLength] characters (whole emoji and accents kept).
 String clipName(String name) {
   final trimmed = name.trim().characters;
@@ -26,6 +55,7 @@ class GameSetup {
     this.playerCount = minPlayers,
     this.names = const ['', '', '', ''],
     this.difficulty = Difficulty.easy,
+    this.colors = defaultColors,
   });
 
   /// A [GameMode.id]; see [gameModes].
@@ -34,6 +64,9 @@ class GameSetup {
   final int playerCount;
   final List<String> names;
   final Difficulty difficulty;
+
+  /// Palette slot per seat, seat 1 first. The computer's seat uses slot [1].
+  final List<int> colors;
 
   static const defaults = GameSetup();
 
@@ -71,17 +104,21 @@ class GameSetup {
         other.opponent != opponent ||
         other.playerCount != playerCount ||
         other.difficulty != difficulty ||
-        other.names.length != names.length) {
+        other.names.length != names.length ||
+        other.colors.length != colors.length) {
       return false;
     }
     for (var i = 0; i < names.length; i++) {
       if (names[i] != other.names[i]) return false;
     }
+    for (var i = 0; i < colors.length; i++) {
+      if (colors[i] != other.colors[i]) return false;
+    }
     return true;
   }
 
   @override
-  int get hashCode => Object.hash(modeId, opponent, playerCount, difficulty, Object.hashAll(names));
+  int get hashCode => Object.hash(modeId, opponent, playerCount, difficulty, Object.hashAll(names), Object.hashAll(colors));
 
   /// The setup with [modeId] swapped for another mode.
   GameSetup withMode(String modeId) {
@@ -91,6 +128,7 @@ class GameSetup {
       playerCount: playerCount,
       names: names,
       difficulty: difficulty,
+      colors: colors,
     );
   }
 }
@@ -121,6 +159,7 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
   static const playerCountKey = 'playerCount';
   static const namesKey = 'playerNames';
   static const difficultyKey = 'difficulty';
+  static const colorsKey = 'playerColors';
 
   @override
   Future<GameSetup> load() async {
@@ -135,6 +174,7 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
       difficulty: difficulty,
       playerCount: count,
       names: [for (var i = 0; i < maxPlayers; i++) i < stored.length ? stored[i] : ''],
+      colors: cleanColors(prefs.getStringList(colorsKey)?.map((color) => int.tryParse(color) ?? -1)),
     );
   }
 
@@ -146,5 +186,6 @@ class SharedPrefsGameSetupStore implements GameSetupStore {
     await prefs.setInt(playerCountKey, setup.playerCount);
     await prefs.setStringList(namesKey, setup.names);
     await prefs.setString(difficultyKey, setup.difficulty.name);
+    await prefs.setStringList(colorsKey, [for (final color in setup.colors) '$color']);
   }
 }
