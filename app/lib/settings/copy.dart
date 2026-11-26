@@ -232,7 +232,7 @@ class Copy {
     creator: 'Creator',
     creatorName: 'Yurii Ivanskyi',
     thanks: 'Thanks',
-    thanksBody: 'To my best friend Bohdan, with whom a paper version of this game first appeared during our school years.',
+    thanksBody: 'To my best friend Bohdan, with whom we created a paper version of this game during our school years.',
     tech: 'Tech',
     techLines: [
       'Flutter and Dart.',
@@ -316,7 +316,7 @@ class Copy {
     creator: 'Автор',
     creatorName: 'Yurii Ivanskyi',
     thanks: 'Подяка',
-    thanksBody: 'Моєму найкращому другу Богдану, з яким паперова версія цієї гри вперше з’явилася ще в шкільні роки.',
+    thanksBody: 'Моєму найкращому другу Богдану, з яким ми створили паперову версію цієї гри ще в шкільні роки.',
     tech: 'Технології',
     techLines: [
       'Flutter і Dart.',

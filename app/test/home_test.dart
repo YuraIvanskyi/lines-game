@@ -362,7 +362,7 @@ void main() {
     expect(find.textContaining('pure Dart package'), findsNothing);
     expect(find.textContaining('audioplayers'), findsOneWidget);
     expect(find.textContaining('Bohdan'), findsOneWidget);
-    expect(find.textContaining('paper version'), findsOneWidget);
+    expect(find.textContaining('with whom we created a paper version of this game during'), findsOneWidget);
     expect(find.textContaining('SIL Open Font License'), findsOneWidget);
     expect(find.textContaining('variable font'), findsOneWidget);
     expect(find.textContaining('illegal tap'), findsNothing);
