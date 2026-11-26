@@ -11,7 +11,7 @@ const defaultPlayers = [
   Player(id: 'p2', name: 'Player 2'),
 ];
 
-/// Deals [mode]. Classic is [classicMode]: 6×6, wall chance 0.05.
+/// Deals [mode]. Classic is [classicMode]: 6×6, wall chance 0.05. [starsMode] adds stars.
 Match deal(
   GameMode mode, {
   required int seed,
@@ -26,10 +26,12 @@ Match deal(
     wallChance: mode.wallChance,
     firstTurn: firstTurn,
     modeId: mode.id,
+    stars: mode.stars,
   );
 }
 
-/// Anchor first, then one wall roll per other cell, in index order.
+/// Anchor first, then one wall roll per other cell, in index order. [stars] come last from the
+/// same generator, so a deal without stars draws exactly the classic sequence.
 Match dealClassic({
   required int seed,
   List<Player> players = defaultPlayers,
@@ -38,6 +40,7 @@ Match dealClassic({
   double wallChance = classicWallChance,
   int firstTurn = 0,
   String modeId = classicModeId,
+  int stars = 0,
 }) {
   if (players.length < 2) {
     throw ArgumentError('A match needs two or more players.');
@@ -53,6 +56,7 @@ Match dealClassic({
     if (i == anchor) continue;
     if (rng.nextDouble() < wallChance) wallIndexes.add(i);
   }
+  final starIndexes = stars > 0 ? _dealStars(rng, width, height, anchor, wallIndexes.toSet(), stars) : const <int>[];
   return settle(
     Match(
       width: width,
@@ -61,6 +65,7 @@ Match dealClassic({
       modeId: modeId,
       wallChance: wallChance,
       walls: BitGrid.of(count, wallIndexes),
+      stars: BitGrid.of(count, starIndexes),
       occupied: BitGrid.of(count, [anchor]),
       head: anchor,
       tail: anchor,
@@ -70,6 +75,25 @@ Match dealClassic({
       firstTurn: firstTurn % players.length,
     ),
   );
+}
+
+/// Up to [want] stars on open cells. None touches the anchor, so the first growth can't take one.
+List<int> _dealStars(Random rng, int width, int height, int anchor, Set<int> walls, int want) {
+  final ax = anchor % width;
+  final ay = anchor ~/ width;
+  final open = [
+    for (var cell = 0; cell < width * height; cell++)
+      if (!walls.contains(cell) && max((cell % width - ax).abs(), (cell ~/ width - ay).abs()) > 1) cell,
+  ];
+  // Partial Fisher-Yates: the first [want] slots end up a uniform pick.
+  final take = min(want, open.length);
+  for (var i = 0; i < take; i++) {
+    final j = i + rng.nextInt(open.length - i);
+    final swap = open[i];
+    open[i] = open[j];
+    open[j] = swap;
+  }
+  return open.sublist(0, take)..sort();
 }
 
 Match settle(Match match) {
@@ -115,6 +139,7 @@ bool _diagonalBlocked(Match match, int from, int to) {
 }
 
 /// Returns [match] unchanged when the growth is illegal or the game is over.
+/// Growing onto a star keeps the turn with the same player.
 Match apply(Match match, Move move) {
   if (match.isTerminal) return match;
   if (!legalMoves(match).contains(move)) return match;
@@ -129,7 +154,7 @@ Match apply(Match match, Move move) {
       ...match.segments,
       Segment(a: from, b: move.cell, playerId: playerId),
     ],
-    turn: (match.turn + 1) % match.players.length,
+    turn: match.stars.test(move.cell) ? match.turn : (match.turn + 1) % match.players.length,
     clearLoser: true,
   );
   return settle(next);
@@ -143,6 +168,7 @@ class MatchLog {
     required this.width,
     required this.height,
     required this.wallChance,
+    this.stars = 0,
     required this.players,
     required this.firstTurn,
     required this.moves,
@@ -154,6 +180,7 @@ class MatchLog {
   final int width;
   final int height;
   final double wallChance;
+  final int stars;
   final List<Player> players;
   final int firstTurn;
   final List<Move> moves;
@@ -165,6 +192,7 @@ class MatchLog {
       width: match.width,
       height: match.height,
       wallChance: match.wallChance,
+      stars: Iterable<int>.generate(match.cellCount).where(match.stars.test).length,
       players: match.players,
       firstTurn: match.firstTurn,
       moves: moves,
@@ -180,6 +208,7 @@ class MatchLog {
       wallChance: wallChance,
       firstTurn: firstTurn,
       modeId: modeId,
+      stars: stars,
     );
     for (final move in moves) {
       final next = apply(match, move);
@@ -196,6 +225,7 @@ class MatchLog {
     'width': width,
     'height': height,
     'wallChance': wallChance,
+    'stars': stars,
     'players': [for (final player in players) player.toJson()],
     'firstTurn': firstTurn,
     'moves': [for (final move in moves) move.toJson()],
@@ -209,6 +239,8 @@ class MatchLog {
       width: json['width']! as int,
       height: json['height']! as int,
       wallChance: (json['wallChance']! as num).toDouble(),
+      // Logs written before stars existed have none.
+      stars: (json['stars'] as int?) ?? 0,
       players: [
         for (final player in json['players']! as List<Object?>)
           Player.fromJson(player! as Map<String, Object?>),

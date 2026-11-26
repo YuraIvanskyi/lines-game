@@ -67,6 +67,7 @@ class Match {
     required this.modeId,
     required this.wallChance,
     required this.walls,
+    BitGrid? stars,
     required this.occupied,
     required this.head,
     required this.tail,
@@ -75,7 +76,8 @@ class Match {
     required this.turn,
     required this.firstTurn,
     this.loserId,
-  }) : segments = List.unmodifiable(segments),
+  }) : stars = stars ?? BitGrid.empty(width * height),
+       segments = List.unmodifiable(segments),
        players = List.unmodifiable(players),
        segmentKeys = Set.unmodifiable({for (final segment in segments) segment.key});
 
@@ -85,6 +87,9 @@ class Match {
   final String modeId;
   final double wallChance;
   final BitGrid walls;
+
+  /// Star cells as dealt. A star is spent once the line covers it.
+  final BitGrid stars;
   final BitGrid occupied;
   final int head;
   final int tail;
@@ -98,6 +103,16 @@ class Match {
   int get cellCount => width * height;
 
   bool get isTerminal => loserId != null;
+
+  /// The last growth landed on a star, so the same player grows again.
+  bool get onStar => !isTerminal && segments.isNotEmpty && stars.test(segments.last.b);
+
+  /// Stars the line has not reached yet.
+  Iterable<int> get openStars sync* {
+    for (var cell = 0; cell < cellCount; cell++) {
+      if (stars.test(cell) && !occupied.test(cell)) yield cell;
+    }
+  }
 
   Player get currentPlayer => players[turn];
 
@@ -125,6 +140,7 @@ class Match {
       modeId: modeId,
       wallChance: wallChance,
       walls: walls,
+      stars: stars,
       occupied: occupied ?? this.occupied,
       head: head ?? this.head,
       tail: tail ?? this.tail,
@@ -150,6 +166,7 @@ class Match {
         firstTurn != other.firstTurn ||
         loserId != other.loserId ||
         walls != other.walls ||
+        stars != other.stars ||
         occupied != other.occupied ||
         players.length != other.players.length ||
         segments.length != other.segments.length) {
