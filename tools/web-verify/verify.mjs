@@ -33,6 +33,11 @@ const mime = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/jav
 let server;
 async function serve() {
   if (!fs.existsSync(path.join(webRoot, 'index.html'))) throw new Error(`No build at ${webRoot}. Run: flutter build web (in app/)`);
+  // Flutter's build cache can skip the asset copy and leave empty asset folders behind: fonts and icons then
+  // fall back to tofu with only a 404 in the console. Catch it here instead of in the screenshots.
+  if (!fs.existsSync(path.join(webRoot, 'assets', 'FontManifest.json'))) {
+    throw new Error(`Build at ${webRoot} has no assets. Delete app/build/web and run: flutter build web --release`);
+  }
   server = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
     if (p.endsWith('/')) p += 'index.html';

@@ -12,7 +12,8 @@ Tooling lives in `tools/web-verify/` (Playwright driving the installed Chrome, f
 
 1. Fast gate (seconds): `cd app && flutter analyze && flutter test`
 2. Build (about 45 s; **required after every code edit**, the browser serves `app/build/web`, not your source):
-   `cd app && flutter build web --release`
+   `cd app && rm -rf build/web && flutter build web --release`
+   (start from an empty `build/web`: after `flutter test` runs, an incremental web build can skip copying fonts and sounds)
 3. Run a scenario:
    `cd tools/web-verify && node verify.mjs <scenario>`
    (first time on a fresh clone: `npm install` there)
@@ -44,6 +45,7 @@ Options: `--size 390x844` (default, portrait phone), `--headed` (watch it), `--o
 - The table seed comes from the clock, so the board layout differs on every launch. Don't assert on specific cell contents or hard-code "legal" cells.
 - Persistent state (settings) is per-run: each run uses a fresh browser context, so first-run behaviour is always exercised.
 - Use `t.tap('play')`, not `'^play'`; labels are plain strings, not regexes.
+- Icons drawn as crossed boxes and a `FontManifest.json` 404 mean the build lost its assets (Flutter's build cache can skip the copy). `verify.mjs` refuses such a build; delete `app/build/web` and build again.
 - Don't run `flutter run -d chrome` for verification: it opens an interactive window and has no scripted control. Use this tool.
 
 ## Making it better (suggest to the user, don't do unasked)

@@ -8,9 +8,7 @@ export default async function (t) {
   await t.tap('hard');
   await t.wait(300);
   await t.shot('mode-computer-hard');
-  await t.tap('save');
-  await t.wait(500);
-  await t.tap('back');
+  await t.tap('save');                    // Save returns home by itself
   await t.wait(500);
   await t.expectLabel('hard');            // home badge
   await t.shot('home-computer');
