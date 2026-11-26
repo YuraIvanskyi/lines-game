@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
+import '../theme/card_scroll.dart';
 import '../theme/ink_theme.dart';
 import 'play_snippet.dart';
 
@@ -36,20 +37,13 @@ class HowToPage extends StatelessWidget {
                       child: PopBackButton(onPressed: onDone, label: copy.back),
                     ),
                     PopTitle(copy.howTo, size: 40),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 6),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            for (var i = 0; i < tips.length; i++) ...[
-                              if (i > 0) const SizedBox(height: 12),
-                              _Tip(demo: tips[i].demo, text: tips[i].text),
-                            ],
-                          ],
-                        ),
+                      child: CardScroll(
+                        children: [for (final tip in tips) _Tip(demo: tip.demo, text: tip.text)],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     PopButton(label: copy.letsGo, onPressed: onDone),
                   ],
                 ),

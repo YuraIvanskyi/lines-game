@@ -15,6 +15,7 @@ import 'settings/app_settings.dart';
 import 'settings/copy.dart';
 import 'settings/game_setup.dart';
 import 'table/table_page.dart';
+import 'theme/card_scroll.dart';
 import 'theme/game_feel.dart';
 import 'theme/ink_theme.dart';
 
@@ -110,6 +111,7 @@ class _EndsAppState extends State<EndsApp> {
       child: MaterialApp(
         title: 'ENDS',
         debugShowCheckedModeBanner: false,
+        scrollBehavior: const AppScrollBehavior(),
         theme: ThemeData(
           fontFamily: 'Nunito',
           colorScheme: ColorScheme.fromSeed(seedColor: InkTheme.skyTop, surface: InkTheme.paper),

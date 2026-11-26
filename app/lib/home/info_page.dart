@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../legal_links.dart';
 import '../settings/copy.dart';
 import '../theme/arcade_shell.dart';
+import '../theme/card_scroll.dart';
 import '../theme/ink_theme.dart';
 
 class InfoPage extends StatelessWidget {
@@ -31,23 +32,16 @@ class InfoPage extends StatelessWidget {
                       child: PopBackButton(onPressed: onBack, label: copy.back),
                     ),
                     PopTitle(copy.info, size: 40),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 6),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _Credit(copy.creator, [copy.creatorName]),
-                            const SizedBox(height: 12),
-                            _Credit(copy.tech, copy.techLines),
-                            const SizedBox(height: 12),
-                            _Credit(copy.assets, copy.assetLines),
-                            const SizedBox(height: 12),
-                            _LegalBlock(title: copy.legal, copy: copy, open: onOpenLink),
-                            const SizedBox(height: 12),
-                            _Credit(copy.thanks, [copy.thanksBody]),
-                          ],
-                        ),
+                      child: CardScroll(
+                        children: [
+                          _Credit(copy.creator, [copy.creatorName]),
+                          _Credit(copy.tech, copy.techLines),
+                          _Credit(copy.assets, copy.assetLines),
+                          _LegalBlock(title: copy.legal, copy: copy, open: onOpenLink),
+                          _Credit(copy.thanks, [copy.thanksBody]),
+                        ],
                       ),
                     ),
                   ],

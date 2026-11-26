@@ -5,6 +5,7 @@ import 'package:rules/rules.dart';
 import '../settings/copy.dart';
 import '../settings/game_setup.dart';
 import '../theme/arcade_shell.dart';
+import '../theme/card_scroll.dart';
 import '../theme/ink_theme.dart';
 import 'play_snippet.dart';
 
@@ -106,24 +107,17 @@ class _GameModePageState extends State<GameModePage> {
                     PopTitle(copy.gameMode, size: 40),
                     const SizedBox(height: 16),
                     Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            PopBlock(title: copy.mode, child: _modeCards(copy)),
-                            const SizedBox(height: 12),
-                            PopBlock(title: copy.opponent, child: _opponents(copy)),
-                            if (_opponent == Opponent.computer) ...[
-                              const SizedBox(height: 12),
-                              PopBlock(title: copy.difficulty, child: _difficulties(copy)),
-                            ],
-                            const SizedBox(height: 12),
-                            PopBlock(title: copy.players, child: _players(copy)),
-                          ],
-                        ),
+                      child: CardScroll(
+                        children: [
+                          PopBlock(key: const ValueKey('mode'), title: copy.mode, child: _modeCards(copy)),
+                          PopBlock(key: const ValueKey('opponent'), title: copy.opponent, child: _opponents(copy)),
+                          if (_opponent == Opponent.computer)
+                            PopBlock(key: const ValueKey('difficulty'), title: copy.difficulty, child: _difficulties(copy)),
+                          PopBlock(key: const ValueKey('players'), title: copy.players, child: _players(copy)),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 6),
                     PopButton(label: copy.save, color: InkTheme.greenFace, onPressed: _save),
                   ],
                 ),
