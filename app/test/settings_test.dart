@@ -21,12 +21,15 @@ void main() {
     final copy = Copy.english;
     expect(copy.player(1), 'Player 1');
     expect(copy.turn('Player 1'), "Player 1's turn");
-    expect(copy.lostPlayer('Player 1'), 'Player 1 lost');
+    expect(copy.lostPlayer('Player 1'), 'Player 1 is boxed in!');
+    expect(copy.winners(['Player 2']), 'Player 2 wins!');
+    expect(copy.winners(['Player 2', 'Player 3']), 'Everyone else wins!');
+    expect(Copy.ukrainian.winners(['Ада']), 'Перемога: Ада!');
     expect(copy.passPhone, 'Pass the phone');
-    expect(copy.restartAsk('Player 2'), 'Player 2 wants to restart?');
+    expect(copy.restartAsk('Player 2'), 'Start over, Player 2?');
     expect(
       Copy.ukrainian.restartAsk('Гравець 2'),
-      'Гравець 2 хоче почати спочатку?',
+      'Гравець 2, почати заново?',
     );
   });
 

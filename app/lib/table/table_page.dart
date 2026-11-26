@@ -174,7 +174,10 @@ class _TablePageState extends State<TablePage> {
         ? copy.whichEnd
         : copy.turn(_match.currentPlayer.name);
     final detail = _match.isTerminal
-        ? copy.noGrowth
+        ? copy.winners([
+            for (final player in _match.players)
+              if (player.id != _match.loserId) player.name,
+          ])
         : _pendingCell != null
         ? copy.tapEnd
         : _botTurn

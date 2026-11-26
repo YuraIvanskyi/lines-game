@@ -41,7 +41,8 @@ class Copy {
     required this.assets,
     required this.assetLines,
     required this.whichEnd,
-    required this.noGrowth,
+    required this.winsOf,
+    required this.othersWin,
     required this.tapEnd,
     required this.passPhone,
     required this.rematch,
@@ -50,13 +51,13 @@ class Copy {
     required this.lostOf,
     required this.leaveTitle,
     required this.leaveBody,
-    required this.stay,
+    required this.keepPlaying,
     required this.leave,
     required this.back,
     required this.restart,
     required this.restartOf,
     required this.restartBody,
-    required this.cancel,
+    required this.startOver,
     required this.sound,
     required this.soundOn,
     required this.soundOff,
@@ -105,7 +106,8 @@ class Copy {
   final String assets;
   final List<String> assetLines;
   final String whichEnd;
-  final String noGrowth;
+  final String winsOf;
+  final String othersWin;
   final String tapEnd;
   final String passPhone;
   final String rematch;
@@ -114,13 +116,13 @@ class Copy {
   final String lostOf;
   final String leaveTitle;
   final String leaveBody;
-  final String stay;
+  final String keepPlaying;
   final String leave;
   final String back;
   final String restart;
   final String restartOf;
   final String restartBody;
-  final String cancel;
+  final String startOver;
   final String sound;
   final String soundOn;
   final String soundOff;
@@ -143,6 +145,9 @@ class Copy {
   String lostPlayer(String name) => lostOf.replaceAll('{name}', name);
 
   String restartAsk(String name) => restartOf.replaceAll('{name}', name);
+
+  /// Who wins when [loser] is stuck: the one other seat, or everyone else.
+  String winners(List<String> others) => others.length == 1 ? winsOf.replaceAll('{name}', others.single) : othersWin;
 
   static Copy forLanguage(AppLanguage language) {
     return switch (language) {
@@ -196,23 +201,24 @@ class Copy {
       'Material Icons by Google. Apache License\u00A02.0.',
       'Sound effects: original, created for this app.',
     ],
-    whichEnd: 'Which end?',
-    noGrowth: 'No growth left.',
+    whichEnd: 'Which end should grow?',
+    winsOf: '{name} wins!',
+    othersWin: 'Everyone else wins!',
     tapEnd: 'Tap the ring or the square.',
     passPhone: 'Pass the phone',
     rematch: 'Rematch',
     home: 'Home',
     turnOf: "{name}'s turn",
-    lostOf: '{name} lost',
-    leaveTitle: 'Leave this game?',
-    leaveBody: 'Stay keeps this match. Leave returns home.',
-    stay: 'Stay',
+    lostOf: '{name} is boxed in!',
+    leaveTitle: 'Leaving so soon?',
+    leaveBody: "This game isn't over yet. If you leave now, it won't be saved.",
+    keepPlaying: 'Keep playing',
     leave: 'Leave',
     back: 'Back',
     restart: 'Restart',
-    restartOf: '{name} wants to restart?',
-    restartBody: 'This starts the current game over.',
-    cancel: 'Cancel',
+    restartOf: 'Start over, {name}?',
+    restartBody: 'The line gets wiped and the game starts fresh on this same board.',
+    startOver: 'Start over',
     sound: 'Sound',
     soundOn: 'Sound on',
     soundOff: 'Sound off',
@@ -270,23 +276,24 @@ class Copy {
       'Material Icons від Google. Apache License\u00A02.0.',
       'Звукові ефекти: авторські, створені для цього застосунку.',
     ],
-    whichEnd: 'Який кінець?',
-    noGrowth: 'Подовжити вже нікуди.',
+    whichEnd: 'Який кінець подовжити?',
+    winsOf: 'Перемога: {name}!',
+    othersWin: 'Перемагають усі інші!',
     tapEnd: 'Торкніться кільця або квадрата.',
     passPhone: 'Передайте телефон',
     rematch: 'Ще раз',
     home: 'На головну',
     turnOf: 'Хід: {name}',
-    lostOf: 'Поразка: {name}',
-    leaveTitle: 'Вийти з цієї гри?',
-    leaveBody: '«Залишитись» зберігає цю партію. «Вийти» повертає на головну.',
-    stay: 'Залишитись',
+    lostOf: '{name} у пастці!',
+    leaveTitle: 'Уже йдете?',
+    leaveBody: 'Гра ще не закінчилася. Якщо вийти зараз, її не буде збережено.',
+    keepPlaying: 'Грати далі',
     leave: 'Вийти',
     back: 'Назад',
     restart: 'Заново',
-    restartOf: '{name} хоче почати спочатку?',
-    restartBody: 'Поточна гра почнеться з початку.',
-    cancel: 'Скасувати',
+    restartOf: '{name}, почати заново?',
+    restartBody: 'Лінію буде стерто, і гра почнеться наново на цьому ж полі.',
+    startOver: 'Почати знову',
     sound: 'Звук',
     soundOn: 'Звук увімкнено',
     soundOff: 'Звук вимкнено',

@@ -66,13 +66,15 @@ Future<bool> confirmLeave(BuildContext context) async {
       title: copy.leaveTitle,
       body: copy.leaveBody,
       actions: [
+        // The safe choice is the bright one; leaving is a step down.
         PopButton(
-          label: copy.stay,
-          color: InkTheme.blueFace,
+          label: copy.keepPlaying,
           onPressed: () => Navigator.pop(context, false),
         ),
         PopButton(
           label: copy.leave,
+          color: InkTheme.blueFace,
+          compact: true,
           onPressed: () => Navigator.pop(context, true),
         ),
       ],
@@ -90,12 +92,13 @@ Future<bool> confirmRestart(BuildContext context, String name) async {
       body: copy.restartBody,
       actions: [
         PopButton(
-          label: copy.cancel,
-          color: InkTheme.blueFace,
+          label: copy.keepPlaying,
           onPressed: () => Navigator.pop(context, false),
         ),
         PopButton(
-          label: copy.restart,
+          label: copy.startOver,
+          color: InkTheme.blueFace,
+          compact: true,
           onPressed: () => Navigator.pop(context, true),
         ),
       ],

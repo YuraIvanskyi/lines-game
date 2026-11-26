@@ -60,7 +60,8 @@ void main() {
         ),
       ),
     );
-    expect(find.text('Player 1 lost'), findsOneWidget);
+    expect(find.text('Player 1 is boxed in!'), findsOneWidget);
+    expect(find.text('Player 2 wins!'), findsOneWidget);
     expect(find.text('REMATCH'), findsOneWidget);
     await tester.tap(find.text('HOME'));
     await tester.pump();
@@ -89,9 +90,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.restart_alt));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Player 3 wants to restart?'), findsOneWidget);
-    expect(find.text('This starts the current game over.'), findsOneWidget);
-    await tester.tap(find.text('CANCEL'));
+    expect(find.text('Start over, Player 3?'), findsOneWidget);
+    expect(find.text('The line gets wiped and the game starts fresh on this same board.'), findsOneWidget);
+    await tester.tap(find.text('KEEP PLAYING'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text("Player 3's turn"), findsOneWidget);
@@ -109,8 +110,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.restart_alt));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('Player 2 wants to restart?'), findsOneWidget);
-    await tester.tap(find.text('RESTART'));
+    expect(find.text('Start over, Player 2?'), findsOneWidget);
+    await tester.tap(find.text('START OVER'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text("Player 1's turn"), findsOneWidget);
@@ -129,8 +130,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('STAY'), findsOneWidget);
-    await tester.tap(find.text('STAY'));
+    expect(find.text('KEEP PLAYING'), findsOneWidget);
+    await tester.tap(find.text('KEEP PLAYING'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(wentHome, isFalse);
@@ -236,7 +237,7 @@ void main() {
       final nearlyOver = dealClassic(seed: 1, width: 2, height: 1, wallChance: 0, firstTurn: 1);
       await mount(tester, {'p2': bot}, initial: nearlyOver);
       await tester.pump(delay);
-      expect(find.text('Player 1 lost'), findsOneWidget);
+      expect(find.text('Player 1 is boxed in!'), findsOneWidget);
       expect(find.text('REMATCH'), findsOneWidget);
       await tester.pump(delay * 3);
       expect(bot.asked, 1);
@@ -251,8 +252,8 @@ void main() {
       await tester.tap(find.byIcon(Icons.restart_alt));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Player 1 wants to restart?'), findsOneWidget);
-      await tester.tap(find.text('RESTART'));
+      expect(find.text('Start over, Player 1?'), findsOneWidget);
+      await tester.tap(find.text('START OVER'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text("Player 1's turn"), findsOneWidget);
