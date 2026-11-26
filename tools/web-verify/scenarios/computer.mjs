@@ -1,11 +1,9 @@
-// Game mode -> Computer + Hard -> Save -> Play -> the bot answers a tap on its own.
+// Game mode -> Hard computer -> Save -> Play -> the bot answers a tap on its own.
 export default async function (t) {
   await t.tap('game mode');
   await t.wait(500);
   await t.shot('mode-before');
-  await t.tap('computer');
-  await t.wait(300);
-  await t.tap('hard');
+  await t.tap('hard computer');          // strength is part of the opponent choice
   await t.wait(300);
   await t.shot('mode-computer-hard');
   await t.tap('save');                    // Save returns home by itself

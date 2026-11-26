@@ -153,6 +153,15 @@ const ctx = {
     const yMid = 364 + 2.5 * 56.35 + (h - 844) / 2;
     await ctx.tapAt(x0 + cell * col, yMid + cell * (row - 2.5));
   },
+  /** Wheel-scroll the list under (x, y) by dy pixels (positive = further down the page), then let it glide.
+   *  Needed before tapping anything below the fold: a node outside a scroll view's visible area still has a
+   *  label, but a click at its centre lands on whatever covers that spot (often the Save button). */
+  async scroll(dy, { x = 0.5, y = 0.5 } = {}) {
+    await page.mouse.move(x <= 1 ? x * w : x, y <= 1 ? y * h : y);
+    await page.mouse.wheel(0, dy);
+    await page.waitForTimeout(600);
+    log(`scroll: ${dy}`);
+  },
   async expectLabel(text, { timeout = 5000 } = {}) {
     try { await page.waitForFunction((t) => [...document.querySelectorAll('flt-semantics')]
       .some((n) => ((n.getAttribute('aria-label') || n.textContent || '')).toLowerCase().includes(t.toLowerCase())), text, { timeout }); }

@@ -56,6 +56,8 @@ void main() {
     expect(find.text('CLASSIC'), findsOneWidget);
     expect(_tile('Same phone'), findsOneWidget);
     expect(find.byType(TextField), findsNWidgets(2));
+    await tester.ensureVisible(find.text('3'));
+    await _settle(tester);
     await tester.tap(find.text('3'));
     await tester.pump();
     expect(find.byType(TextField), findsNWidgets(3));
@@ -116,6 +118,8 @@ void main() {
     await tester.pumpWidget(EndsApp(seed: 1, modes: openModes));
     await tester.tap(find.text('GAME MODE'));
     await _settle(tester);
+    await tester.ensureVisible(find.text('4'));
+    await _settle(tester);
     await tester.tap(find.text('4'));
     await tester.pump();
     await tester.tap(find.byIcon(Icons.arrow_back));
@@ -147,29 +151,45 @@ void main() {
     await tester.pumpWidget(EndsApp(seed: 1, modes: openModes, setupStore: store));
     await tester.tap(find.text('GAME MODE'));
     await _settle(tester);
+    // The computer's strength is part of the opponent choice, not a card of its own.
+    expect(_tile('Easy computer'), findsOneWidget);
+    expect(_tile('Hard computer'), findsOneWidget);
     expect(find.text('Difficulty'), findsNothing);
+    expect(tester.widget<PopTile>(_tile('Same phone')).selected, isTrue);
 
-    await tester.tap(find.text('COMPUTER'));
+    await tester.tap(_tile('Easy computer'));
     await tester.pump();
-    expect(find.text('Difficulty'), findsOneWidget);
-    expect(find.text('EASY'), findsOneWidget);
-    expect(find.text('HARD'), findsOneWidget);
+    expect(tester.widget<PopTile>(_tile('Easy computer')).selected, isTrue);
+    expect(tester.widget<PopTile>(_tile('Same phone')).selected, isFalse);
     // Only the person's own name is editable, and the player count is fixed at two.
     expect(find.byType(TextField), findsOneWidget);
     expect(find.text('3'), findsNothing);
 
-    await tester.tap(find.text('HARD'));
+    await tester.tap(_tile('Hard computer'));
     await tester.pump();
+    expect(tester.widget<PopTile>(_tile('Hard computer')).selected, isTrue);
+    expect(tester.widget<PopTile>(_tile('Easy computer')).selected, isFalse);
     await tester.tap(find.text('SAVE'));
     await _settle(tester);
     final saved = await store.load();
     expect(saved.opponent, Opponent.computer);
     expect(saved.difficulty, Difficulty.hard);
 
-    // The computer badge names the difficulty in place of a player count.
+    // The home badge names the opponent in place of a player count.
     expect(find.text('2 PLAYERS'), findsNothing);
-    expect(find.text('HARD'), findsOneWidget);
+    expect(find.text('HARD COMPUTER'), findsOneWidget);
     expect(find.byIcon(Icons.computer), findsOneWidget);
+
+    // Back on the page, the saved choice is the lit tile, and same phone clears it.
+    await tester.tap(find.text('GAME MODE'));
+    await _settle(tester);
+    expect(tester.widget<PopTile>(_tile('Hard computer')).selected, isTrue);
+    await tester.tap(_tile('Same phone'));
+    await tester.pump();
+    expect(tester.widget<PopTile>(_tile('Hard computer')).selected, isFalse);
+    expect(find.text('3'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.arrow_back));
+    await _settle(tester);
 
     await tester.tap(find.text('PLAY'));
     await tester.pump();

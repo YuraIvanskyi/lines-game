@@ -31,6 +31,7 @@ Add `tools/web-verify/scenarios/<name>.mjs` exporting a default async function. 
 | `t.tap('label')` | tap a button by its Semantics label (exact match preferred, then substring, case-insensitive) |
 | `t.tapAt(x, y)` | tap viewport coordinates; values <= 1 are fractions of the viewport |
 | `t.tapCell(row, col)` | tap a 6x6 board cell (calibrated for the default 390x844 only) |
+| `t.scroll(dy)` | wheel-scroll the list in the middle of the screen by `dy` px (positive scrolls down), then wait for the glide |
 | `t.labels()` | every text/label currently in the semantics tree; use it to discover what you can tap or assert |
 | `t.expectLabel('text')` | wait for text to appear, or fail and list what is visible |
 | `t.shot('name')` | screenshot to `out/NN-name.png` |
@@ -41,6 +42,7 @@ Options: `--size 390x844` (default, portrait phone), `--headed` (watch it), `--o
 ## How it works / gotchas
 
 - Flutter web paints to a canvas, so there are no DOM buttons. The driver turns on Flutter's accessibility tree, which exposes `Semantics` widgets as DOM nodes. Anything **without** a `Semantics(label: ...)` (e.g. board cells, plain `Text` inside gestures) is not findable by label: use `tapAt`/`tapCell` plus a screenshot.
+- A node below the fold of a scroll view is still listed by `t.labels()`, but tapping it clicks whatever covers that spot (on Game mode, the Save button). `t.scroll(400)` first.
 - Screens that appear conditionally add steps: e.g. Back during a game raises a Stay/Leave dialog (`t.tap('leave')`).
 - The table seed comes from the clock, so the board layout differs on every launch. Don't assert on specific cell contents or hard-code "legal" cells.
 - Persistent state (settings) is per-run: each run uses a fresh browser context, so first-run behaviour is always exercised.

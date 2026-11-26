@@ -34,9 +34,8 @@ class Copy {
     required this.opponent,
     required this.sameScreen,
     required this.computer,
-    required this.difficulty,
-    required this.easy,
-    required this.hard,
+    required this.easyComputer,
+    required this.hardComputer,
     required this.yourMove,
     required this.thinking,
     required this.online,
@@ -108,9 +107,8 @@ class Copy {
   final String opponent;
   final String sameScreen;
   final String computer;
-  final String difficulty;
-  final String easy;
-  final String hard;
+  final String easyComputer;
+  final String hardComputer;
   final String yourMove;
   final String thinking;
   final String online;
@@ -152,7 +150,8 @@ class Copy {
   final String support;
   final String licenses;
 
-  String difficultyName(Difficulty level) => level == Difficulty.easy ? easy : hard;
+  /// The computer opponent by strength: "Easy computer" or "Hard computer".
+  String computerName(Difficulty level) => level == Difficulty.easy ? easyComputer : hardComputer;
 
   /// Menu name of a mode. Modes the copy doesn't know keep the rules package's name.
   String modeName(GameMode mode) => switch (mode.id) {
@@ -222,9 +221,8 @@ class Copy {
     opponent: 'Opponent',
     sameScreen: 'Same phone',
     computer: 'Computer',
-    difficulty: 'Difficulty',
-    easy: 'Easy',
-    hard: 'Hard',
+    easyComputer: 'Easy computer',
+    hardComputer: 'Hard computer',
     yourMove: 'Your move',
     thinking: 'Thinking…',
     online: 'Online',
@@ -306,9 +304,8 @@ class Copy {
     opponent: 'Суперник',
     sameScreen: 'Один телефон',
     computer: 'Комп’ютер',
-    difficulty: 'Складність',
-    easy: 'Легко',
-    hard: 'Важко',
+    easyComputer: 'Простий комп’ютер',
+    hardComputer: 'Сильний комп’ютер',
     yourMove: 'Ваш хід',
     thinking: 'Думає…',
     online: 'Онлайн',

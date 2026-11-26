@@ -56,7 +56,7 @@ class HomePage extends StatelessWidget {
                       children: [
                         PopBadge(modeLabel),
                         PopBadge(
-                          setup.vsComputer ? copy.difficultyName(setup.difficulty) : copy.playerCount(setup.seatCount),
+                          setup.vsComputer ? copy.computerName(setup.difficulty) : copy.playerCount(setup.seatCount),
                           icon: _opponentIcon(setup.opponent),
                         ),
                       ],

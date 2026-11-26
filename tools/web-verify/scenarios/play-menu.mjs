@@ -12,6 +12,7 @@ export default async function (t) {
   await t.tap('online');
   await t.expectLabel('3');
 
+  await t.scroll(400);                    // the player count sits below the fold
   await t.tap('3');
   await t.shot('game-mode-three-unsaved');
   // Save returns home on its own.
@@ -32,6 +33,7 @@ export default async function (t) {
   await t.tap('back');
   await t.tap('leave');
   await t.tap('game mode');
+  await t.scroll(400);
   await t.tap('2');
   await t.tap('save');
   await t.expectLabel('2 players');

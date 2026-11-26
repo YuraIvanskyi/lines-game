@@ -5,8 +5,8 @@
 const uk = process.env.STORE_LANG === 'uk';
 const L = uk
   ? { lang: 'українська', save: 'зберегти', play: 'грати',
-      gameMode: 'режим гри', computer: 'комп’ютер', hard: 'важко', home: 'на головну', which: 'який кінець', rematch: 'ще раз' }
-  : { play: 'play', save: 'save', gameMode: 'game mode', computer: 'computer', hard: 'hard', home: 'home',
+      gameMode: 'режим гри', hardComputer: 'сильний комп’ютер', home: 'на головну', which: 'який кінець', rematch: 'ще раз' }
+  : { play: 'play', save: 'save', gameMode: 'game mode', hardComputer: 'hard computer', home: 'home',
       which: 'which end', rematch: 'rematch' };
 
 const cells = [];
@@ -56,8 +56,7 @@ export default async function (t) {
 
   await t.tap(L.home);
   await t.tap(L.gameMode);
-  await t.tap(L.computer);
-  await t.tap(L.hard);
+  await t.tap(L.hardComputer);
   await t.wait(300);
   await t.shot('game-mode');
   await t.tap(L.save);                    // Save returns home

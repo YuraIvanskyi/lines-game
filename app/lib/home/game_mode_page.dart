@@ -111,8 +111,6 @@ class _GameModePageState extends State<GameModePage> {
                         children: [
                           PopBlock(key: const ValueKey('mode'), title: copy.mode, child: _modeCards(copy)),
                           PopBlock(key: const ValueKey('opponent'), title: copy.opponent, child: _opponents(copy)),
-                          if (_opponent == Opponent.computer)
-                            PopBlock(key: const ValueKey('difficulty'), title: copy.difficulty, child: _difficulties(copy)),
                           PopBlock(key: const ValueKey('players'), title: copy.players, child: _players(copy)),
                         ],
                       ),
@@ -194,32 +192,49 @@ class _GameModePageState extends State<GameModePage> {
     );
   }
 
+  /// People on top (this phone, online), the computer below in its two strengths.
   Widget _opponents(Copy copy) {
-    return _TileRow(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _choice(Icons.people, copy.sameScreen, _opponent == Opponent.samePhone, () => _opponent = Opponent.samePhone),
-        _choice(Icons.computer, copy.computer, _opponent == Opponent.computer, () => _opponent = Opponent.computer),
-        _choice(Icons.public, copy.online, false, () {}, tag: copy.soon),
+        _TileRow(
+          children: [
+            _choice(Icons.people, copy.sameScreen, _opponent == Opponent.samePhone, () => _opponent = Opponent.samePhone),
+            _choice(Icons.public, copy.online, false, () {}, tag: copy.soon),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _TileRow(
+          children: [
+            for (final level in Difficulty.values)
+              _choice(
+                Icons.computer,
+                copy.computerName(level),
+                _opponent == Opponent.computer && _difficulty == level,
+                () {
+                  _opponent = Opponent.computer;
+                  _difficulty = level;
+                },
+                mark: level == Difficulty.easy
+                    ? (icon: Icons.sentiment_satisfied_alt, color: InkTheme.greenFace)
+                    : (icon: Icons.local_fire_department, color: InkTheme.pinkFace),
+              ),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _difficulties(Copy copy) {
-    return _TileRow(
-      children: [
-        for (final level in Difficulty.values)
-          _choice(
-            level == Difficulty.easy ? Icons.sentiment_satisfied_alt : Icons.local_fire_department,
-            copy.difficultyName(level),
-            _difficulty == level,
-            () => _difficulty = level,
-          ),
-      ],
-    );
-  }
-
-  /// An icon over a short label. A [tag] marks a choice that is not open yet.
-  Widget _choice(IconData icon, String label, bool selected, VoidCallback pick, {String? tag}) {
+  /// An icon over a short label. A [tag] marks a choice that is not open yet; a [mark] is a
+  /// small badge on the icon's corner (the computer's strength).
+  Widget _choice(
+    IconData icon,
+    String label,
+    bool selected,
+    VoidCallback pick, {
+    String? tag,
+    ({IconData icon, Color color})? mark,
+  }) {
     return PopTile(
       label: label,
       selected: selected,
@@ -230,7 +245,31 @@ class _GameModePageState extends State<GameModePage> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 30, color: InkTheme.cloud, shadows: _halo),
+          SizedBox(
+            width: 30,
+            height: 30,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(icon, size: 30, color: InkTheme.cloud, shadows: _halo),
+                if (mark != null)
+                  Positioned(
+                    right: -10,
+                    bottom: -6,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: mark.color,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 2),
+                      ),
+                      child: Icon(mark.icon, size: 13, color: InkTheme.cloud),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(height: 6),
           // One word per line, shrunk as a block, so a long word ("КОМП’ЮТЕР") never breaks mid-word.
           FittedBox(
