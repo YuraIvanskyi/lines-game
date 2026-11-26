@@ -6,12 +6,7 @@ import '../theme/arcade_shell.dart';
 import '../theme/ink_theme.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({
-    super.key,
-    required this.settings,
-    required this.onSave,
-    required this.onBack,
-  });
+  const SettingsPage({super.key, required this.settings, required this.onSave, required this.onBack});
 
   final AppSettings settings;
   final Future<void> Function(AppSettings settings) onSave;
@@ -57,32 +52,40 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     PopTitle(copy.settings, size: 40),
                     const SizedBox(height: 16),
-                    PopBlock(
-                      title: copy.sound,
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: PopIconButton(
-                          icon: _sound ? Icons.volume_up : Icons.volume_off,
-                          label: _sound ? copy.soundOn : copy.soundOff,
-                          onPressed: () => _change(() => _sound = !_sound),
-                          extent: 64,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            PopBlock(
+                              title: copy.sound,
+                              child: Align(
+                                alignment: Alignment.center,
+                                child: PopIconButton(
+                                  icon: _sound ? Icons.volume_up : Icons.volume_off,
+                                  label: _sound ? copy.soundOn : copy.soundOff,
+                                  onPressed: () => _change(() => _sound = !_sound),
+                                  extent: 64,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            PopBlock(
+                              title: copy.languages,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  for (final language in AppLanguage.values) ...[
+                                    if (language != AppLanguage.values.first) const SizedBox(height: 8),
+                                    _languageButton(language),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    PopBlock(
-                      title: copy.languages,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final language in AppLanguage.values) ...[
-                            if (language != AppLanguage.values.first) const SizedBox(height: 8),
-                            _languageButton(language),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
                     const SizedBox(height: 12),
                     PopButton(label: copy.save, color: InkTheme.greenFace, onPressed: _save),
                   ],

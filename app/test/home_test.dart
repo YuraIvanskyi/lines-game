@@ -160,6 +160,26 @@ void main() {
     expect(const GameSetup(playerCount: 3).seatCount, 3);
   });
 
+  test('names are trimmed and cut to a length the table can show', () {
+    const setup = GameSetup(names: ['  Bartholomew the Third  ', '   ', '', '']);
+    final players = setup.players(Copy.english);
+    expect(players.first.name, 'Bartholomew');
+    expect(players.first.name.length, lessThanOrEqualTo(maxNameLength));
+    expect(players[1].name, 'Player 2');
+    expect(clipName('Олександра-Марія'), 'Олександра-М');
+    expect(clipName('🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂'), '🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂🙂');
+  });
+
+  testWidgets('a name field stops at the length limit', (tester) async {
+    await _phone(tester);
+    await tester.pumpWidget(EndsApp(seed: 1, mode: open));
+    await tester.tap(find.text('GAME MODE'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, 'Bartholomew the Magnificent');
+    await tester.pump();
+    expect(tester.widget<TextField>(find.byType(TextField).first).controller!.text, 'Bartholomew ');
+  });
+
   test('saved setup survives the store and keeps default names blank', () async {
     SharedPreferences.setMockInitialValues({});
     final store = SharedPrefsGameSetupStore();

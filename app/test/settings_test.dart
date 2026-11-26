@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ends/main.dart';
@@ -42,6 +43,12 @@ void main() {
     feel.passTurn();
     feel.loss();
     expect(feel.cuesStarted, 0);
+  });
+
+  test('effects mix with other audio and follow the silent switch', () {
+    expect(DeviceFeel.effects.android.audioFocus, AndroidAudioFocus.none);
+    expect(DeviceFeel.effects.android.usageType, AndroidUsageType.game);
+    expect(DeviceFeel.effects.iOS.category, AVAudioSessionCategory.ambient);
   });
 
   test('shared preferences keep sound and language', () async {

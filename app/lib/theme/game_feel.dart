@@ -35,6 +35,18 @@ class DeviceFeel extends GameFeel {
   final bool Function() _soundOn;
   final Map<String, AudioPlayer> _players = {};
 
+  /// Short effects play over the person's own music instead of pausing it, and
+  /// follow the iPhone's silent switch. The plugin's default takes full audio
+  /// focus on Android and uses the iOS playback session, which does neither.
+  static final effects = AudioContext(
+    iOS: AudioContextIOS(category: AVAudioSessionCategory.ambient),
+    android: const AudioContextAndroid(
+      contentType: AndroidContentType.sonification,
+      usageType: AndroidUsageType.game,
+      audioFocus: AndroidAudioFocus.none,
+    ),
+  );
+
   @visibleForTesting
   int cuesStarted = 0;
 
@@ -74,6 +86,7 @@ class DeviceFeel extends GameFeel {
     if (!_soundOn()) return;
     cuesStarted++;
     final player = _players.putIfAbsent(name, AudioPlayer.new);
-    player.play(AssetSource('sounds/$name.wav')).catchError((_) {});
+    // The web has no audio session to configure.
+    player.play(AssetSource('sounds/$name.wav'), ctx: kIsWeb ? null : effects).catchError((_) {});
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rules/rules.dart';
 
 import '../settings/copy.dart';
@@ -204,6 +205,7 @@ class _GameModePageState extends State<GameModePage> {
             child: TextField(
               controller: _names[i],
               textAlign: TextAlign.center,
+              inputFormatters: [LengthLimitingTextInputFormatter(maxNameLength)],
               onChanged: (_) => _change(() {}),
               style: const TextStyle(fontWeight: FontWeight.w700, color: InkTheme.ink),
               cursorColor: InkTheme.inks[i],

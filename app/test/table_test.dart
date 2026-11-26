@@ -68,6 +68,19 @@ void main() {
     expect(wentHome, isTrue);
   });
 
+  testWidgets('restart after the game is over skips the question', (tester) async {
+    final start = dealClassic(seed: 1, width: 2, height: 1, wallChance: 0);
+    final finished = apply(start, legalMoves(start).single);
+    expect(finished.isTerminal, isTrue);
+    await tester.pumpWidget(MaterialApp(home: TablePage(mode: open, initial: finished)));
+    expect(find.text('Player 2 is boxed in!'), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.restart_alt));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('KEEP PLAYING'), findsNothing);
+    expect(find.text("Player 1's turn"), findsOneWidget);
+  });
+
   testWidgets('restart sits opposite back and names who asked', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

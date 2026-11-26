@@ -113,7 +113,8 @@ class _EndsAppState extends State<EndsApp> {
         home: PopScope(
           canPop: _place == _Place.home,
           onPopInvokedWithResult: (didPop, _) {
-            if (!didPop) _home();
+            // The table asks before a live game is thrown away, so it handles its own back.
+            if (!didPop && _place != _Place.table) _home();
           },
           child: switch (_place) {
             _Place.home => HomePage(

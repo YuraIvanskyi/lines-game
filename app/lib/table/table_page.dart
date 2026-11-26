@@ -140,13 +140,15 @@ class _TablePageState extends State<TablePage> {
   }
 
   Future<void> _askRestart() async {
-    // The computer never asks, so the question goes to the first person at the phone.
-    final asker = _botTurn
-        ? _match.players.firstWhere((player) => !widget.bots.containsKey(player.id), orElse: () => _match.currentPlayer)
-        : _match.currentPlayer;
-    final name = asker.name;
-    final restart = await confirmRestart(context, name);
-    if (!restart || !mounted) return;
+    // A finished game has nothing to lose, so it starts over without a question.
+    if (!_match.isTerminal) {
+      // The computer never asks, so the question goes to the first person at the phone.
+      final asker = _botTurn
+          ? _match.players.firstWhere((player) => !widget.bots.containsKey(player.id), orElse: () => _match.currentPlayer)
+          : _match.currentPlayer;
+      final restart = await confirmRestart(context, asker.name);
+      if (!restart || !mounted) return;
+    }
     setState(() {
       _match = _deal(_match.seed, _match.firstTurn);
       _pendingCell = null;
@@ -166,7 +168,6 @@ class _TablePageState extends State<TablePage> {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
     final copy = AppCopy.of(context);
     final headline = _match.isTerminal
         ? copy.lostPlayer(_playerName(_match.loserId!))
@@ -188,6 +189,18 @@ class _TablePageState extends State<TablePage> {
     final ink = InkTheme.inks[_match.turn % InkTheme.inks.length];
     final chipColor = _match.isTerminal ? InkTheme.sun : InkTheme.cloud;
 
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back();
+      },
+      child: _scaffold(context, headline, detail, ink, chipColor),
+    );
+  }
+
+  Widget _scaffold(BuildContext context, String headline, String detail, Color ink, Color chipColor) {
+    final text = Theme.of(context).textTheme;
+    final copy = AppCopy.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ArcadeBackdrop(

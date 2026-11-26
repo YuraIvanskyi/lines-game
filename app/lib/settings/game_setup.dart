@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:rules/rules.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +8,15 @@ enum Opponent { samePhone, computer, online }
 
 const minPlayers = 2;
 const maxPlayers = 4;
+
+/// Long enough for a nickname, short enough for `<name>'s turn` on one line.
+const maxNameLength = 12;
+
+/// [name] trimmed and cut to [maxNameLength] characters (whole emoji and accents kept).
+String clipName(String name) {
+  final trimmed = name.trim().characters;
+  return trimmed.length <= maxNameLength ? trimmed.toString() : trimmed.take(maxNameLength).toString().trim();
+}
 
 /// What PLAY starts. Blank names follow the app language.
 class GameSetup {
@@ -38,9 +48,9 @@ class GameSetup {
           id: 'p${i + 1}',
           name: vsComputer && i == 1
               ? copy.computer
-              : names[i].trim().isEmpty
+              : clipName(names[i]).isEmpty
               ? copy.player(i + 1)
-              : names[i].trim(),
+              : clipName(names[i]),
         ),
     ];
   }
@@ -56,7 +66,8 @@ class GameSetup {
     if (other is! GameSetup ||
         other.opponent != opponent ||
         other.playerCount != playerCount ||
-        other.difficulty != difficulty) {
+        other.difficulty != difficulty ||
+        other.names.length != names.length) {
       return false;
     }
     for (var i = 0; i < names.length; i++) {
